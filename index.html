@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Simulador Holding</title>
+    <!-- Tailwind CSS via CDN for quick styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      body {
+        font-family: 'Inter', sans-serif;
+      }
+    </style>
+  </head>
+  <body class="bg-slate-950 text-slate-100">
+    <div class="min-h-screen p-8 flex flex-col items-center gap-8">
+      <h1 class="text-3xl md:text-4xl font-bold mb-4 text-center">
+        Simulador de Holding Imobiliária
+      </h1>
+      <!-- Container for PF and PJ input forms -->
+      <div class="grid md:grid-cols-2 gap-8 w-full max-w-5xl">
+        <!-- Pessoa Física (PF) section -->
+        <section class="bg-slate-900/80 rounded-2xl p-6 shadow-lg">
+          <h2 class="text-xl font-semibold mb-4">Pessoa Física</h2>
+          <div class="space-y-3">
+            <label class="block">
+              <span class="text-sm">Número de imóveis</span>
+              <input
+                id="pf-imoveis"
+                type="number"
+                min="0"
+                class="mt-1 block w-full rounded-md bg-slate-800 border border-slate-700 px-3 py-2 text-slate-100"
+                value="2"
+              />
+            </label>
+            <label class="block">
+              <span class="text-sm">Receita anual de aluguel (R$)</span>
+              <input
+                id="pf-receita"
+                type="number"
+                min="0"
+                class="mt-1 block w-full rounded-md bg-slate-800 border border-slate-700 px-3 py-2 text-slate-100"
+                value="120000"
+              />
+            </label>
+            <label class="block">
+              <span class="text-sm">Despesas anuais dedutíveis (R$)</span>
+              <input
+                id="pf-despesas"
+                type="number"
+                min="0"
+                class="mt-1 block w-full rounded-md bg-slate-800 border border-slate-700 px-3 py-2 text-slate-100"
+                value="5000"
+              />
+            </label>
+            <label class="block">
+              <span class="text-sm">Alíquota IRPF (%)</span>
+              <input
+                id="pf-aliq-irpf"
+                type="number"
+                min="0"
+                max="100"
+                step="0.1"
+                class="mt-1 block w-full rounded-md bg-slate-800 border border-slate-700 px-3 py-2 text-slate-100"
+                value="27.5"
+              />
+            </label>
+            <label class="block" id="pf-aliq-ibs-row" style="display: none;">
+              <span class="text-sm">Alíquota IBS/CBS PF (%)</span>
+              <input
+                id="pf-aliq-ibs"
+                type="number"
+                min="0"
+                max="100"
+                step="0.1"
+                class="mt-1 block w-full rounded-md bg-slate-800 border border-slate-700 px-3 py-2 text-slate-100"
+                value="0"
+              />
+            </label>
+          </div>
+          <div id="pf-result" class="mt-6"></div>
+        </section>
+        <!-- Pessoa Jurídica (PJ) section -->
+        <section class="bg-slate-900/80 rounded-2xl p-6 shadow-lg">
+          <h2 class="text-xl font-semibold mb-4">Pessoa Jurídica</h2>
+          <div class="space-y-3">
+            <label class="block">
+              <span class="text-sm">Número de imóveis</span>
+              <input
+                id="pj-imoveis"
+                type="number"
+                min="0"
+                class="mt-1 block w-full rounded-md bg-slate-800 border border-slate-700 px-3 py-2 text-slate-100"
+                value="2"
+              />
+            </label>
+            <label class="block">
+              <span class="text-sm">Receita anual de aluguel (R$)</span>
+              <input
+                id="pj-receita"
+                type="number"
+                min="0"
+                class="mt-1 block w-full rounded-md bg-slate-800 border border-slate-700 px-3 py-2 text-slate-100"
+                value="120000"
+              />
+            </label>
+            <label class="block">
+              <span class="text-sm">Base presumida (%)</span>
+              <input
+                id="pj-base-presumida"
+                type="number"
+                min="0"
+                max="100"
+                step="0.1"
+                class="mt-1 block w-full rounded-md bg-slate-800 border border-slate-700 px-3 py-2 text-slate-100"
+                value="32"
+              />
+            </label>
+            <label class="block">
+              <span class="text-sm">Alíquota IRPJ (%)</span>
+              <input
+                id="pj-aliq-irpj"
+                type="number"
+                min="0"
+                max="100"
+                step="0.1"
+                class="mt-1 block w-full rounded-md bg-slate-800 border border-slate-700 px-3 py-2 text-slate-100"
+                value="15"
+              />
+            </label>
+            <label class="block">
+              <span class="text-sm">Alíquota IRPJ adicional (%)</span>
+              <input
+                id="pj-aliq-irpj-adicional"
+                type="number"
+                min="0"
+                max="100"
+                step="0.1"
+                class="mt-1 block w-full rounded-md bg-slate-800 border border-slate-700 px-3 py-2 text-slate-100"
+                value="10"
+              />
+            </label>
+            <label class="block">
+              <span class="text-sm">Limite anual para adicional (R$)</span>
+              <input
+                id="pj-limite-adicional"
+                type="number"
+                min="0"
+                class="mt-1 block w-full rounded-md bg-slate-800 border border-slate-700 px-3 py-2 text-slate-100"
+                value="240000"
+              />
+            </label>
+            <label class="block">
+              <span class="text-sm">Alíquota CSLL (%)</span>
+              <input
+                id="pj-aliq-csll"
+                type="number"
+                min="0"
+                max="100"
+                step="0.1"
+                class="mt-1 block w-full rounded-md bg-slate-800 border border-slate-700 px-3 py-2 text-slate-100"
+                value="9"
+              />
+            </label>
+            <label class="block">
+              <span class="text-sm">Alíquota IBS/CBS PJ (%)</span>
+              <input
+                id="pj-aliq-ibs"
+                type="number"
+                min="0"
+                max="100"
+                step="0.1"
+                class="mt-1 block w-full rounded-md bg-slate-800 border border-slate-700 px-3 py-2 text-slate-100"
+                value="8.4"
+              />
+            </label>
+            <label class="block">
+              <span class="text-sm">Custos fixos anuais (R$)</span>
+              <input
+                id="pj-custos-fixos"
+                type="number"
+                min="0"
+                class="mt-1 block w-full rounded-md bg-slate-800 border border-slate-700 px-3 py-2 text-slate-100"
+                value="10000"
+              />
+            </label>
+            <label class="block">
+              <span class="text-sm">Valor total de ITBI (R$)</span>
+              <input
+                id="pj-itbi"
+                type="number"
+                min="0"
+                class="mt-1 block w-full rounded-md bg-slate-800 border border-slate-700 px-3 py-2 text-slate-100"
+                value="0"
+              />
+            </label>
+            <label class="block">
+              <span class="text-sm">Anos para amortizar ITBI</span>
+              <input
+                id="pj-anos-itbi"
+                type="number"
+                min="1"
+                class="mt-1 block w-full rounded-md bg-slate-800 border border-slate-700 px-3 py-2 text-slate-100"
+                value="10"
+              />
+            </label>
+          </div>
+          <div id="pj-result" class="mt-6"></div>
+        </section>
+      </div>
+      <!-- Comparative section -->
+      <section class="w-full max-w-5xl bg-slate-900/80 rounded-2xl p-6 shadow-lg">
+        <h2 class="text-xl font-semibold mb-4">Comparativo</h2>
+        <p id="comparativo" class="font-semibold"></p>
+      </section>
+    </div>
+    <!-- Vanilla JS for computation and dynamic updates -->
+    <script>
+      // Parse numeric inputs safely; return 0 for invalid values
+      function parseNumber(value) {
+        var n = parseFloat(value);
+        return isNaN(n) ? 0 : n;
+      }
+
+      // Update calculations and display results
+      function update() {
+        // Get PF values
+        var pfImoveis = parseNumber(document.getElementById('pf-imoveis').value);
+        var pfReceita = parseNumber(document.getElementById('pf-receita').value);
+        var pfDespesas = parseNumber(document.getElementById('pf-despesas').value);
+        var pfAliqIrpf = parseNumber(document.getElementById('pf-aliq-irpf').value);
+        var pfAliqIbs = parseNumber(document.getElementById('pf-aliq-ibs').value);
+
+        // Determine whether PF is IBS/CBS contributor (receita > 240k and >3 imoveis)
+        var pfIbsContribuinte = pfReceita > 240000 && pfImoveis > 3;
+        // Show or hide PF IBS input based on condition
+        document.getElementById('pf-aliq-ibs-row').style.display = pfIbsContribuinte ? 'block' : 'none';
+
+        var pfIbsTotal = pfIbsContribuinte ? pfReceita * (pfAliqIbs / 100) : 0;
+        var pfIrpfTotal = (pfReceita - pfDespesas) * (pfAliqIrpf / 100);
+        var pfTotalImpostos = pfIbsTotal + pfIrpfTotal;
+
+        // Update PF result markup
+        var pfResult = '';
+        pfResult += '<h3 class="font-semibold mb-2">Resultado PF</h3>';
+        pfResult += '<p class="text-sm">IRPF total: R$ ' + pfIrpfTotal.toFixed(2) + '</p>';
+        if (pfIbsContribuinte) {
+          pfResult += '<p class="text-sm">IBS/CBS PF: R$ ' + pfIbsTotal.toFixed(2) + '</p>';
+        }
+        pfResult += '<p class="mt-2 font-bold">Total PF: R$ ' + pfTotalImpostos.toFixed(2) + '</p>';
+        document.getElementById('pf-result').innerHTML = pfResult;
+
+        // Get PJ values
+        var pjImoveis = parseNumber(document.getElementById('pj-imoveis').value);
+        var pjReceita = parseNumber(document.getElementById('pj-receita').value);
+        var pjBasePresumida = parseNumber(document.getElementById('pj-base-presumida').value);
+        var pjAliqIrpj = parseNumber(document.getElementById('pj-aliq-irpj').value);
+        var pjAliqIrpjAdicional = parseNumber(document.getElementById('pj-aliq-irpj-adicional').value);
+        var pjLimiteAdicional = parseNumber(document.getElementById('pj-limite-adicional').value);
+        var pjAliqCsll = parseNumber(document.getElementById('pj-aliq-csll').value);
+        var pjAliqIbs = parseNumber(document.getElementById('pj-aliq-ibs').value);
+        var pjCustosFixos = parseNumber(document.getElementById('pj-custos-fixos').value);
+        var pjItbi = parseNumber(document.getElementById('pj-itbi').value);
+        var pjAnosItbi = parseNumber(document.getElementById('pj-anos-itbi').value);
+
+        // PJ calculations
+        var pjBase = pjReceita * (pjBasePresumida / 100);
+        var pjIrpjValorPrincipal = pjBase * (pjAliqIrpj / 100);
+        var excedente = Math.max(0, pjReceita - pjLimiteAdicional);
+        var pjIrpjValorAdicional = excedente > 0 ? excedente * (pjAliqIrpjAdicional / 100) : 0;
+        var pjCsllTotal = pjBase * (pjAliqCsll / 100);
+        var pjIbsTotal = pjReceita * (pjAliqIbs / 100);
+        var pjItbiAnualizado = pjAnosItbi > 0 ? pjItbi / pjAnosItbi : 0;
+        var pjTotalImpostos = pjIrpjValorPrincipal + pjIrpjValorAdicional + pjCsllTotal + pjIbsTotal + pjCustosFixos + pjItbiAnualizado;
+
+        // Update PJ result markup
+        var pjResult = '';
+        pjResult += '<h3 class="font-semibold mb-2">Resultado PJ</h3>';
+        pjResult += '<p class="text-sm">IRPJ: R$ ' + pjIrpjValorPrincipal.toFixed(2) + '</p>';
+        if (pjIrpjValorAdicional > 0) {
+          pjResult += '<p class="text-sm">Adicional IRPJ: R$ ' + pjIrpjValorAdicional.toFixed(2) + '</p>';
+        }
+        pjResult += '<p class="text-sm">CSLL: R$ ' + pjCsllTotal.toFixed(2) + '</p>';
+        pjResult += '<p class="text-sm">IBS/CBS PJ: R$ ' + pjIbsTotal.toFixed(2) + '</p>';
+        pjResult += '<p class="text-sm">Custos fixos: R$ ' + pjCustosFixos.toFixed(2) + '</p>';
+        if (pjItbiAnualizado > 0) {
+          pjResult += '<p class="text-sm">ITBI anualizado: R$ ' + pjItbiAnualizado.toFixed(2) + '</p>';
+        }
+        pjResult += '<p class="mt-2 font-bold">Total PJ: R$ ' + pjTotalImpostos.toFixed(2) + '</p>';
+        document.getElementById('pj-result').innerHTML = pjResult;
+
+        // Comparative
+        var comparacao = pjTotalImpostos - pfTotalImpostos;
+        var comparativoText;
+        if (comparacao < 0) {
+          comparativoText = 'Pessoa Jurídica economiza R$ ' + Math.abs(comparacao).toFixed(2) + ' em tributos.';
+        } else if (comparacao > 0) {
+          comparativoText = 'Pessoa Física economiza R$ ' + Math.abs(comparacao).toFixed(2) + ' em tributos.';
+        } else {
+          comparativoText = 'Tributação equivalente em PF e PJ.';
+        }
+        document.getElementById('comparativo').textContent = comparativoText;
+      }
+
+      // Attach listeners to all inputs for live updates
+      document.querySelectorAll('input').forEach(function (input) {
+        input.addEventListener('input', update);
+      });
+      // Initial calculation on page load
+      update();
+    </script>
+  </body>
+</html>
