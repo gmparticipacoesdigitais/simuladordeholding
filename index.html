@@ -3,16 +3,17 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Simulador Holding — Ano & IBS/CBS (PF)</title>
-    <!-- Tailwind via CDN (leve e prático para projeto estático) -->
+    <title>Simulador Holding — Ano & IBS/CBS</title>
+    <!-- Tailwind via CDN (somente para estilo; o app é 100% JS vanilla) -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
       body { font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Helvetica Neue, Arial, 'Apple Color Emoji','Segoe UI Emoji'; }
-      .card { @apply rounded-2xl bg-slate-900/80 border border-white/10 p-5 shadow-xl; }
-      .badge { @apply text-[10px] uppercase tracking-wider text-white/60; }
-      .label { @apply text-xs uppercase tracking-wider text-slate-400; }
-      .input { @apply w-full rounded-xl bg-slate-950/40 border border-white/10 px-3 py-2 outline-none focus:ring-2 focus:ring-indigo-500/60; }
-      .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; }
+      .card { border-radius: 1rem; background: rgba(2,6,23,.8); border: 1px solid rgba(255,255,255,.08); padding: 1.25rem; box-shadow: 0 10px 30px rgba(0,0,0,.35); }
+      .label { font-size: .75rem; letter-spacing: .06em; text-transform: uppercase; color: rgba(226,232,240,.7); }
+      .input { width: 100%; border-radius: .75rem; background: rgba(2,6,23,.4); border: 1px solid rgba(255,255,255,.08); padding: .5rem .75rem; outline: none;}
+      .input:focus { box-shadow: 0 0 0 2px rgba(99,102,241,.5); border-color: rgba(99,102,241,.6); }
+      .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace; }
+      .badge { font-size: .65rem; text-transform: uppercase; letter-spacing: .08em; color: rgba(255,255,255,.65); }
     </style>
   </head>
   <body class="min-h-screen bg-[radial-gradient(75%_75%_at_50%_0%,rgba(99,102,241,0.22),rgba(2,6,23,1))] text-white">
@@ -23,7 +24,7 @@
             <span class="text-indigo-300 text-lg">λ</span>
           </div>
           <div>
-            <h1 class="text-lg font-semibold leading-tight">Simulador Holding — PF com Ano & IBS/CBS</h1>
+            <h1 class="text-lg font-semibold leading-tight">Simulador Holding — IBS/CBS por Ano</h1>
             <p class="badge">Comparativo PF × PJ · IRPF · IBS · CBS</p>
           </div>
         </div>
@@ -32,167 +33,144 @@
     </header>
 
     <main class="max-w-6xl mx-auto px-4 py-6 grid grid-cols-1 lg:grid-cols-2 gap-6">
-      <!-- Painel de regras/ano (PF) -->
+      <!-- Parâmetros (PF) -->
       <section class="card lg:col-span-2">
         <div class="flex items-center justify-between mb-4">
           <h2 class="text-base font-semibold">Parâmetros de Regra — Pessoa Física</h2>
           <span class="badge">defina ano e limiares</span>
         </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
           <label class="block">
             <div class="label mb-1">Ano da simulação</div>
-            <input id="ano" class="input" type="number" value="2025" min="2024" step="1">
+            <input id="ano" class="input" type="number" step="1" min="2024" value="2027" inputmode="numeric">
+          </label>
+          <label class="block">
+            <div class="label mb-1">Ano de início do IBS/CBS (PF)</div>
+            <input id="anoInicioPf" class="input" type="number" step="1" min="2024" value="2027" inputmode="numeric">
           </label>
           <label class="block">
             <div class="label mb-1">Limiar de imóveis (PF) — &gt;</div>
-            <input id="limiarImoveis" class="input" type="number" value="3" min="0" step="1">
+            <input id="limiarImoveis" class="input" type="number" step="1" min="0" value="3" inputmode="numeric">
           </label>
           <label class="block">
             <div class="label mb-1">Limiar de receita anual (PF) — &gt;</div>
-            <input id="limiarReceita" class="input" type="number" value="240000" min="0" step="1000">
+            <input id="limiarReceita" class="input" type="text" value="240000">
           </label>
         </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mt-4">
-          <label class="block">
-            <div class="label mb-1">Ano de início do IBS/CBS para PF</div>
-            <input id="anoInicioPf" class="input" type="number" value="2027" min="2025" step="1">
-          </label>
-          <label class="block">
-            <div class="label mb-1">Ano de transição (opcional)</div>
-            <input id="anoTransicao" class="input" type="number" value="2026" min="2025" step="1">
-          </label>
-          <label class="block">
-            <div class="label mb-1">Aplicar regra de transição no ano de transição?</div>
-            <select id="usarTransicao" class="input"><option value="nao">Não</option><option value="sim" selected>Sim</option></select>
-          </label>
-          <label class="block">
-            <div class="label mb-1">% de aplicação da incidência no ano de transição</div>
-            <input id="percentualTransicao" class="input" type="number" value="50" min="0" max="100" step="1">
-          </label>
-        </div>
-
         <p class="text-xs text-white/60 mt-3">
-          <strong>Critério PF (editável):</strong> incide IBS/CBS se <span class="mono">nº imóveis &gt; limiar</span> e
-          <span class="mono">receita anual &gt; limiar</span>, <em>e</em> o ano selecionado for
-          <span class="mono">≥ Ano de início</span>. No ano de transição, se ativado, aplica-se o percentual de incidência informado.
+          <strong>Regra PF simplificada:</strong> IBS e CBS incidem se <span class="mono">nº de imóveis &gt; limiar</span> e
+          <span class="mono">receita anual &gt; limiar</span> e <span class="mono">ano ≥ ano de início</span>.
         </p>
       </section>
 
-      <!-- Painel PF -->
+      <!-- PF -->
       <section class="card">
         <div class="flex items-center justify-between mb-4">
           <h2 class="text-base font-semibold">Pessoa Física</h2>
           <span class="badge">entradas</span>
         </div>
-
         <div class="grid grid-cols-1 gap-4">
           <label class="block">
             <div class="label mb-1">Número de imóveis</div>
-            <input id="pfImoveis" class="input" type="number" value="2" min="0">
+            <input id="pfImoveis" class="input" type="number" step="1" min="0" value="2" inputmode="numeric">
           </label>
           <label class="block">
             <div class="label mb-1">Receita anual de aluguel (R$)</div>
-            <input id="pfReceita" class="input" type="number" value="120000" min="0" step="1000">
+            <input id="pfReceita" class="input" type="text" value="120000">
           </label>
           <label class="block">
             <div class="label mb-1">Despesas anuais dedutíveis (R$)</div>
-            <input id="pfDespesas" class="input" type="number" value="5000" min="0" step="500">
+            <input id="pfDespesas" class="input" type="text" value="5000">
           </label>
           <label class="block">
             <div class="label mb-1">Alíquota efetiva IRPF (%)</div>
-            <input id="pfAliqIRPF" class="input" type="number" value="27.5" min="0" max="100" step="0.1">
+            <input id="pfAliqIRPF" class="input" type="text" value="27,5" inputmode="decimal">
           </label>
         </div>
-
         <div class="mt-6">
-          <h3 class="text-sm font-medium mb-2 text-white/80">Alíquotas IBS/CBS para PF</h3>
+          <h3 class="text-sm font-medium mb-2 text-white/80">Alíquotas IBS/CBS (PF)</h3>
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <label class="block">
-              <div class="label mb-1">Alíquota IBS (%)</div>
-              <input id="pfAliqIBS" class="input" type="number" value="5.6" min="0" max="100" step="0.1">
+              <div class="label mb-1">IBS (%)</div>
+              <input id="pfAliqIBS" class="input" type="text" value="5,6" inputmode="decimal">
             </label>
             <label class="block">
-              <div class="label mb-1">Alíquota CBS (%)</div>
-              <input id="pfAliqCBS" class="input" type="number" value="2.8" min="0" max="100" step="0.1">
+              <div class="label mb-1">CBS (%)</div>
+              <input id="pfAliqCBS" class="input" type="text" value="2,8" inputmode="decimal">
             </label>
           </div>
         </div>
-
         <div class="mt-6">
           <h3 class="text-sm font-medium mb-2 text-white/80">Resultado PF</h3>
           <dl class="space-y-2 text-sm">
-            <div class="flex justify-between"><dt>IRPF</dt><dd id="pfIRPF" class="mono">R$ 0,00</dd></div>
-            <div class="flex justify-between"><dt>IBS</dt><dd id="pfIBS" class="mono">R$ 0,00</dd></div>
-            <div class="flex justify-between"><dt>CBS</dt><dd id="pfCBS" class="mono">R$ 0,00</dd></div>
-            <div class="flex justify-between font-semibold"><dt>Total de tributos (PF)</dt><dd id="pfTotal" class="mono">R$ 0,00</dd></div>
+            <div class="flex justify-between"><dt>IRPF</dt><dd id="pfIRPF" class="mono">R$ 0,00</dd></div>
+            <div class="flex justify-between"><dt>IBS</dt><dd id="pfIBS" class="mono">R$ 0,00</dd></div>
+            <div class="flex justify-between"><dt>CBS</dt><dd id="pfCBS" class="mono">R$ 0,00</dd></div>
+            <div class="flex justify-between font-semibold"><dt>Total de tributos (PF)</dt><dd id="pfTotal" class="mono">R$ 0,00</dd></div>
           </dl>
           <div id="pfIncidenciaMsg" class="text-xs text-white/60 mt-2"></div>
         </div>
       </section>
 
-      <!-- Painel PJ (mantido para comparativo básico) -->
+      <!-- PJ -->
       <section class="card">
         <div class="flex items-center justify-between mb-4">
           <h2 class="text-base font-semibold">Pessoa Jurídica (Holding)</h2>
           <span class="badge">entradas</span>
         </div>
-
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <label class="block">
             <div class="label mb-1">Receita anual de aluguel (R$)</div>
-            <input id="pjReceita" class="input" type="number" value="120000" min="0" step="1000">
+            <input id="pjReceita" class="input" type="text" value="120000">
           </label>
           <label class="block">
             <div class="label mb-1">Custos fixos anuais (R$)</div>
-            <input id="pjCustos" class="input" type="number" value="10000" min="0" step="500">
+            <input id="pjCustos" class="input" type="text" value="10000">
           </label>
           <label class="block">
             <div class="label mb-1">Base presumida (%)</div>
-            <input id="pjBase" class="input" type="number" value="32" min="0" max="100" step="0.1">
+            <input id="pjBase" class="input" type="text" value="32">
           </label>
           <label class="block">
             <div class="label mb-1">IRPJ 15% (%)</div>
-            <input id="pjIRPJ" class="input" type="number" value="15" min="0" max="100" step="0.1">
+            <input id="pjIRPJ" class="input" type="text" value="15">
           </label>
           <label class="block">
             <div class="label mb-1">Adicional IRPJ (%)</div>
-            <input id="pjAdicional" class="input" type="number" value="10" min="0" max="100" step="0.1">
+            <input id="pjAdicional" class="input" type="text" value="10">
           </label>
           <label class="block">
             <div class="label mb-1">Limite anual para adicional (R$)</div>
-            <input id="pjLimiteAdic" class="input" type="number" value="240000" min="0" step="1000">
+            <input id="pjLimiteAdic" class="input" type="text" value="240000">
           </label>
           <label class="block">
             <div class="label mb-1">CSLL (%)</div>
-            <input id="pjCSLL" class="input" type="number" value="9" min="0" max="100" step="0.1">
+            <input id="pjCSLL" class="input" type="text" value="9">
           </label>
           <label class="block">
             <div class="label mb-1">IBS PJ (%)</div>
-            <input id="pjIBS" class="input" type="number" value="5.6" min="0" max="100" step="0.1">
+            <input id="pjIBS" class="input" type="text" value="5,6">
           </label>
           <label class="block">
             <div class="label mb-1">CBS PJ (%)</div>
-            <input id="pjCBS" class="input" type="number" value="2.8" min="0" max="100" step="0.1">
+            <input id="pjCBS" class="input" type="text" value="2,8">
           </label>
           <label class="block">
             <div class="label mb-1">ITBI anualizado (R$)</div>
-            <input id="pjITBIano" class="input" type="number" value="0" min="0" step="1000">
+            <input id="pjITBIano" class="input" type="text" value="0">
           </label>
         </div>
-
         <div class="mt-6">
           <h3 class="text-sm font-medium mb-2 text-white/80">Resultado PJ</h3>
           <dl class="space-y-2 text-sm">
-            <div class="flex justify-between"><dt>Base Presumida</dt><dd id="pjBaseCalc" class="mono">R$ 0,00</dd></div>
-            <div class="flex justify-between"><dt>IRPJ 15%</dt><dd id="pjIRPJValor" class="mono">R$ 0,00</dd></div>
-            <div class="flex justify-between"><dt>Adicional IRPJ</dt><dd id="pjAdicValor" class="mono">R$ 0,00</dd></div>
-            <div class="flex justify-between"><dt>CSLL</dt><dd id="pjCSLLValor" class="mono">R$ 0,00</dd></div>
-            <div class="flex justify-between"><dt>IBS</dt><dd id="pjIBSValor" class="mono">R$ 0,00</dd></div>
-            <div class="flex justify-between"><dt>CBS</dt><dd id="pjCBSValor" class="mono">R$ 0,00</dd></div>
-            <div class="flex justify-between"><dt>ITBI (anual)</dt><dd id="pjITBIValor" class="mono">R$ 0,00</dd></div>
-            <div class="flex justify-between font-semibold"><dt>Total de tributos (PJ)</dt><dd id="pjTotal" class="mono">R$ 0,00</dd></div>
+            <div class="flex justify-between"><dt>Base Presumida</dt><dd id="pjBaseCalc" class="mono">R$ 0,00</dd></div>
+            <div class="flex justify-between"><dt>IRPJ 15%</dt><dd id="pjIRPJValor" class="mono">R$ 0,00</dd></div>
+            <div class="flex justify-between"><dt>Adicional IRPJ</dt><dd id="pjAdicValor" class="mono">R$ 0,00</dd></div>
+            <div class="flex justify-between"><dt>CSLL</dt><dd id="pjCSLLValor" class="mono">R$ 0,00</dd></div>
+            <div class="flex justify-between"><dt>IBS</dt><dd id="pjIBSValor" class="mono">R$ 0,00</dd></div>
+            <div class="flex justify-between"><dt>CBS</dt><dd id="pjCBSValor" class="mono">R$ 0,00</dd></div>
+            <div class="flex justify-between"><dt>ITBI (anual)</dt><dd id="pjITBIValor" class="mono">R$ 0,00</dd></div>
+            <div class="flex justify-between font-semibold"><dt>Total de tributos (PJ)</dt><dd id="pjTotal" class="mono">R$ 0,00</dd></div>
           </dl>
         </div>
       </section>
@@ -201,120 +179,107 @@
       <section class="card lg:col-span-2">
         <div class="flex items-center justify-between mb-4">
           <h2 class="text-base font-semibold">Comparativo</h2>
-          <span class="badge">cálculo em tempo real</span>
+          <span class="badge">recalcula ao digitar</span>
         </div>
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div class="rounded-xl border border-white/10 p-4 bg-slate-950/30">
             <div class="text-sm text-white/70">Total PF</div>
-            <div id="boxPfTotal" class="text-2xl font-semibold mono mt-1">R$ 0,00</div>
+            <div id="boxPfTotal" class="text-2xl font-semibold mono mt-1">R$ 0,00</div>
           </div>
           <div class="rounded-xl border border-white/10 p-4 bg-slate-950/30">
             <div class="text-sm text-white/70">Total PJ</div>
-            <div id="boxPjTotal" class="text-2xl font-semibold mono mt-1">R$ 0,00</div>
+            <div id="boxPjTotal" class="text-2xl font-semibold mono mt-1">R$ 0,00</div>
           </div>
           <div class="rounded-xl border border-white/10 p-4 bg-slate-950/30">
             <div class="text-sm text-white/70">Diferença (PJ − PF)</div>
-            <div id="boxDiff" class="text-2xl font-semibold mono mt-1">R$ 0,00</div>
+            <div id="boxDiff" class="text-2xl font-semibold mono mt-1">R$ 0,00</div>
             <div id="boxPref" class="text-xs text-white/60 mt-1"></div>
           </div>
         </div>
         <p class="text-[11px] text-white/50 mt-3">
-          *Simulador didático. Parâmetros como limiares, anos e alíquotas são editáveis para refletir atualizações normativas ou especificidades contratuais.
+          *Simulador didático. Parâmetros (anos, limiares e alíquotas) são editáveis para refletir sua realidade.
         </p>
       </section>
     </main>
 
     <script>
-      /* Utilidades */
+      // Utilidades robustas para números (aceita 1.234.567,89 ou 1234567.89)
       const $ = (id) => document.getElementById(id);
-      const brl = (n) => (isFinite(n) ? n : 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-      const pct = (n) => Math.max(0, Number(n) || 0) / 100;
+      const toNumber = (raw) => {
+        if (raw == null) return 0;
+        const s = String(raw).trim().replace(/\s+/g,'')
+          .replace(/\./g,'')     // remove separador de milhar com ponto
+          .replace(/,(?=\d{1,2}$)/, '.$&'.slice(1)) // vírgula decimal para ponto (últimos 1-2 dígitos)
+          .replace(/,/g, '.');    // fallback: qualquer vírgula vira ponto
+        const n = parseFloat(s);
+        return Number.isFinite(n) ? n : 0;
+      };
+      const brl = (n) => (Number.isFinite(n) ? n : 0).toLocaleString('pt-BR', { style:'currency', currency:'BRL' });
+      const pct = (v) => Math.max(0, toNumber(v)) / 100;
 
-      function readNumber(id){ const v = Number($(id).value); return isFinite(v) ? v : 0; }
+      function read(id){ return toNumber($(id).value); }
 
       function computePF(){
-        const ano = readNumber('ano');
-        const limiarImoveis = readNumber('limiarImoveis');
-        const limiarReceita = readNumber('limiarReceita');
-        const anoInicioPf = readNumber('anoInicioPf');
-        const anoTransicao = readNumber('anoTransicao');
-        const usarTransicao = $('usarTransicao').value === 'sim';
-        const percTransicao = Math.min(100, Math.max(0, readNumber('percentualTransicao')));
+        const ano = Math.round(read('ano'));
+        const anoInicio = Math.round(read('anoInicioPf'));
+        const limiarImoveis = Math.round(read('limiarImoveis'));
+        const limiarReceita = read('limiarReceita');
 
-        const nImoveis = readNumber('pfImoveis');
-        const receita = readNumber('pfReceita');
-        const despesas = readNumber('pfDespesas');
-        const aliqIRPF = pct(readNumber('pfAliqIRPF'));
-        const aliqIBS = pct(readNumber('pfAliqIBS'));
-        const aliqCBS = pct(readNumber('pfAliqCBS'));
+        const nImoveis = Math.round(read('pfImoveis'));
+        const receita = read('pfReceita');
+        const despesas = read('pfDespesas');
+        const aIRPF = pct($('pfAliqIRPF').value);
+        const aIBS = pct($('pfAliqIBS').value);
+        const aCBS = pct($('pfAliqCBS').value);
 
-        // Critério PF: nImoveis > limiar & receita > limiar & (ano >= anoInicio) OR (ano == anoTransição && usarTransição)
-        const atendeLimiar = (nImoveis > limiarImoveis) && (receita > limiarReceita);
-        let ibsCbsAplica = false;
-        let fatorTransicao = 1;
-
-        if(ano >= anoInicioPf){
-          ibsCbsAplica = atendeLimiar;
-        } else if(usarTransicao && ano === anoTransicao){
-          ibsCbsAplica = atendeLimiar;
-          fatorTransicao = (percTransicao / 100); // aplica parcial
-        } else {
-          ibsCbsAplica = false;
-        }
+        const limiarAtendido = (nImoveis > limiarImoveis) && (receita > limiarReceita);
+        const anoOk = (ano >= anoInicio);
+        const aplicaIVA = limiarAtendido && anoOk;
 
         const baseIRPF = Math.max(0, receita - despesas);
-        const valorIRPF = baseIRPF * aliqIRPF;
-        const valorIBS = ibsCbsAplica ? receita * aliqIBS * fatorTransicao : 0;
-        const valorCBS = ibsCbsAplica ? receita * aliqCBS * fatorTransicao : 0;
-        const total = valorIRPF + valorIBS + valorCBS;
+        const vIRPF = baseIRPF * aIRPF;
+        const vIBS  = aplicaIVA ? receita * aIBS : 0;
+        const vCBS  = aplicaIVA ? receita * aCBS : 0;
+        const total = vIRPF + vIBS + vCBS;
 
-        // Saída PF
-        $('pfIRPF').textContent = brl(valorIRPF);
-        $('pfIBS').textContent  = brl(valorIBS);
-        $('pfCBS').textContent  = brl(valorCBS);
+        $('pfIRPF').textContent = brl(vIRPF);
+        $('pfIBS').textContent  = brl(vIBS);
+        $('pfCBS').textContent  = brl(vCBS);
         $('pfTotal').textContent = brl(total);
-
-        // Mensagem de incidência
-        const msg = [];
-        msg.push(`Ano: ${ano}. Limiar: imóveis > ${limiarImoveis}, receita > ${brl(limiarReceita)}.`);
-        if(ano === anoTransicao && usarTransicao){
-          msg.push(`Regra de transição ATIVA (${percTransicao}% da incidência).`);
-        }
-        msg.push(`Critério atendido? ${atendeLimiar ? 'Sim' : 'Não'}. IBS/CBS incidem? ${ibsCbsAplica ? 'Sim' : 'Não'}.`);
-        $('pfIncidenciaMsg').textContent = msg.join(' ');
-
+        $('pfIncidenciaMsg').textContent =
+          `Ano ${ano}; início ${anoInicio}. Limiar: imóveis > ${limiarImoveis}, receita > ${brl(limiarReceita)}. ` +
+          `Critério atendido? ${limiarAtendido ? 'Sim' : 'Não'}. IBS/CBS incidem? ${aplicaIVA ? 'Sim' : 'Não'}.`;
         return { totalPF: total };
       }
 
       function computePJ(){
-        const receita = readNumber('pjReceita');
-        const custos = readNumber('pjCustos');
-        const basePerc = pct(readNumber('pjBase'));
-        const irpj = pct(readNumber('pjIRPJ'));
-        const adic = pct(readNumber('pjAdicional'));
-        const limiteAdic = readNumber('pjLimiteAdic');
-        const csll = pct(readNumber('pjCSLL'));
-        const ibs = pct(readNumber('pjIBS'));
-        const cbs = pct(readNumber('pjCBS'));
-        const itbiAno = readNumber('pjITBIano');
+        const receita = read('pjReceita');
+        const custos  = read('pjCustos');
+        const baseP   = pct($('pjBase').value);
+        const aIRPJ   = pct($('pjIRPJ').value);
+        const aAdic   = pct($('pjAdicional').value);
+        const limAd   = read('pjLimiteAdic');
+        const aCSLL   = pct($('pjCSLL').value);
+        const aIBS    = pct($('pjIBS').value);
+        const aCBS    = pct($('pjCBS').value);
+        const itbiAno = read('pjITBIano');
 
-        const basePres = receita * basePerc;
-        const valIRPJ = basePres * irpj;
-        const valAdic = basePres > limiteAdic ? (basePres - limiteAdic) * adic : 0;
-        const valCSLL = basePres * csll;
-        const valIBS  = receita * ibs;
-        const valCBS  = receita * cbs;
-        const total = valIRPJ + valAdic + valCSLL + valIBS + valCBS + custos + itbiAno;
+        const basePres = receita * baseP;
+        const vIRPJ = basePres * aIRPJ;
+        const vAdic = basePres > limAd ? (basePres - limAd) * aAdic : 0;
+        const vCSLL = basePres * aCSLL;
+        const vIBS  = receita * aIBS;
+        const vCBS  = receita * aCBS;
+        const total = vIRPJ + vAdic + vCSLL + vIBS + vCBS + custos + itbiAno;
 
         $('pjBaseCalc').textContent = brl(basePres);
-        $('pjIRPJValor').textContent = brl(valIRPJ);
-        $('pjAdicValor').textContent = brl(valAdic);
-        $('pjCSLLValor').textContent = brl(valCSLL);
-        $('pjIBSValor').textContent = brl(valIBS);
-        $('pjCBSValor').textContent = brl(valCBS);
+        $('pjIRPJValor').textContent = brl(vIRPJ);
+        $('pjAdicValor').textContent = brl(vAdic);
+        $('pjCSLLValor').textContent = brl(vCSLL);
+        $('pjIBSValor').textContent  = brl(vIBS);
+        $('pjCBSValor').textContent  = brl(vCBS);
         $('pjITBIValor').textContent = brl(itbiAno);
-        $('pjTotal').textContent = brl(total);
-
+        $('pjTotal').textContent     = brl(total);
         return { totalPJ: total };
       }
 
@@ -325,57 +290,48 @@
         $('boxPjTotal').textContent = brl(totalPJ);
         const diff = totalPJ - totalPF;
         $('boxDiff').textContent = brl(diff);
-        $('boxPref').textContent = diff > 0 ? 'PF tende a ser mais vantajosa.' : (diff < 0 ? 'PJ (Holding) tende a ser mais vantajosa.' : 'Equilíbrio.');
+        $('boxPref').textContent = diff > 0
+          ? 'PF tende a ser mais vantajosa.'
+          : (diff < 0 ? 'PJ (Holding) tende a ser mais vantajosa.' : 'Equilíbrio.');
       }
 
+      // Bind: re-calcula a cada digitação/troca (e também no click do botão reset)
       function bindAll(){
-        document.querySelectorAll('input,select').forEach(el => {
+        document.querySelectorAll('input').forEach(el => {
           el.addEventListener('input', recompute);
           el.addEventListener('change', recompute);
         });
         $('resetBtn').addEventListener('click', () => {
-          // valores padrão
           const defaults = {
-            ano: 2025, limiarImoveis: 3, limiarReceita: 240000, anoInicioPf: 2027, anoTransicao: 2026, usarTransicao: 'sim', percentualTransicao: 50,
-            pfImoveis: 2, pfReceita: 120000, pfDespesas: 5000, pfAliqIRPF: 27.5, pfAliqIBS: 5.6, pfAliqCBS: 2.8,
-            pjReceita: 120000, pjCustos: 10000, pjBase: 32, pjIRPJ: 15, pjAdicional: 10, pjLimiteAdic: 240000, pjCSLL: 9, pjIBS: 5.6, pjCBS: 2.8, pjITBIano: 0
+            ano: 2027, anoInicioPf: 2027, limiarImoveis: 3, limiarReceita: 240000,
+            pfImoveis: 2, pfReceita: 120000, pfDespesas: 5000, pfAliqIRPF: '27,5', pfAliqIBS: '5,6', pfAliqCBS: '2,8',
+            pjReceita: 120000, pjCustos: 10000, pjBase: 32, pjIRPJ: 15, pjAdicional: 10, pjLimiteAdic: 240000, pjCSLL: 9, pjIBS: '5,6', pjCBS: '2,8', pjITBIano: 0
           };
-          Object.entries(defaults).forEach(([k,v]) => { if($(k)){ $(k).value = v; } });
-          $('usarTransicao').value = 'sim';
+          Object.entries(defaults).forEach(([k,v]) => { if($(k)) $(k).value = v; });
           recompute();
         });
       }
 
-      // Auto-run
+      // Inicialização
       bindAll();
       recompute();
 
-      // Testes mínimos (console)
+      // Testes rápidos (console)
       (function tests(){
         try{
-          console.group('[Simulador] Testes rápidos');
-          // 1) PF abaixo dos limiares => IBS/CBS não incidem mesmo após início
-          $('pfImoveis').value = 1;
-          $('pfReceita').value = 100000;
-          $('ano').value = 2028;
+          console.group('[Simulador] Testes');
+          // 1) PF abaixo limiar => sem IBS/CBS
+          $('pfImoveis').value = '1'; $('pfReceita').value = '100000'; $('ano').value = '2028'; $('anoInicioPf').value = '2027';
           recompute();
-          console.assert(document.getElementById('pfIBS').textContent === brl(0), 'PF abaixo dos limiares não deve ter IBS');
-          // 2) PF acima dos limiares no ano de início => IBS/CBS incidem
-          $('pfImoveis').value = 5;
-          $('pfReceita').value = 300000;
-          $('ano').value = 2028;
-          recompute();
-          const ibsNow = document.getElementById('pfIBS').textContent;
-          console.assert(ibsNow !== brl(0), 'PF acima dos limiares após início deve ter IBS');
-          // 3) Ano de transição com 0% => sem incidência
-          $('ano').value = 2026; $('percentualTransicao').value = 0; $('usarTransicao').value='sim';
-          recompute();
-          console.assert(document.getElementById('pfIBS').textContent === brl(0), 'Transição 0% não deve incidir');
-          // 4) Reset volta aos padrões
-          document.getElementById('resetBtn').click();
-          console.assert(document.getElementById('ano').value == 2025, 'Reset deve restaurar ano');
+          console.assert($('pfIBS').textContent === brl(0) && $('pfCBS').textContent === brl(0), 'PF abaixo limiar: sem IBS/CBS');
+          // 2) PF acima limiar e ano >= início => com IBS/CBS
+          $('pfImoveis').value = '5'; $('pfReceita').value = '300000'; $('pfAliqIBS').value='5,6'; $('pfAliqCBS').value='2,8';
+          $('ano').value = '2028'; $('anoInicioPf').value = '2027'; recompute();
+          console.assert($('pfIBS').textContent !== brl(0) && $('pfCBS').textContent !== brl(0), 'PF acima limiar: com IBS/CBS');
+          // 3) Reset
+          $('resetBtn').click(); console.assert($('ano').value === '2027', 'Reset funcionou');
           console.groupEnd();
-        }catch(e){ console.warn('Falha nos testes:', e); }
+        } catch(e){ console.warn('Falha nos testes:', e); }
       })();
     </script>
   </body>
