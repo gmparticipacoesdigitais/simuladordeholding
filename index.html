@@ -1,338 +1,1095 @@
-<!doctype html>
-<html lang="pt-br">
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Simulador Holding — Ano & IBS/CBS</title>
-    <!-- Tailwind via CDN (somente para estilo; o app é 100% JS vanilla) -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-      body { font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Helvetica Neue, Arial, 'Apple Color Emoji','Segoe UI Emoji'; }
-      .card { border-radius: 1rem; background: rgba(2,6,23,.8); border: 1px solid rgba(255,255,255,.08); padding: 1.25rem; box-shadow: 0 10px 30px rgba(0,0,0,.35); }
-      .label { font-size: .75rem; letter-spacing: .06em; text-transform: uppercase; color: rgba(226,232,240,.7); }
-      .input { width: 100%; border-radius: .75rem; background: rgba(2,6,23,.4); border: 1px solid rgba(255,255,255,.08); padding: .5rem .75rem; outline: none;}
-      .input:focus { box-shadow: 0 0 0 2px rgba(99,102,241,.5); border-color: rgba(99,102,241,.6); }
-      .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace; }
-      .badge { font-size: .65rem; text-transform: uppercase; letter-spacing: .08em; color: rgba(255,255,255,.65); }
-    </style>
-  </head>
-  <body class="min-h-screen bg-[radial-gradient(75%_75%_at_50%_0%,rgba(99,102,241,0.22),rgba(2,6,23,1))] text-white">
-    <header class="sticky top-0 z-10 backdrop-blur supports-[backdrop-filter]:bg-slate-950/40 bg-slate-950/30 border-b border-white/10">
-      <div class="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
-        <div class="flex items-center gap-3">
-          <div class="h-8 w-8 rounded-xl bg-indigo-500/20 border border-indigo-400/40 grid place-items-center">
-            <span class="text-indigo-300 text-lg">λ</span>
-          </div>
-          <div>
-            <h1 class="text-lg font-semibold leading-tight">Simulador Holding — IBS/CBS por Ano</h1>
-            <p class="badge">Comparativo PF × PJ · IRPF · IBS · CBS</p>
-          </div>
-        </div>
-        <button id="resetBtn" class="rounded-lg border border-white/10 px-3 py-2 text-sm hover:bg-white/5">Restaurar padrões</button>
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Simulador Holding — Estimativa Tributária</title>
+  <!-- Tailwind via CDN for quick styling -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Chart.js for data visualization -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- Inter font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      /* Design System - Light Theme */
+      --color-primary: #6D5BD0;
+      --color-primary-hover: #5B4BC0;
+      --color-primary-light: #8B7CF2;
+      --color-background: #FFFFFF;
+      --color-surface: #F3F4F6;
+      --color-surface-elevated: #FFFFFF;
+      --color-border: #E5E7EB;
+      --color-border-light: #F3F4F6;
+      --color-text-primary: #111827;
+      --color-text-secondary: #6B7280;
+      --color-text-tertiary: #9CA3AF;
+      --color-success: #16A34A;
+      --color-warning: #F59E0B;
+      --color-error: #DC2626;
+      --color-info: #0EA5E9;
+      --radius-sm: 6px;
+      --radius-md: 8px;
+      --radius-lg: 12px;
+      --radius-xl: 16px;
+      --radius-2xl: 20px;
+      --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+      --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+      --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+      --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+    }
+
+    [data-theme="dark"] {
+      --color-background: #0B0F1A;
+      --color-surface: #111827;
+      --color-surface-elevated: #1F2937;
+      --color-border: #1F2937;
+      --color-border-light: #374151;
+      --color-text-primary: #F9FAFB;
+      --color-text-secondary: #D1D5DB;
+      --color-text-tertiary: #9CA3AF;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background-color: var(--color-background);
+      color: var(--color-text-primary);
+      margin: 0;
+      padding: 0;
+      line-height: 1.6;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 1rem;
+    }
+
+    .card {
+      background: var(--color-surface-elevated);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-lg);
+      padding: 1.5rem;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .card-elevated {
+      box-shadow: var(--shadow-md);
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0.75rem 1.5rem;
+      border-radius: var(--radius-md);
+      font-weight: 500;
+      text-decoration: none;
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-size: 0.875rem;
+    }
+
+    .btn-primary {
+      background: var(--color-primary);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: var(--color-primary-hover);
+    }
+
+    .btn-secondary {
+      background: var(--color-surface);
+      color: var(--color-text-primary);
+      border: 1px solid var(--color-border);
+    }
+
+    .btn-secondary:hover {
+      background: var(--color-border-light);
+    }
+
+    .btn-ghost {
+      background: transparent;
+      color: var(--color-text-secondary);
+    }
+
+    .btn-ghost:hover {
+      background: var(--color-surface);
+      color: var(--color-text-primary);
+    }
+
+    .input {
+      width: 100%;
+      padding: 0.75rem;
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-md);
+      background: var(--color-background);
+      color: var(--color-text-primary);
+      font-size: 0.875rem;
+    }
+
+    .input:focus {
+      outline: none;
+      border-color: var(--color-primary);
+      box-shadow: 0 0 0 3px rgba(109, 91, 208, 0.1);
+    }
+
+    .sidebar {
+      @apply fixed left-0 top-0 h-full w-80 bg-white border-r border-gray-200 z-50 transform -translate-x-full transition-transform duration-300 ease-in-out;
+    }
+
+    .sidebar.open {
+      @apply translate-x-0;
+    }
+
+    .overlay {
+      @apply fixed inset-0 bg-black bg-opacity-50 z-40 hidden;
+    }
+
+    .overlay.open {
+      @apply block;
+    }
+
+    .status-badge {
+      @apply inline-block px-2 py-1 rounded text-xs font-medium;
+    }
+
+    .status-success {
+      @apply bg-green-100 text-green-800;
+    }
+
+    .status-warning {
+      @apply bg-yellow-100 text-yellow-800;
+    }
+
+    .status-error {
+      @apply bg-red-100 text-red-800;
+    }
+
+    .status-info {
+      @apply bg-blue-100 text-blue-800;
+    }
+
+    /* Dark theme overrides */
+    [data-theme="dark"] .card,
+    [data-theme="dark"] .card-elevated {
+      @apply bg-gray-800 border-gray-700;
+    }
+
+    [data-theme="dark"] .sidebar {
+      @apply bg-gray-800 border-gray-700;
+    }
+
+    [data-theme="dark"] .input {
+      @apply bg-gray-800 border-gray-600 text-white placeholder-gray-400;
+    }
+
+    [data-theme="dark"] .btn-secondary {
+      @apply bg-gray-700 text-gray-200 hover:bg-gray-600;
+    }
+
+    [data-theme="dark"] .btn-ghost {
+      @apply text-gray-400 hover:bg-gray-700 hover:text-gray-200;
+    }
+
+    /* Chart containers */
+    .chart-container {
+      position: relative;
+      height: 300px;
+      width: 100%;
+    }
+
+    /* Loading states */
+    .skeleton {
+      @apply animate-pulse bg-gray-200 rounded;
+    }
+
+    [data-theme="dark"] .skeleton {
+      @apply bg-gray-700;
+    }
+
+    /* Focus visible for accessibility */
+    .focus-visible:focus {
+      @apply outline-none ring-2 ring-purple-500 ring-offset-2;
+    }
+
+    /* Responsive utilities */
+    @media (max-width: 768px) {
+      .sidebar {
+        @apply w-full;
+      }
+    }
+
+    /* Login styles */
+    .login-container {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+
+    .login-card {
+      background: white;
+      border-radius: var(--radius-xl);
+      padding: 2rem;
+      box-shadow: var(--shadow-xl);
+      width: 100%;
+      max-width: 400px;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+  </style>
+</head>
+<body data-theme="light">
+  <!-- Login Section -->
+  <div id="login-section" class="login-container">
+    <div class="login-card">
+      <div class="text-center mb-6">
+        <h1 class="text-2xl font-bold text-gray-900 mb-2">Simulador Holding</h1>
+        <p class="text-gray-600">Acesso Restrito</p>
       </div>
-    </header>
+      
+      <div class="space-y-4">
+        <div>
+          <label for="email" class="block text-sm font-medium text-gray-700 mb-1">E-mail</label>
+          <input id="email" type="email" placeholder="seu@email.com" class="input" />
+        </div>
+        
+        <button id="enter" class="btn btn-primary w-full">Entrar</button>
+        <button id="clear" class="btn btn-secondary w-full">Limpar</button>
+        
+        <div id="login-msg" class="text-sm text-red-600 text-center"></div>
+      </div>
+    </div>
+  </div>
 
-    <main class="max-w-6xl mx-auto px-4 py-6 grid grid-cols-1 lg:grid-cols-2 gap-6">
-      <!-- Parâmetros (PF) -->
-      <section class="card lg:col-span-2">
-        <div class="flex items-center justify-between mb-4">
-          <h2 class="text-base font-semibold">Parâmetros de Regra — Pessoa Física</h2>
-          <span class="badge">defina ano e limiares</span>
+  <!-- Main Application -->
+  <div id="app-section" class="hidden">
+    <!-- Overlay for mobile sidebar -->
+    <div id="overlay" class="overlay"></div>
+    
+    <!-- Sidebar Navigation -->
+    <nav id="sidebar" class="sidebar">
+      <div class="p-6">
+        <div class="flex items-center justify-between mb-8">
+          <h2 class="text-xl font-bold text-gray-900">Simulador Holding</h2>
+          <button id="close-sidebar" class="btn-ghost p-2">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+          </button>
         </div>
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <label class="block">
-            <div class="label mb-1">Ano da simulação</div>
-            <input id="ano" class="input" type="number" step="1" min="2024" value="2027" inputmode="numeric">
-          </label>
-          <label class="block">
-            <div class="label mb-1">Ano de início do IBS/CBS (PF)</div>
-            <input id="anoInicioPf" class="input" type="number" step="1" min="2024" value="2027" inputmode="numeric">
-          </label>
-          <label class="block">
-            <div class="label mb-1">Limiar de imóveis (PF) — &gt;</div>
-            <input id="limiarImoveis" class="input" type="number" step="1" min="0" value="3" inputmode="numeric">
-          </label>
-          <label class="block">
-            <div class="label mb-1">Limiar de receita anual (PF) — &gt;</div>
-            <input id="limiarReceita" class="input" type="text" value="240000">
-          </label>
+        
+        <div class="space-y-2">
+          <a href="#dashboard" class="flex items-center px-3 py-2 text-gray-700 rounded-lg hover:bg-gray-100">
+            <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z"></path>
+            </svg>
+            Dashboard
+          </a>
+          <a href="#simulacao" class="flex items-center px-3 py-2 text-gray-700 rounded-lg hover:bg-gray-100">
+            <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
+            </svg>
+            Simulação
+          </a>
         </div>
-        <p class="text-xs text-white/60 mt-3">
-          <strong>Regra PF simplificada:</strong> IBS e CBS incidem se <span class="mono">nº de imóveis &gt; limiar</span> e
-          <span class="mono">receita anual &gt; limiar</span> e <span class="mono">ano ≥ ano de início</span>.
-        </p>
-      </section>
+        
+        <div class="mt-8 pt-6 border-t border-gray-200">
+          <div id="whoami" class="text-sm text-gray-600 mb-4"></div>
+          <button id="logout" class="btn btn-secondary w-full">Sair</button>
+        </div>
+      </div>
+    </nav>
 
-      <!-- PF -->
-      <section class="card">
-        <div class="flex items-center justify-between mb-4">
-          <h2 class="text-base font-semibold">Pessoa Física</h2>
-          <span class="badge">entradas</span>
-        </div>
-        <div class="grid grid-cols-1 gap-4">
-          <label class="block">
-            <div class="label mb-1">Número de imóveis</div>
-            <input id="pfImoveis" class="input" type="number" step="1" min="0" value="2" inputmode="numeric">
-          </label>
-          <label class="block">
-            <div class="label mb-1">Receita anual de aluguel (R$)</div>
-            <input id="pfReceita" class="input" type="text" value="120000">
-          </label>
-          <label class="block">
-            <div class="label mb-1">Despesas anuais dedutíveis (R$)</div>
-            <input id="pfDespesas" class="input" type="text" value="5000">
-          </label>
-          <label class="block">
-            <div class="label mb-1">Alíquota efetiva IRPF (%)</div>
-            <input id="pfAliqIRPF" class="input" type="text" value="27,5" inputmode="decimal">
-          </label>
-        </div>
-        <div class="mt-6">
-          <h3 class="text-sm font-medium mb-2 text-white/80">Alíquotas IBS/CBS (PF)</h3>
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <label class="block">
-              <div class="label mb-1">IBS (%)</div>
-              <input id="pfAliqIBS" class="input" type="text" value="5,6" inputmode="decimal">
-            </label>
-            <label class="block">
-              <div class="label mb-1">CBS (%)</div>
-              <input id="pfAliqCBS" class="input" type="text" value="2,8" inputmode="decimal">
-            </label>
+    <!-- Main Content -->
+    <div class="ml-0 lg:ml-80">
+      <!-- Header -->
+      <header class="bg-white border-b border-gray-200 px-6 py-4">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center">
+            <button id="menu-button" class="btn-ghost p-2 lg:hidden">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+              </svg>
+            </button>
+            <h1 class="text-xl font-semibold text-gray-900 ml-2">Simulador de Holding Patrimonial</h1>
+          </div>
+          
+          <div class="flex items-center space-x-4">
+            <button id="theme-toggle" class="btn-ghost p-2">
+              <svg id="sun-icon" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path>
+              </svg>
+              <svg id="moon-icon" class="w-5 h-5 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path>
+              </svg>
+            </button>
           </div>
         </div>
-        <div class="mt-6">
-          <h3 class="text-sm font-medium mb-2 text-white/80">Resultado PF</h3>
-          <dl class="space-y-2 text-sm">
-            <div class="flex justify-between"><dt>IRPF</dt><dd id="pfIRPF" class="mono">R$ 0,00</dd></div>
-            <div class="flex justify-between"><dt>IBS</dt><dd id="pfIBS" class="mono">R$ 0,00</dd></div>
-            <div class="flex justify-between"><dt>CBS</dt><dd id="pfCBS" class="mono">R$ 0,00</dd></div>
-            <div class="flex justify-between font-semibold"><dt>Total de tributos (PF)</dt><dd id="pfTotal" class="mono">R$ 0,00</dd></div>
-          </dl>
-          <div id="pfIncidenciaMsg" class="text-xs text-white/60 mt-2"></div>
-        </div>
-      </section>
+      </header>
 
-      <!-- PJ -->
-      <section class="card">
-        <div class="flex items-center justify-between mb-4">
-          <h2 class="text-base font-semibold">Pessoa Jurídica (Holding)</h2>
-          <span class="badge">entradas</span>
-        </div>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <label class="block">
-            <div class="label mb-1">Receita anual de aluguel (R$)</div>
-            <input id="pjReceita" class="input" type="text" value="120000">
-          </label>
-          <label class="block">
-            <div class="label mb-1">Custos fixos anuais (R$)</div>
-            <input id="pjCustos" class="input" type="text" value="10000">
-          </label>
-          <label class="block">
-            <div class="label mb-1">Base presumida (%)</div>
-            <input id="pjBase" class="input" type="text" value="32">
-          </label>
-          <label class="block">
-            <div class="label mb-1">IRPJ 15% (%)</div>
-            <input id="pjIRPJ" class="input" type="text" value="15">
-          </label>
-          <label class="block">
-            <div class="label mb-1">Adicional IRPJ (%)</div>
-            <input id="pjAdicional" class="input" type="text" value="10">
-          </label>
-          <label class="block">
-            <div class="label mb-1">Limite anual para adicional (R$)</div>
-            <input id="pjLimiteAdic" class="input" type="text" value="240000">
-          </label>
-          <label class="block">
-            <div class="label mb-1">CSLL (%)</div>
-            <input id="pjCSLL" class="input" type="text" value="9">
-          </label>
-          <label class="block">
-            <div class="label mb-1">IBS PJ (%)</div>
-            <input id="pjIBS" class="input" type="text" value="5,6">
-          </label>
-          <label class="block">
-            <div class="label mb-1">CBS PJ (%)</div>
-            <input id="pjCBS" class="input" type="text" value="2,8">
-          </label>
-          <label class="block">
-            <div class="label mb-1">ITBI anualizado (R$)</div>
-            <input id="pjITBIano" class="input" type="text" value="0">
-          </label>
-        </div>
-        <div class="mt-6">
-          <h3 class="text-sm font-medium mb-2 text-white/80">Resultado PJ</h3>
-          <dl class="space-y-2 text-sm">
-            <div class="flex justify-between"><dt>Base Presumida</dt><dd id="pjBaseCalc" class="mono">R$ 0,00</dd></div>
-            <div class="flex justify-between"><dt>IRPJ 15%</dt><dd id="pjIRPJValor" class="mono">R$ 0,00</dd></div>
-            <div class="flex justify-between"><dt>Adicional IRPJ</dt><dd id="pjAdicValor" class="mono">R$ 0,00</dd></div>
-            <div class="flex justify-between"><dt>CSLL</dt><dd id="pjCSLLValor" class="mono">R$ 0,00</dd></div>
-            <div class="flex justify-between"><dt>IBS</dt><dd id="pjIBSValor" class="mono">R$ 0,00</dd></div>
-            <div class="flex justify-between"><dt>CBS</dt><dd id="pjCBSValor" class="mono">R$ 0,00</dd></div>
-            <div class="flex justify-between"><dt>ITBI (anual)</dt><dd id="pjITBIValor" class="mono">R$ 0,00</dd></div>
-            <div class="flex justify-between font-semibold"><dt>Total de tributos (PJ)</dt><dd id="pjTotal" class="mono">R$ 0,00</dd></div>
-          </dl>
-        </div>
-      </section>
+      <!-- Main Content Area -->
+      <main class="p-6">
+        <div class="container">
+          <!-- Dashboard KPIs -->
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <div class="card">
+              <div class="flex items-center justify-between">
+                <div>
+                  <p class="text-sm text-gray-600">Economia Potencial</p>
+                  <p id="kpi-economia" class="text-2xl font-bold text-green-600">R$ 0</p>
+                </div>
+                <div class="p-3 bg-green-100 rounded-full">
+                  <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
+                  </svg>
+                </div>
+              </div>
+            </div>
+            
+            <div class="card">
+              <div class="flex items-center justify-between">
+                <div>
+                  <p class="text-sm text-gray-600">Tributos PF</p>
+                  <p id="kpi-pf" class="text-2xl font-bold text-blue-600">R$ 0</p>
+                </div>
+                <div class="p-3 bg-blue-100 rounded-full">
+                  <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                  </svg>
+                </div>
+              </div>
+            </div>
+            
+            <div class="card">
+              <div class="flex items-center justify-between">
+                <div>
+                  <p class="text-sm text-gray-600">Tributos PJ</p>
+                  <p id="kpi-pj" class="text-2xl font-bold text-orange-600">R$ 0</p>
+                </div>
+                <div class="p-3 bg-orange-100 rounded-full">
+                  <svg class="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+                  </svg>
+                </div>
+              </div>
+            </div>
+            
+            <div class="card">
+              <div class="flex items-center justify-between">
+                <div>
+                  <p class="text-sm text-gray-600">Payback</p>
+                  <p id="kpi-payback" class="text-2xl font-bold text-purple-600">0 anos</p>
+                </div>
+                <div class="p-3 bg-purple-100 rounded-full">
+                  <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                  </svg>
+                </div>
+              </div>
+            </div>
+          </div>
 
-      <!-- Comparativo -->
-      <section class="card lg:col-span-2">
-        <div class="flex items-center justify-between mb-4">
-          <h2 class="text-base font-semibold">Comparativo</h2>
-          <span class="badge">recalcula ao digitar</span>
-        </div>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div class="rounded-xl border border-white/10 p-4 bg-slate-950/30">
-            <div class="text-sm text-white/70">Total PF</div>
-            <div id="boxPfTotal" class="text-2xl font-semibold mono mt-1">R$ 0,00</div>
+          <!-- Charts Section -->
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+            <div class="card">
+              <h3 class="text-lg font-semibold mb-4">Comparativo de Tributos</h3>
+              <div class="chart-container">
+                <canvas id="tributos-chart"></canvas>
+              </div>
+            </div>
+            
+            <div class="card">
+              <h3 class="text-lg font-semibold mb-4">Distribuição de Tributos</h3>
+              <div class="chart-container">
+                <canvas id="distribuicao-chart"></canvas>
+              </div>
+            </div>
           </div>
-          <div class="rounded-xl border border-white/10 p-4 bg-slate-950/30">
-            <div class="text-sm text-white/70">Total PJ</div>
-            <div id="boxPjTotal" class="text-2xl font-semibold mono mt-1">R$ 0,00</div>
-          </div>
-          <div class="rounded-xl border border-white/10 p-4 bg-slate-950/30">
-            <div class="text-sm text-white/70">Diferença (PJ − PF)</div>
-            <div id="boxDiff" class="text-2xl font-semibold mono mt-1">R$ 0,00</div>
-            <div id="boxPref" class="text-xs text-white/60 mt-1"></div>
-          </div>
-        </div>
-        <p class="text-[11px] text-white/50 mt-3">
-          *Simulador didático. Parâmetros (anos, limiares e alíquotas) são editáveis para refletir sua realidade.
-        </p>
-      </section>
-    </main>
 
-    <script>
-      // Utilidades robustas para números (aceita 1.234.567,89 ou 1234567.89)
-      const $ = (id) => document.getElementById(id);
-      const toNumber = (raw) => {
-        if (raw == null) return 0;
-        const s = String(raw).trim().replace(/\s+/g,'')
-          .replace(/\./g,'')     // remove separador de milhar com ponto
-          .replace(/,(?=\d{1,2}$)/, '.$&'.slice(1)) // vírgula decimal para ponto (últimos 1-2 dígitos)
-          .replace(/,/g, '.');    // fallback: qualquer vírgula vira ponto
-        const n = parseFloat(s);
-        return Number.isFinite(n) ? n : 0;
+          <!-- Simulation Form -->
+          <section class="card mb-6">
+            <h2 class="text-xl font-semibold mb-6">Parâmetros da Simulação</h2>
+            
+            <!-- Basic Configuration -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+              <div>
+                <label for="ano" class="block text-sm font-medium text-gray-700 mb-1">Ano da Simulação</label>
+                <select id="ano" class="input">
+                  <option value="2024">2024</option>
+                  <option value="2025">2025</option>
+                  <option value="2026">2026</option>
+                  <option value="2027" selected>2027</option>
+                  <option value="2028">2028</option>
+                </select>
+              </div>
+              
+              <div>
+                <label for="pf-imoveis" class="block text-sm font-medium text-gray-700 mb-1">Número de Imóveis (PF)</label>
+                <input id="pf-imoveis" type="number" min="0" value="5" class="input" />
+              </div>
+              
+              <div>
+                <label for="pf-receita" class="block text-sm font-medium text-gray-700 mb-1">Receita Anual PF (R$)</label>
+                <input id="pf-receita" type="text" value="500000" class="input" />
+              </div>
+              
+              <div>
+                <label for="pf-despesas" class="block text-sm font-medium text-gray-700 mb-1">Despesas Anuais PF (R$)</label>
+                <input id="pf-despesas" type="text" value="50000" class="input" />
+              </div>
+            </div>
+
+            <!-- PJ Configuration -->
+            <div class="mb-6">
+              <h3 class="text-lg font-medium mb-4">Configuração PJ</h3>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label for="pj-copy" class="block text-sm font-medium text-gray-700 mb-1">Usar mesma receita da PF?</label>
+                  <select id="pj-copy" class="input">
+                    <option value="sim">Sim</option>
+                    <option value="nao">Não</option>
+                  </select>
+                </div>
+                
+                <div id="pj-receita-container" class="hidden">
+                  <label for="pj-receita" class="block text-sm font-medium text-gray-700 mb-1">Receita Anual PJ (R$)</label>
+                  <input id="pj-receita" type="text" value="500000" class="input" />
+                </div>
+              </div>
+            </div>
+
+            <!-- Advanced Settings -->
+            <details class="mb-6">
+              <summary class="cursor-pointer text-lg font-medium mb-4">Configurações Avançadas</summary>
+              <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
+                <!-- PF Thresholds -->
+                <div>
+                  <label for="limiar-imoveis" class="block text-sm font-medium text-gray-700 mb-1">Limiar Imóveis PF</label>
+                  <input id="limiar-imoveis" type="number" min="0" value="0" class="input" />
+                </div>
+                <div>
+                  <label for="limiar-receita" class="block text-sm font-medium text-gray-700 mb-1">Limiar Receita PF (R$)</label>
+                  <input id="limiar-receita" type="text" value="0" class="input" />
+                </div>
+                
+                <!-- IVA Rates -->
+                <div>
+                  <label for="taxa-iva-ref" class="block text-sm font-medium text-gray-700 mb-1">Taxa IVA Referência (%)</label>
+                  <input id="taxa-iva-ref" type="number" step="0.1" min="0" max="100" value="26.5" class="input" />
+                </div>
+                <div>
+                  <label for="reducao-base" class="block text-sm font-medium text-gray-700 mb-1">Redução Base (%)</label>
+                  <input id="reducao-base" type="number" step="0.01" min="0" max="1" value="0.7" class="input" />
+                </div>
+                <div>
+                  <label for="prop-ibs" class="block text-sm font-medium text-gray-700 mb-1">Proporção IBS (%)</label>
+                  <input id="prop-ibs" type="number" step="0.01" min="0" max="1" value="0.66" class="input" />
+                </div>
+                <div>
+                  <label for="prop-cbs" class="block text-sm font-medium text-gray-700 mb-1">Proporção CBS (%)</label>
+                  <input id="prop-cbs" type="number" step="0.01" min="0" max="1" value="0.34" class="input" />
+                </div>
+                
+                <!-- PJ Parameters -->
+                <div>
+                  <label for="pj-base-presumida" class="block text-sm font-medium text-gray-700 mb-1">Base Presumida PJ (%)</label>
+                  <input id="pj-base-presumida" type="number" step="0.1" min="0" max="100" value="32" class="input" />
+                </div>
+                <div>
+                  <label for="pj-aliq-irpj" class="block text-sm font-medium text-gray-700 mb-1">Alíquota IRPJ (%)</label>
+                  <input id="pj-aliq-irpj" type="number" step="0.1" min="0" max="100" value="15" class="input" />
+                </div>
+                <div>
+                  <label for="pj-aliq-irpj-adicional" class="block text-sm font-medium text-gray-700 mb-1">Alíquota Adicional IRPJ (%)</label>
+                  <input id="pj-aliq-irpj-adicional" type="number" step="0.1" min="0" max="100" value="10" class="input" />
+                </div>
+                <div>
+                  <label for="pj-limite-adicional" class="block text-sm font-medium text-gray-700 mb-1">Limite Anual Adicional IRPJ (R$)</label>
+                  <input id="pj-limite-adicional" type="text" value="240000" class="input" />
+                </div>
+                <div>
+                  <label for="pj-aliq-csll" class="block text-sm font-medium text-gray-700 mb-1">Alíquota CSLL (%)</label>
+                  <input id="pj-aliq-csll" type="number" step="0.1" min="0" max="100" value="9" class="input" />
+                </div>
+                <div>
+                  <label for="pj-custos-fixos" class="block text-sm font-medium text-gray-700 mb-1">Custos Fixos Anuais (R$)</label>
+                  <input id="pj-custos-fixos" type="text" value="10000" class="input" />
+                </div>
+                <div>
+                  <label for="pj-itbi" class="block text-sm font-medium text-gray-700 mb-1">Valor Total ITBI (R$)</label>
+                  <input id="pj-itbi" type="text" value="0" class="input" />
+                </div>
+                <div>
+                  <label for="pj-anos-itbi" class="block text-sm font-medium text-gray-700 mb-1">Anos para Amortizar ITBI</label>
+                  <input id="pj-anos-itbi" type="number" min="1" value="10" class="input" />
+                </div>
+              </div>
+            </details>
+          </section>
+
+          <!-- Results Section -->
+          <div class="card mb-6">
+            <h2 class="text-xl font-semibold mb-6">Resultados Detalhados</h2>
+            <div class="grid md:grid-cols-2 gap-6" id="results-wrapper">
+              <div id="pf-result" class="card bg-blue-50 border-blue-200"></div>
+              <div id="pj-result" class="card bg-orange-50 border-orange-200"></div>
+            </div>
+            <div class="mt-6 card bg-gray-50 border-gray-200" id="comparativo"></div>
+          </div>
+
+          <!-- Disclaimers -->
+          <div class="card">
+            <h2 class="text-lg font-semibold mb-4 flex items-center">
+              <svg class="w-5 h-5 mr-2 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+              </svg>
+              Avisos Importantes
+            </h2>
+            <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-4">
+              <p class="text-sm text-yellow-800 mb-2">Este simulador tem caráter <strong>estimativo</strong>. Ele não substitui aconselhamento jurídico ou contábil profissional.</p>
+            </div>
+            <div class="text-sm text-gray-600 space-y-2">
+              <p><strong>IRPF:</strong> usa a tabela progressiva mensal vigente conforme <em>Lei 11.482/2007</em> com alterações da <em>Lei 15.191/2025</em> para rendimentos a partir de maio/2025. Não considera dependentes, INSS, pensão, outras deduções ou rendas.</p>
+              <p><strong>IBS/CBS:</strong> Para 2026, aplica-se alíquotas iniciais simbólicas de 0,1% (IBS) e 0,9% (CBS) conforme a proposta de teste de sistema. A partir de 2027, considera-se redução de 70% da base de cálculo nas locações de imóveis, resultando em 30% da alíquota de referência (26,5%), com repartição de 66% para o IBS e 34% para a CBS. Para 2024 e 2025, as alíquotas são zero.</p>
+              <p><strong>PF:</strong> somente contribui para IBS/CBS se <strong>número de imóveis > limiar</strong> e <strong>receita anual > limiar</strong> (art. 251 da LC 214/25).</p>
+              <p><strong>PJ:</strong> cálculo baseado no regime de <em>Lucro Presumido</em>, com base presumida de 32% sobre a receita, IRPJ de 15% + adicional sobre excedente, CSLL de 9%, além de custos fixos e ITBI anualizado. Não considera créditos de IBS/CBS nem outras deduções.</p>
+              <p><strong>IVA:</strong> a alíquota de referência do IVA (26,5%) pode ser revisada pelo Senado conforme art. 475, § 11, da LC 214/25. Ajuste este valor nas configurações se houver mudança legal.</p>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <script>
+    // ==========================
+    // ========== AUTHENTICATION =========
+    // ==========================
+
+    /* Allowlist por SHA-256 (client-side) 
+     * 1) Rode via HTTPS ou localhost para ter WebCrypto (crypto.subtle).
+     * 2) Gere os hashes em hash-generator.html e cole aqui.
+     * 3) Este gate apenas ofusca o acesso; não é proteção real.
+     */
+
+    // >>>>>>>>> ALLOWLIST: HASHES PERMITIDOS (lowercase + trim do e-mail) <<<<<<<<<
+    const ALLOWLIST_SHA256 = [
+      // gmparticipacoes@gmail.com
+      "6c73e10b855181d66d9241415ee1aa71f535b49bd8c420f8890a76f64db6b727"
+    ];
+
+    // Chaves do localStorage para "persistir" sessão (conveniência apenas)
+    const LS_HASH = "ALLOWLIST_AUTH_HASH";
+    const LS_EMAIL = "ALLOWLIST_AUTH_EMAIL";
+
+    const $ = (s) => document.querySelector(s);
+    const loginSection = $("#login-section");
+    const appSection = $("#app-section");
+    const loginMsg = $("#login-msg");
+    const whoami = $("#whoami");
+
+    const emailInput = $("#email");
+    const btnEnter = $("#enter");
+    const btnClear = $("#clear");
+    const btnLogout = $("#logout");
+
+    function isSecureContextAvailable() {
+      return typeof crypto !== "undefined" && crypto?.subtle && window.isSecureContext;
+    }
+
+    async function sha256hex(str) {
+      if (!isSecureContextAvailable()) {
+        throw new Error("WebCrypto indisponível. Use HTTPS ou localhost.");
+      }
+      const enc = new TextEncoder().encode(str);
+      const buf = await crypto.subtle.digest("SHA-256", enc);
+      return [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2, "0")).join("");
+    }
+
+    function normEmail(email) {
+      return String(email || "").trim().toLowerCase();
+    }
+
+    function setUIAuthorized(email, hash) {
+      loginSection.classList.add("hidden");
+      appSection.classList.remove("hidden");
+      whoami.textContent = `Autorizado: ${email}`;
+      localStorage.setItem(LS_HASH, hash);
+      localStorage.setItem(LS_EMAIL, email);
+      // Initialize the app after login
+      initializeApp();
+    }
+
+    function setUILogout(msg = "") {
+      appSection.classList.add("hidden");
+      loginSection.classList.remove("hidden");
+      loginMsg.textContent = msg;
+      localStorage.removeItem(LS_HASH);
+      localStorage.removeItem(LS_EMAIL);
+    }
+
+    async function tryRestoreSession() {
+      const hash = localStorage.getItem(LS_HASH);
+      const email = localStorage.getItem(LS_EMAIL);
+      if (hash && email && ALLOWLIST_SHA256.includes(hash)) {
+        setUIAuthorized(email, hash);
+      }
+    }
+
+    // Authentication event listeners
+    if (btnEnter) {
+      btnEnter.addEventListener("click", async () => {
+        loginMsg.textContent = "";
+        const email = normEmail(emailInput.value);
+        if (!email || !email.includes("@")) {
+          loginMsg.textContent = "Informe um e-mail válido.";
+          return;
+        }
+        try {
+          const hash = await sha256hex(email);
+          if (ALLOWLIST_SHA256.includes(hash)) {
+            setUIAuthorized(email, hash);
+          } else {
+            loginMsg.textContent = "Acesso negado.";
+          }
+        } catch (e) {
+          loginMsg.textContent = (e?.message || String(e));
+        }
+      });
+    }
+
+    if (btnClear) {
+      btnClear.addEventListener("click", () => {
+        emailInput.value = "";
+        loginMsg.textContent = "";
+      });
+    }
+
+    if (btnLogout) {
+      btnLogout.addEventListener("click", () => {
+        setUILogout("Sessão encerrada.");
+      });
+    }
+
+    // ==========================
+    // ========== APPLICATION LOGIC =========
+    // ==========================
+
+    // Global variables for charts
+    let tributosChart = null;
+    let distribuicaoChart = null;
+
+    // Theme management
+    function initTheme() {
+      const theme = localStorage.getItem('theme') || 'light';
+      document.documentElement.setAttribute('data-theme', theme);
+      updateThemeIcons(theme);
+    }
+
+    function toggleTheme() {
+      const currentTheme = document.documentElement.getAttribute('data-theme');
+      const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+      document.documentElement.setAttribute('data-theme', newTheme);
+      localStorage.setItem('theme', newTheme);
+      updateThemeIcons(newTheme);
+    }
+
+    function updateThemeIcons(theme) {
+      const sunIcon = document.getElementById('sun-icon');
+      const moonIcon = document.getElementById('moon-icon');
+      if (theme === 'light') {
+        sunIcon.classList.remove('hidden');
+        moonIcon.classList.add('hidden');
+      } else {
+        sunIcon.classList.add('hidden');
+        moonIcon.classList.remove('hidden');
+      }
+    }
+
+    // Sidebar management
+    function initSidebar() {
+      const menuButton = document.getElementById('menu-button');
+      const sidebar = document.getElementById('sidebar');
+      const overlay = document.getElementById('overlay');
+      const closeSidebar = document.getElementById('close-sidebar');
+
+      menuButton.addEventListener('click', () => {
+        sidebar.classList.add('open');
+        overlay.classList.add('open');
+      });
+
+      closeSidebar.addEventListener('click', () => {
+        sidebar.classList.remove('open');
+        overlay.classList.remove('open');
+      });
+
+      overlay.addEventListener('click', () => {
+        sidebar.classList.remove('open');
+        overlay.classList.remove('open');
+      });
+    }
+
+    // Chart initialization
+    function initCharts() {
+      // Tributos comparison chart
+      const tributosCtx = document.getElementById('tributos-chart');
+      if (tributosCtx) {
+        tributosChart = new Chart(tributosCtx, {
+          type: 'bar',
+          data: {
+            labels: ['Pessoa Física', 'Pessoa Jurídica'],
+            datasets: [{
+              label: 'Tributos Anuais (R$)',
+              data: [0, 0],
+              backgroundColor: ['#3B82F6', '#F59E0B'],
+              borderColor: ['#2563EB', '#D97706'],
+              borderWidth: 1
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: {
+                display: false
+              }
+            },
+            scales: {
+              y: {
+                beginAtZero: true,
+                ticks: {
+                  callback: function(value) {
+                    return 'R$ ' + value.toLocaleString('pt-BR');
+                  }
+                }
+              }
+            }
+          }
+        });
+      }
+
+      // Distribuição chart
+      const distribuicaoCtx = document.getElementById('distribuicao-chart');
+      if (distribuicaoCtx) {
+        distribuicaoChart = new Chart(distribuicaoCtx, {
+          type: 'doughnut',
+          data: {
+            labels: ['IRPF', 'IBS', 'CBS', 'IRPJ', 'CSLL', 'Custos'],
+            datasets: [{
+              data: [0, 0, 0, 0, 0, 0],
+              backgroundColor: [
+                '#3B82F6',
+                '#10B981',
+                '#F59E0B',
+                '#EF4444',
+                '#8B5CF6',
+                '#6B7280'
+              ]
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: {
+                position: 'bottom'
+              }
+            }
+          }
+        });
+      }
+    }
+
+    // Utility functions
+    function parseNumberBR(str) {
+      if (!str) return 0;
+      return parseFloat(String(str).replace(/[^\d,-]/g, '').replace(',', '.')) || 0;
+    }
+
+    function formatBRL(value) {
+      return new Intl.NumberFormat('pt-BR', {
+        style: 'currency',
+        currency: 'BRL'
+      }).format(value);
+    }
+
+    // Tax calculation functions
+    function calculaIrpfAnual(baseAnual, ano) {
+      const baseMensal = baseAnual / 12;
+      
+      // Tabela IRPF 2025 (vigente a partir de maio/2025)
+      const faixas = [
+        { limite: 2259.20, aliquota: 0, deducao: 0 },
+        { limite: 2826.65, aliquota: 0.075, deducao: 169.44 },
+        { limite: 3751.05, aliquota: 0.15, deducao: 381.44 },
+        { limite: 4664.68, aliquota: 0.225, deducao: 662.77 },
+        { limite: Infinity, aliquota: 0.275, deducao: 896.00 }
+      ];
+
+      let aliquotaNominal = 0;
+      let deducaoMensal = 0;
+
+      for (const faixa of faixas) {
+        if (baseMensal <= faixa.limite) {
+          aliquotaNominal = faixa.aliquota;
+          deducaoMensal = faixa.deducao;
+          break;
+        }
+      }
+
+      const irMensal = Math.max(0, baseMensal * aliquotaNominal - deducaoMensal);
+      const irAnual = irMensal * 12;
+      const aliquotaEfetiva = baseAnual > 0 ? irAnual / baseAnual : 0;
+
+      return {
+        irAnual,
+        aliquotaNominal,
+        aliquotaEfetiva,
+        deducaoMensal
       };
-      const brl = (n) => (Number.isFinite(n) ? n : 0).toLocaleString('pt-BR', { style:'currency', currency:'BRL' });
-      const pct = (v) => Math.max(0, toNumber(v)) / 100;
+    }
 
-      function read(id){ return toNumber($(id).value); }
+    function getAutoIvaRates(ano) {
+      const taxaIvaRef = parseFloat(document.getElementById('taxa-iva-ref').value) || 26.5;
+      const reducaoBase = parseFloat(document.getElementById('reducao-base').value) || 0.7;
+      const propIbs = parseFloat(document.getElementById('prop-ibs').value) || 0.66;
+      const propCbs = parseFloat(document.getElementById('prop-cbs').value) || 0.34;
 
-      function computePF(){
-        const ano = Math.round(read('ano'));
-        const anoInicio = Math.round(read('anoInicioPf'));
-        const limiarImoveis = Math.round(read('limiarImoveis'));
-        const limiarReceita = read('limiarReceita');
-
-        const nImoveis = Math.round(read('pfImoveis'));
-        const receita = read('pfReceita');
-        const despesas = read('pfDespesas');
-        const aIRPF = pct($('pfAliqIRPF').value);
-        const aIBS = pct($('pfAliqIBS').value);
-        const aCBS = pct($('pfAliqCBS').value);
-
-        const limiarAtendido = (nImoveis > limiarImoveis) && (receita > limiarReceita);
-        const anoOk = (ano >= anoInicio);
-        const aplicaIVA = limiarAtendido && anoOk;
-
-        const baseIRPF = Math.max(0, receita - despesas);
-        const vIRPF = baseIRPF * aIRPF;
-        const vIBS  = aplicaIVA ? receita * aIBS : 0;
-        const vCBS  = aplicaIVA ? receita * aCBS : 0;
-        const total = vIRPF + vIBS + vCBS;
-
-        $('pfIRPF').textContent = brl(vIRPF);
-        $('pfIBS').textContent  = brl(vIBS);
-        $('pfCBS').textContent  = brl(vCBS);
-        $('pfTotal').textContent = brl(total);
-        $('pfIncidenciaMsg').textContent =
-          `Ano ${ano}; início ${anoInicio}. Limiar: imóveis > ${limiarImoveis}, receita > ${brl(limiarReceita)}. ` +
-          `Critério atendido? ${limiarAtendido ? 'Sim' : 'Não'}. IBS/CBS incidem? ${aplicaIVA ? 'Sim' : 'Não'}.`;
-        return { totalPF: total };
+      let totalRate = 0;
+      
+      if (ano <= 2025) {
+        totalRate = 0; // Sem IVA
+      } else if (ano === 2026) {
+        // Período de teste
+        totalRate = 1.0; // 0.1% IBS + 0.9% CBS
+      } else {
+        // 2027+: 30% da alíquota de referência
+        totalRate = taxaIvaRef * (1 - reducaoBase);
       }
 
-      function computePJ(){
-        const receita = read('pjReceita');
-        const custos  = read('pjCustos');
-        const baseP   = pct($('pjBase').value);
-        const aIRPJ   = pct($('pjIRPJ').value);
-        const aAdic   = pct($('pjAdicional').value);
-        const limAd   = read('pjLimiteAdic');
-        const aCSLL   = pct($('pjCSLL').value);
-        const aIBS    = pct($('pjIBS').value);
-        const aCBS    = pct($('pjCBS').value);
-        const itbiAno = read('pjITBIano');
+      const ibsRate = totalRate * propIbs;
+      const cbsRate = totalRate * propCbs;
 
-        const basePres = receita * baseP;
-        const vIRPJ = basePres * aIRPJ;
-        const vAdic = basePres > limAd ? (basePres - limAd) * aAdic : 0;
-        const vCSLL = basePres * aCSLL;
-        const vIBS  = receita * aIBS;
-        const vCBS  = receita * aCBS;
-        const total = vIRPJ + vAdic + vCSLL + vIBS + vCBS + custos + itbiAno;
+      return { totalRate, ibsRate, cbsRate };
+    }
 
-        $('pjBaseCalc').textContent = brl(basePres);
-        $('pjIRPJValor').textContent = brl(vIRPJ);
-        $('pjAdicValor').textContent = brl(vAdic);
-        $('pjCSLLValor').textContent = brl(vCSLL);
-        $('pjIBSValor').textContent  = brl(vIBS);
-        $('pjCBSValor').textContent  = brl(vCBS);
-        $('pjITBIValor').textContent = brl(itbiAno);
-        $('pjTotal').textContent     = brl(total);
-        return { totalPJ: total };
+    function updateKPIs(pfTributos, pjTributos, economia, payback) {
+      document.getElementById('kpi-economia').textContent = formatBRL(economia);
+      document.getElementById('kpi-pf').textContent = formatBRL(pfTributos);
+      document.getElementById('kpi-pj').textContent = formatBRL(pjTributos);
+      document.getElementById('kpi-payback').textContent = payback > 0 ? `${payback.toFixed(1)} anos` : 'N/A';
+    }
+
+    function updateCharts(pfTributos, pjTributos, pfIrpf, pfIbs, pfCbs, pjIrpj, pjCsll, pjIbs, pjCbs, pjCustos) {
+      // Update comparison chart
+      if (tributosChart) {
+        tributosChart.data.datasets[0].data = [pfTributos, pjTributos];
+        tributosChart.update();
       }
 
-      function recompute(){
-        const { totalPF } = computePF();
-        const { totalPJ } = computePJ();
-        $('boxPfTotal').textContent = brl(totalPF);
-        $('boxPjTotal').textContent = brl(totalPJ);
-        const diff = totalPJ - totalPF;
-        $('boxDiff').textContent = brl(diff);
-        $('boxPref').textContent = diff > 0
-          ? 'PF tende a ser mais vantajosa.'
-          : (diff < 0 ? 'PJ (Holding) tende a ser mais vantajosa.' : 'Equilíbrio.');
+      // Update distribution chart
+      if (distribuicaoChart) {
+        distribuicaoChart.data.datasets[0].data = [
+          pfIrpf, pfIbs, pfCbs, pjIrpj, pjCsll, pjCustos
+        ];
+        distribuicaoChart.update();
+      }
+    }
+
+    function update() {
+      // Gate: só calcula se "autorizado" (client-side, trivial de burlar)
+      const hash = localStorage.getItem(LS_HASH);
+      if (!hash || !ALLOWLIST_SHA256.includes(hash)) {
+        // Show access denied message in results
+        document.getElementById('pf-result').innerHTML = '<p class="text-red-600">Acesso negado.</p>';
+        document.getElementById('pj-result').innerHTML = '<p class="text-red-600">Acesso negado.</p>';
+        document.getElementById('comparativo').innerHTML = '<p class="text-red-600">Acesso negado.</p>';
+        return;
       }
 
-      // Bind: re-calcula a cada digitação/troca (e também no click do botão reset)
-      function bindAll(){
-        document.querySelectorAll('input').forEach(el => {
-          el.addEventListener('input', recompute);
-          el.addEventListener('change', recompute);
-        });
-        $('resetBtn').addEventListener('click', () => {
-          const defaults = {
-            ano: 2027, anoInicioPf: 2027, limiarImoveis: 3, limiarReceita: 240000,
-            pfImoveis: 2, pfReceita: 120000, pfDespesas: 5000, pfAliqIRPF: '27,5', pfAliqIBS: '5,6', pfAliqCBS: '2,8',
-            pjReceita: 120000, pjCustos: 10000, pjBase: 32, pjIRPJ: 15, pjAdicional: 10, pjLimiteAdic: 240000, pjCSLL: 9, pjIBS: '5,6', pjCBS: '2,8', pjITBIano: 0
-          };
-          Object.entries(defaults).forEach(([k,v]) => { if($(k)) $(k).value = v; });
-          recompute();
-        });
+      // Read essential inputs
+      var ano = parseInt(document.getElementById('ano').value);
+      var pfImoveis = parseInt(document.getElementById('pf-imoveis').value) || 0;
+      var pfReceita = parseNumberBR(document.getElementById('pf-receita').value);
+      var pfDespesas = parseNumberBR(document.getElementById('pf-despesas').value);
+      var pjCopy = document.getElementById('pj-copy').value;
+      var pjReceita = pjCopy === 'sim' ? pfReceita : parseNumberBR(document.getElementById('pj-receita').value);
+
+      // Advanced inputs
+      var limiarImoveis = parseInt(document.getElementById('limiar-imoveis').value) || 0;
+      var limiarReceita = parseNumberBR(document.getElementById('limiar-receita').value);
+      var ivaRates = getAutoIvaRates(ano);
+      
+      // Determine if PF contributes to IVA
+      var pfIvaContribuinte = (pfImoveis > limiarImoveis) && (pfReceita > limiarReceita) && (ivaRates.totalRate > 0);
+
+      // PF calculations
+      var pfBaseAnual = Math.max(0, pfReceita - pfDespesas);
+      var irpfData = calculaIrpfAnual(pfBaseAnual, ano);
+      var pfIrpfTotal = irpfData.irAnual;
+      var pfIbsTotal = pfIvaContribuinte ? pfReceita * (ivaRates.ibsRate / 100) : 0;
+      var pfCbsTotal = pfIvaContribuinte ? pfReceita * (ivaRates.cbsRate / 100) : 0;
+      var pfTotalTributos = pfIrpfTotal + pfIbsTotal + pfCbsTotal;
+      var pfLiquido = pfReceita - pfDespesas - pfTotalTributos;
+
+      // Render PF result
+      var pfHtml = '';
+      pfHtml += '<h3 class="text-lg font-semibold mb-2">Pessoa Física</h3>';
+      pfHtml += '<p>Base mensal (após despesas/12): <strong>' + formatBRL(pfBaseAnual/12) + '</strong></p>';
+      pfHtml += '<p>IRPF anual: <strong>' + formatBRL(pfIrpfTotal) + '</strong></p>';
+      pfHtml += '<p>Alíquota IRPF aplicada: <strong>' + (irpfData.aliquotaNominal*100).toFixed(1) + '%</strong> (dedução mensal R$ ' + irpfData.deducaoMensal.toFixed(2) + ')</p>';
+      pfHtml += '<p>Alíquota IRPF efetiva: <strong>' + (irpfData.aliquotaEfetiva*100).toFixed(2) + '%</strong></p>';
+      pfHtml += '<p>Despesas: <strong>' + formatBRL(pfDespesas) + '</strong></p>';
+      if (pfIvaContribuinte) {
+        pfHtml += '<p>IBS: <strong>' + formatBRL(pfIbsTotal) + '</strong> (' + ivaRates.ibsRate.toFixed(2) + '%)</p>';
+        pfHtml += '<p>CBS: <strong>' + formatBRL(pfCbsTotal) + '</strong> (' + ivaRates.cbsRate.toFixed(2) + '%)</p>';
+      } else {
+        pfHtml += '<p>IBS/CBS: <strong>R$ 0,00</strong> (não aplicável)</p>';
       }
+      pfHtml += '<p class="mt-2 font-bold">Tributos totais (PF): ' + formatBRL(pfTotalTributos) + '</p>';
+      pfHtml += '<p class="text-green-600 font-bold">Líquido PF: ' + formatBRL(pfLiquido) + '</p>';
+      pfHtml += '<p class="mt-2 text-xs text-gray-500">Ano ' + ano + '. Limiar: imóveis &gt; ' + limiarImoveis + ', receita &gt; ' + formatBRL(limiarReceita) + '. Critério atendido? ' + (pfIvaContribuinte ? 'Sim' : 'Não') + '. IVA no ano? ' + (ivaRates.totalRate > 0 ? 'Sim' : 'Não') + '.</p>';
+      document.getElementById('pf-result').innerHTML = pfHtml;
 
-      // Inicialização
-      bindAll();
-      recompute();
+      // PJ advanced values
+      var pjBasePresumida = parseFloat(document.getElementById('pj-base-presumida').value) || 0;
+      var pjAliqIrpj = parseFloat(document.getElementById('pj-aliq-irpj').value) || 0;
+      var pjAliqIrpjAdicional = parseFloat(document.getElementById('pj-aliq-irpj-adicional').value) || 0;
+      var pjLimiteAdicional = parseNumberBR(document.getElementById('pj-limite-adicional').value);
+      var pjAliqCsll = parseFloat(document.getElementById('pj-aliq-csll').value) || 0;
+      var pjCustosFixos = parseNumberBR(document.getElementById('pj-custos-fixos').value);
+      var pjItbi = parseNumberBR(document.getElementById('pj-itbi').value);
+      var pjAnosItbi = parseInt(document.getElementById('pj-anos-itbi').value) || 1;
 
-      // Testes rápidos (console)
-      (function tests(){
-        try{
-          console.group('[Simulador] Testes');
-          // 1) PF abaixo limiar => sem IBS/CBS
-          $('pfImoveis').value = '1'; $('pfReceita').value = '100000'; $('ano').value = '2028'; $('anoInicioPf').value = '2027';
-          recompute();
-          console.assert($('pfIBS').textContent === brl(0) && $('pfCBS').textContent === brl(0), 'PF abaixo limiar: sem IBS/CBS');
-          // 2) PF acima limiar e ano >= início => com IBS/CBS
-          $('pfImoveis').value = '5'; $('pfReceita').value = '300000'; $('pfAliqIBS').value='5,6'; $('pfAliqCBS').value='2,8';
-          $('ano').value = '2028'; $('anoInicioPf').value = '2027'; recompute();
-          console.assert($('pfIBS').textContent !== brl(0) && $('pfCBS').textContent !== brl(0), 'PF acima limiar: com IBS/CBS');
-          // 3) Reset
-          $('resetBtn').click(); console.assert($('ano').value === '2027', 'Reset funcionou');
-          console.groupEnd();
-        } catch(e){ console.warn('Falha nos testes:', e); }
-      })();
-    </script>
-  </body>
+      // Use same IVA rates for PJ
+      var pjIbsRate = ivaRates.ibsRate;
+      var pjCbsRate = ivaRates.cbsRate;
+
+      // PJ calculations
+      var pjBase = pjReceita * (pjBasePresumida / 100);
+      var pjIrpjPrincipal = pjBase * (pjAliqIrpj / 100);
+      var excedente = Math.max(0, pjReceita - pjLimiteAdicional);
+      var pjIrpjAdicionalVal = excedente * (pjAliqIrpjAdicional / 100);
+      var pjCsllTotal = pjBase * (pjAliqCsll / 100);
+      var pjIbsTotal = pjReceita * (pjIbsRate / 100);
+      var pjCbsTotal = pjReceita * (pjCbsRate / 100);
+      var pjItbiAnual = pjItbi / pjAnosItbi;
+      var pjTotalTributos = pjIrpjPrincipal + pjIrpjAdicionalVal + pjCsllTotal + pjIbsTotal + pjCbsTotal + pjCustosFixos + pjItbiAnual;
+      var pjLiquido = pjReceita - pjTotalTributos;
+
+      // Render PJ result
+      var pjHtml = '';
+      pjHtml += '<h3 class="text-lg font-semibold mb-2">Pessoa Jurídica (Holding)</h3>';
+      pjHtml += '<p>Base presumida: <strong>' + formatBRL(pjBase) + '</strong></p>';
+      pjHtml += '<p>IRPJ 15%: <strong>' + formatBRL(pjIrpjPrincipal) + '</strong></p>';
+      if (pjIrpjAdicionalVal > 0) {
+        pjHtml += '<p>Adicional IRPJ: <strong>' + formatBRL(pjIrpjAdicionalVal) + '</strong></p>';
+      }
+      pjHtml += '<p>CSLL: <strong>' + formatBRL(pjCsllTotal) + '</strong></p>';
+      pjHtml += '<p>IBS: <strong>' + formatBRL(pjIbsTotal) + '</strong> (' + pjIbsRate.toFixed(2) + '%)</p>';
+      pjHtml += '<p>CBS: <strong>' + formatBRL(pjCbsTotal) + '</strong> (' + pjCbsRate.toFixed(2) + '%)</p>';
+      pjHtml += '<p>Custos fixos: <strong>' + formatBRL(pjCustosFixos) + '</strong></p>';
+      if (pjItbiAnual > 0) {
+        pjHtml += '<p>ITBI (anual): <strong>' + formatBRL(pjItbiAnual) + '</strong></p>';
+      }
+      pjHtml += '<p class="mt-2 font-bold">Tributos totais (PJ): ' + formatBRL(pjTotalTributos) + '</p>';
+      pjHtml += '<p class="text-blue-600 font-bold">Líquido PJ: ' + formatBRL(pjLiquido) + '</p>';
+      document.getElementById('pj-result').innerHTML = pjHtml;
+
+      // Comparative analysis
+      var economia = pfTotalTributos - pjTotalTributos;
+      var payback = economia > 0 ? pjCustosFixos / economia : 0;
+      
+      var compHtml = '';
+      compHtml += '<h3 class="text-lg font-semibold mb-4">Análise Comparativa</h3>';
+      compHtml += '<div class="grid md:grid-cols-3 gap-4">';
+      compHtml += '<div class="text-center">';
+      compHtml += '<p class="text-sm text-gray-600">Economia Anual</p>';
+      compHtml += '<p class="text-2xl font-bold ' + (economia > 0 ? 'text-green-600' : 'text-red-600') + '">' + formatBRL(economia) + '</p>';
+      compHtml += '</div>';
+      compHtml += '<div class="text-center">';
+      compHtml += '<p class="text-sm text-gray-600">Economia Percentual</p>';
+      compHtml += '<p class="text-2xl font-bold ' + (economia > 0 ? 'text-green-600' : 'text-red-600') + '">' + (pfTotalTributos > 0 ? ((economia / pfTotalTributos) * 100).toFixed(1) : '0') + '%</p>';
+      compHtml += '</div>';
+      compHtml += '<div class="text-center">';
+      compHtml += '<p class="text-sm text-gray-600">Payback</p>';
+      compHtml += '<p class="text-2xl font-bold text-purple-600">' + (payback > 0 ? payback.toFixed(1) + ' anos' : 'N/A') + '</p>';
+      compHtml += '</div>';
+      compHtml += '</div>';
+      
+      if (economia > 0) {
+        compHtml += '<div class="mt-4 p-4 bg-green-50 border border-green-200 rounded-lg">';
+        compHtml += '<p class="text-green-800"><strong>Recomendação:</strong> A estrutura PJ apresenta vantagem tributária de ' + formatBRL(economia) + ' anuais.</p>';
+        compHtml += '</div>';
+      } else {
+        compHtml += '<div class="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg">';
+        compHtml += '<p class="text-red-800"><strong>Atenção:</strong> A estrutura PF apresenta menor carga tributária neste cenário.</p>';
+        compHtml += '</div>';
+      }
+      
+      document.getElementById('comparativo').innerHTML = compHtml;
+
+      // Update KPIs and charts
+      updateKPIs(pfTotalTributos, pjTotalTributos, economia, payback);
+      updateCharts(
+        pfTotalTributos, pjTotalTributos,
+        pfIrpfTotal, pfIbsTotal, pfCbsTotal,
+        pjIrpjPrincipal + pjIrpjAdicionalVal, pjCsllTotal, pjIbsTotal, pjCbsTotal, pjCustosFixos + pjItbiAnual
+      );
+    }
+
+    // Form event listeners
+    function initFormListeners() {
+      // Auto-update on input changes
+      const inputs = document.querySelectorAll('input, select');
+      inputs.forEach(input => {
+        input.addEventListener('input', update);
+        input.addEventListener('change', update);
+      });
+
+      // PJ copy toggle
+      document.getElementById('pj-copy').addEventListener('change', function() {
+        const container = document.getElementById('pj-receita-container');
+        if (this.value === 'nao') {
+          container.classList.remove('hidden');
+        } else {
+          container.classList.add('hidden');
+        }
+        update();
+      });
+
+      // Theme toggle
+      document.getElementById('theme-toggle').addEventListener('click', toggleTheme);
+    }
+
+    // Initialize application
+    function initializeApp() {
+      initTheme();
+      initSidebar();
+      initCharts();
+      initFormListeners();
+      update(); // Initial calculation
+    }
+
+    // Initialize on page load
+    document.addEventListener('DOMContentLoaded', () => {
+      tryRestoreSession();
+    });
+  </script>
+</body>
 </html>
+
