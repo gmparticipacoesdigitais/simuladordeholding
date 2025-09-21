@@ -8,24 +8,6 @@ Este simulador permite comparar cenários fiscais entre Pessoa Física (PF) e Pe
 
 A aplicação possui um sistema de controle de acesso baseado em allowlist de emails. Apenas emails autorizados podem acessar o simulador.
 
-### Email Autorizado
-- **gmparticipacoes@gmail.com** - Acesso completo ao simulador
-
-### Como Adicionar Novos Emails
-
-1. Abra o arquivo `hash-generator.html` no navegador
-2. Digite o email que deseja autorizar
-3. Clique em "Gerar Hash"
-4. Copie o hash SHA-256 gerado
-5. Edite o arquivo `index.html` e adicione o hash à constante `ALLOWLIST_SHA256`:
-
-```javascript
-const ALLOWLIST_SHA256 = [
-  "6c73e10b855181d66d9241415ee1aa71f535b49bd8c420f8890a76f64db6b727", // gmparticipacoes@gmail.com
-  "SEU_NOVO_HASH_AQUI" // novo@email.com
-];
-```
-
 ## 🚀 Como Usar
 
 ### 1. Acesso à Aplicação
