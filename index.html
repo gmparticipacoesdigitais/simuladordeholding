@@ -11,148 +11,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <style>
-    :root {
-      /* Design System - Light Theme */
-      --color-primary: #7C3AED;
-      --color-primary-hover: #6D28D9;
-      --color-background: #F9FAFB;
-      --color-surface-elevated: #FFFFFF;
-      --color-border: #E5E7EB;
-      --color-text-primary: #1F2937;
-      --color-text-secondary: #6B7280;
-      --radius-lg: 12px;
-      --radius-xl: 16px;
-      --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-      --shadow-xl: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
-    }
-
-    [data-theme="dark"] {
-      --color-background: #0B0F1A;
-      --color-surface-elevated: #1F2937;
-      --color-border: #374151;
-      --color-text-primary: #F9FAFB;
-      --color-text-secondary: #D1D5DB;
-    }
-
-    body {
-      font-family: 'Inter', sans-serif;
-      background-color: var(--color-background);
-      color: var(--color-text-primary);
-      line-height: 1.6;
-    }
-
-    .card {
-      background: var(--color-surface-elevated);
-      border: 1px solid var(--color-border);
-      border-radius: var(--radius-lg);
-      padding: 1.5rem;
-      box-shadow: var(--shadow-sm);
-    }
-
-    .btn {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      padding: 0.75rem 1.5rem;
-      border-radius: 8px;
-      font-weight: 500;
-      border: none;
-      cursor: pointer;
-      transition: all 0.2s ease;
-    }
-
-    .btn-primary {
-      background: var(--color-primary);
-      color: white;
-    }
-
-    .btn-primary:hover:not(:disabled) {
-      background: var(--color-primary-hover);
-    }
-
-    .btn-secondary {
-        background: var(--color-border);
-        color: var(--color-text-primary);
-    }
-    .btn-secondary:hover {
-        background: #D1D5DB;
-    }
-    [data-theme="dark"] .btn-secondary {
-        background: var(--color-border);
-        color: var(--color-text-primary);
-    }
-    [data-theme="dark"] .btn-secondary:hover {
-        background: #4B5563;
-    }
-
-    .btn:disabled {
-        opacity: 0.6;
-        cursor: not-allowed;
-    }
-
-    .input {
-      width: 100%;
-      padding: 0.75rem;
-      border: 1px solid var(--color-border);
-      border-radius: 8px;
-      background: var(--color-surface-elevated);
-      color: var(--color-text-primary);
-    }
-
-    [data-theme="dark"] .input {
-        background-color: var(--color-background);
-    }
-
-    .input:focus {
-      outline: none;
-      border-color: var(--color-primary);
-      box-shadow: 0 0 0 3px rgba(109, 91, 208, 0.2);
-    }
-
-    /* Styling for read-only inputs displaying derived data */
-    .input[readonly] {
-        background-color: var(--color-background);
-        cursor: not-allowed;
-        opacity: 0.8;
-    }
-    [data-theme="dark"] .input[readonly] {
-        background-color: var(--color-border);
-    }
-
-    /* Chart containers */
-    .chart-container {
-      position: relative;
-      height: 300px;
-      width: 100%;
-    }
-
-    /* Login styles */
-    .login-container {
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    }
-
-    .login-card {
-      background: white;
-      border-radius: var(--radius-xl);
-      padding: 2rem;
-      box-shadow: var(--shadow-xl);
-      width: 100%;
-      max-width: 400px;
-    }
-
-    .hidden {
-      display: none !important;
-    }
-
-    #save-status {
-        transition: opacity 0.5s ease;
-    }
-  </style>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body data-theme="light">
 
@@ -179,7 +38,10 @@
           <input id="code" type="text" placeholder="Código de acesso" class="input" />
         </div>
 
-        <button id="auth-button" class="btn btn-primary w-full">Entrar</button>
+        <button id="auth-button" class="btn btn-primary w-full">
+            <span class="spinner"></span>
+            <span class="btn-text">Entrar</span>
+        </button>
 
         <div id="login-msg" class="text-sm text-red-600 text-center h-4"></div>
 
@@ -201,7 +63,7 @@
             <div class="flex items-center space-x-4">
                 <div id="save-status" class="text-sm opacity-0 flex items-center" style="color: var(--color-text-secondary);">
                                     </div>
-                <button id="theme-toggle" class="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition">
+                <button id="theme-toggle" class="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition" aria-label="Toggle light/dark theme">
                     <svg id="sun-icon" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path>
                     </svg>
@@ -210,7 +72,7 @@
                     </svg>
                 </button>
                 <span id="whoami" class="text-sm hidden md:inline" style="color: var(--color-text-secondary);"></span>
-                <button id="logout" class="btn bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600">Sair</button>
+                <button id="logout" class="btn bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600" aria-label="Logout">Sair</button>
             </div>
         </div>
     </header>
@@ -221,7 +83,7 @@
             <section class="card mb-8">
                 <div class="flex justify-between items-center mb-6">
                     <h2 class="text-xl font-semibold">Dados do Patrimônio e Renda</h2>
-                    <button id="reset-button" class="btn btn-secondary">Resetar</button>
+                    <button id="reset-button" class="btn btn-secondary" aria-label="Reset all fields to default values">Resetar</button>
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -298,7 +160,7 @@
 
                       <section class="card mb-8">
                 <details>
-                    <summary class="cursor-pointer text-lg font-semibold mb-4">Premissas Utilizadas e Configurações Avançadas</summary>
+                    <summary class="cursor-pointer text-lg font-semibold mb-4">Premissas e Configurações Avançadas</summary>
                     <div class="mt-4">
 
                         <div class="bg-blue-100 dark:bg-blue-900 border border-blue-300 dark:border-blue-700 rounded-lg p-4 mb-6">
@@ -566,14 +428,17 @@
         if (!db || !authButton) return;
         loginMsg.textContent = '';
         authButton.disabled = false;
+        authButton.classList.remove('loading');
+        const btnText = authButton.querySelector('.btn-text');
+
         if (isSignUp) {
             formTitle.textContent = 'Crie sua Conta';
-            authButton.textContent = 'Cadastrar';
+            if (btnText) btnText.textContent = 'Cadastrar';
             toggleFormLink.textContent = 'Já tem uma conta? Entre';
             $("#code-field").classList.remove('hidden');
         } else {
             formTitle.textContent = 'Acesso Restrito';
-            authButton.textContent = 'Entrar';
+            if (btnText) btnText.textContent = 'Entrar';
             toggleFormLink.textContent = 'Não tem uma conta? Cadastre-se';
             $("#code-field").classList.add('hidden');
         }
@@ -585,7 +450,7 @@
         const email = $("#email").value;
         const password = $("#password").value;
         loginMsg.textContent = '';
-        authButton.textContent = 'Carregando...';
+        authButton.classList.add('loading');
         authButton.disabled = true;
 
         try {

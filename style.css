@@ -1,0 +1,191 @@
+:root {
+      /* Design System - Light Theme */
+      --color-primary: #5B21B6; /* Adjusted for WCAG AA contrast */
+      --color-primary-hover: #4C1D95;
+      --color-background: #F9FAFB;
+      --color-surface-elevated: #FFFFFF;
+      --color-border: #E5E7EB;
+      --color-text-primary: #1F2937;
+      --color-text-secondary: #6B7280;
+      --radius-lg: 12px;
+      --radius-xl: 16px;
+      --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+      --shadow-xl: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+    }
+
+    [data-theme="dark"] {
+      --color-background: #0B0F1A;
+      --color-surface-elevated: #1F2937;
+      --color-border: #374151;
+      --color-text-primary: #F9FAFB;
+      --color-text-secondary: #D1D5DB;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: var(--color-background);
+      color: var(--color-text-primary);
+      line-height: 1.6;
+    }
+
+    .card {
+      background: var(--color-surface-elevated);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-lg);
+      padding: 1.5rem;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0.75rem 1.5rem;
+      border-radius: 8px;
+      font-weight: 500;
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .btn-primary {
+      background: var(--color-primary);
+      color: white;
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      background: var(--color-primary-hover);
+    }
+
+    .btn-secondary {
+        background: var(--color-border);
+        color: var(--color-text-primary);
+    }
+    .btn-secondary:hover {
+        background: #D1D5DB;
+    }
+    [data-theme="dark"] .btn-secondary {
+        background: var(--color-border);
+        color: var(--color-text-primary);
+    }
+    [data-theme="dark"] .btn-secondary:hover {
+        background: #4B5563;
+    }
+
+    .btn:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+
+    .btn:focus {
+      outline: 3px solid var(--color-primary);
+      outline-offset: 2px;
+    }
+
+    .input {
+      width: 100%;
+      padding: 0.75rem;
+      border: 1px solid var(--color-border);
+      border-radius: 8px;
+      background: var(--color-surface-elevated);
+      color: var(--color-text-primary);
+    }
+
+    [data-theme="dark"] .input {
+        background-color: var(--color-background);
+    }
+
+    .input:focus {
+      outline: none;
+      border-color: var(--color-primary);
+      box-shadow: 0 0 0 3px rgba(109, 91, 208, 0.2);
+    }
+
+    /* Styling for read-only inputs displaying derived data */
+    .input[readonly] {
+        background-color: var(--color-background);
+        cursor: not-allowed;
+        opacity: 0.8;
+    }
+    [data-theme="dark"] .input[readonly] {
+        background-color: var(--color-border);
+    }
+
+    /* Chart containers */
+    .chart-container {
+      position: relative;
+      height: 300px;
+      width: 100%;
+    }
+
+    /* Login styles */
+    .login-container {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+
+    .login-card {
+      background: white;
+      border-radius: var(--radius-xl);
+      padding: 2rem;
+      box-shadow: var(--shadow-xl);
+      width: 90%; /* Responsive width */
+      max-width: 400px;
+    }
+
+    .btn .spinner {
+        display: none;
+        border: 2px solid rgba(255, 255, 255, 0.5);
+        border-left-color: #fff;
+        border-radius: 50%;
+        width: 1.25rem;
+        height: 1.25rem;
+        animation: spin 0.8s linear infinite;
+        margin-right: 0.5rem;
+    }
+
+    .btn.loading .spinner {
+        display: inline-block;
+    }
+
+    .btn.loading .btn-text {
+        display: none;
+    }
+
+    @keyframes spin {
+        to {
+            transform: rotate(360deg);
+        }
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    #save-status {
+        transition: opacity 0.5s ease;
+    }
+    summary {
+        list-style: none; /* Remove default marker */
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    summary::-webkit-details-marker {
+        display: none;
+    }
+
+    summary::after {
+        content: '▼'; /* Collapsed: pointing down */
+        font-size: 1.2rem;
+        transition: transform 0.2s ease-in-out;
+        margin-left: 0.5rem;
+    }
+
+    details[open] > summary::after {
+        transform: rotate(-90deg); /* Expanded: pointing left */
+    }
