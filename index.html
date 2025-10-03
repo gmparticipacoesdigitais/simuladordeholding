@@ -928,20 +928,22 @@
     }
 
     function updateFormUI() {
-      if (!db || !authButton) return;
+        if (!db || !authButton) return;
+
         loginMsg.textContent = '';
+        loginMsg.className = 'text-sm text-red-600 text-center font-medium min-h-[1.25rem]'; // Reset to default error class
         authButton.disabled = false;
-      authButton.classList.remove('loading');
-      const btnText = authButton.querySelector('.btn-text');
+        authButton.classList.remove('loading');
+        const btnText = authButton.querySelector('.btn-text');
 
         if (isSignUp) {
             formTitle.textContent = 'Crie sua Conta';
-          if (btnText) btnText.textContent = 'Cadastrar';
+            if (btnText) btnText.textContent = 'Cadastrar';
             toggleFormLink.textContent = 'Já tem uma conta? Entre';
             $("#code-field").classList.remove('hidden');
         } else {
             formTitle.textContent = 'Acesso Restrito';
-          if (btnText) btnText.textContent = 'Entrar';
+            if (btnText) btnText.textContent = 'Entrar';
             toggleFormLink.textContent = 'Não tem uma conta? Cadastre-se';
             $("#code-field").classList.add('hidden');
         }
@@ -949,40 +951,61 @@
 
     // --- LÓGICA DE AUTENTICAÇÃO ---
     async function handleAuth() {
-      if (!db) return;
+        if (!db) return;
         const email = $("#email").value;
         const password = $("#password").value;
+
+        // Reset UI state for new submission
         loginMsg.textContent = '';
-      authButton.classList.add('loading');
+        authButton.classList.add('loading');
         authButton.disabled = true;
 
         try {
             if (isSignUp) {
+                // --- SIGN UP LOGIC ---
                 if ($("#code").value.toLowerCase() !== EBOOK_CODE) {
-                    loginMsg.textContent = 'Código "e-book" inválido.';
-                    updateFormUI();
-                    return;
+                    throw new Error('Código "e-book" inválido.');
                 }
-                const { error } = await db.auth.signUp({ email, password });
+                const { data, error } = await db.auth.signUp({ email, password });
                 if (error) throw error;
-                alert('Cadastro realizado! Confirme seu e-mail antes de entrar.');
+                if (data.user && data.user.identities && data.user.identities.length === 0) {
+                   throw new Error("Este e-mail já está cadastrado. Tente fazer o login.");
+                }
+
+                loginMsg.textContent = 'Cadastro realizado! Verifique seu e-mail para confirmação.';
+                loginMsg.className = 'text-sm text-green-600 text-center font-medium min-h-[1.25rem]';
                 isSignUp = false;
-                updateFormUI();
             } else {
+                // --- SIGN IN LOGIC ---
                 const { error } = await db.auth.signInWithPassword({ email, password });
-                if (error) throw error;
+                if (error) throw error; // Let the catch block handle it
             }
         } catch (error) {
-            if (error.message.includes('Invalid login credentials') || error.message.includes('Email not confirmed')) {
-                loginMsg.textContent = 'E-mail/senha inválidos ou conta não confirmada.';
+            // --- ERROR HANDLING ---
+            loginMsg.className = 'text-sm text-red-600 text-center font-medium min-h-[1.25rem]'; // Ensure error styling
+            if (error.message.includes('Invalid login credentials')) {
+                loginMsg.textContent = 'E-mail ou senha inválidos.';
+            } else if (error.message.includes('Email not confirmed')) {
+                loginMsg.textContent = 'E-mail não confirmado. Verifique sua caixa de entrada.';
             } else {
-                loginMsg.textContent = error.message;
+                loginMsg.textContent = error.message || 'Ocorreu um erro. Tente novamente.';
+                console.error("Auth Error:", error);
             }
-            updateFormUI();
+        } finally {
+            // --- UI CLEANUP ---
+            authButton.disabled = false;
+            authButton.classList.remove('loading');
+            // After signup, reset form to login mode
+            if (!isSignUp) {
+                const btnText = authButton.querySelector('.btn-text');
+                if (btnText) btnText.textContent = 'Entrar';
+                toggleFormLink.textContent = 'Não tem uma conta? Cadastre-se';
+                $("#code-field").classList.add('hidden');
+            }
         }
     }
 
-    // --- GERENCIAMENTO DE SESSÃO ---
+    // --- GERENCIAMENTO DE SESSÃO E EVENT LISTENERS ---
     if (db) {
         db.auth.onAuthStateChange((event, session) => {
             if (session && session.user) {
@@ -990,6 +1013,23 @@
             } else {
                 showLogin();
             }
+        });
+
+        authButton.addEventListener('click', handleAuth);
+        toggleFormLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            isSignUp = !isSignUp;
+            updateFormUI();
+        });
+
+        // Allow submission with Enter key
+        $("#email").addEventListener('keyup', (e) => { if (e.key === 'Enter') handleAuth(); });
+        $("#password").addEventListener('keyup', (e) => { if (e.key === 'Enter') handleAuth(); });
+        $("#code").addEventListener('keyup', (e) => { if (e.key === 'Enter') handleAuth(); });
+
+        btnLogout.addEventListener('click', async () => {
+            const { error } = await db.auth.signOut();
+            if (error) console.error("Logout Error:", error);
         });
     }
 
