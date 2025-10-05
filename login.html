@@ -1,36 +1,28 @@
-<!doctype html>
-<html lang="en">
-
+<!DOCTYPE html>
+<html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Login - Baking with the Gemini API</title>
-  <link rel="stylesheet" href="style.css">
-  <link rel="stylesheet" href="login.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <link rel="stylesheet" href="login.css">
 </head>
-
 <body>
-  <main>
-    <h1>Login</h1>
-    <form action="https://irpf.auditoriaemfoco.com/">
-      <div class="prompt-box">
-        <label>
-          <input name="e-mail" placeholder="Username" type="text">
-        </label>
-      </div>
-      <div class="prompt-box">
-        <label>
-          <input name="senha" placeholder="Password" type="password">
-        </label>
-      </div>
-      <div class="prompt-box">
-        <button type="submit">Login</button>
-      </div>
-    </form>
-    <p>Don't have an account? <a href="https://irpf.auditoriaemfoco.com/">Register here</a></p>
-  </main>
-
-  <script type="module" src="/main.js"></script>
+    <div class="login-container">
+        <div class="login-box">
+            <h2>Login</h2>
+            <form>
+                <div class="input-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email" required>
+                </div>
+                <div class="input-group">
+                    <label for="password">Senha</label>
+                    <input type="password" id="password" name="password" required>
+                </div>
+                <button type="submit">Entrar</button>
+            </form>
+            <p>Não tem uma conta? <a href="#">Cadastre-se</a></p>
+        </div>
+    </div>
 </body>
-
 </html>
