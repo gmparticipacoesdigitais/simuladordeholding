@@ -1,41 +1,115 @@
 <!doctype html>
-<html lang="pt">
-
+<html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Register - Baking with the Gemini API</title>
-  <link rel="stylesheet" href="style.css">
-  <link rel="stylesheet" href="login.css">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Login - IRPF</title>
+    <link rel="stylesheet" href="login.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
-
 <body>
-  <main>
-    <h1>Estimador de IRPF</h1>
-    <form action="https://irpf.auditoriaemfoco.com/">
-      <div class="prompt-box">
-        <label>
-          <input name="name" placeholder="e-mail" type="text">
-        </label>
-      </div>
-      <div class="prompt-box">
-        <label>
-          <input name="password" placeholder="senha" type="password">
-        </label>
-      </div>
-      <div class="prompt-box">
-        <label>
-          <input name="confirm_password" placeholder="confirme a senha" type="password">
-        </label>
-      </div>
-      <div class="prompt-box">
-        <button type="submit">Cadastre-se</button>
-      </div>
-    </form>
-    <p>Já possui uma conta? <a href="login.html">Login</a></p>
-  </main>
+    <div class="background-shapes">
+        <div class="shape shape-1"></div>
+        <div class="shape shape-2"></div>
+        <div class="shape shape-3"></div>
+    </div>
 
-  <script type="module" src="/main.js"></script>
+    <div class="container">
+        <div class="login-card">
+            <div class="card-header">
+                <div class="logo-container">
+                    <i class="fas fa-shield-alt"></i>
+                </div>
+                <h1>Bem-vindo</h1>
+                <p class="subtitle">Acesse sua conta IRPF</p>
+            </div>
+
+            <form class="login-form">
+                <div class="input-group">
+                    <i class="fas fa-envelope"></i>
+                    <input name="e-mail" placeholder="Digite seu e-mail" type="email" required>
+                    <label>E-mail</label>
+                </div>
+
+                <div class="input-group">
+                    <i class="fas fa-lock"></i>
+                    <input name="senha" placeholder="Digite sua senha" type="password" required id="password-input">
+                    <label>Senha</label>
+                    <button type="button" class="toggle-password" onclick="togglePassword()">
+                        <i class="fas fa-eye" id="eye-icon"></i>
+                    </button>
+                </div>
+
+                <div class="form-options">
+                    <label class="checkbox-container">
+                        <input type="checkbox" name="remember">
+                        <span class="checkmark"></span>
+                        <span class="checkbox-label">Lembrar-me</span>
+                    </label>
+                    <a href="#" class="forgot-password">Esqueceu a senha?</a>
+                </div>
+
+                <button type="submit" class="btn-login">
+                    <span>Entrar</span>
+                    <i class="fas fa-arrow-right"></i>
+                </button>
+            </form>
+
+            <div class="card-footer">
+                <p>Não tem uma conta? <a href="register.html" class="signup-link">Cadastre-se gratuitamente</a></p>
+            </div>
+        </div>
+
+        <div class="footer-info">
+            <p><i class="fas fa-lock"></i> Seus dados estão protegidos e criptografados</p>
+        </div>
+    </div>
+
+    <script>
+        function togglePassword() {
+            const passwordInput = document.getElementById('password-input');
+            const eyeIcon = document.getElementById('eye-icon');
+
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                eyeIcon.classList.remove('fa-eye');
+                eyeIcon.classList.add('fa-eye-slash');
+            } else {
+                passwordInput.type = 'password';
+                eyeIcon.classList.remove('fa-eye-slash');
+                eyeIcon.classList.add('fa-eye');
+            }
+        }
+
+        // Animação ao focar nos inputs
+        document.querySelectorAll('.input-group input').forEach(input => {
+            input.addEventListener('focus', function() {
+                this.parentElement.classList.add('focused');
+            });
+
+            input.addEventListener('blur', function() {
+                if (this.value === '') {
+                    this.parentElement.classList.remove('focused');
+                }
+            });
+        });
+
+        // Prevenir submit padrão e adicionar feedback
+        document.querySelector('.login-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const btn = this.querySelector('.btn-login');
+            btn.classList.add('loading');
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> <span>Entrando...</span>';
+
+            // Simulação de login (remover em produção)
+            setTimeout(() => {
+                btn.classList.remove('loading');
+                btn.innerHTML = '<span>Entrar</span><i class="fas fa-arrow-right"></i>';
+            }, 2000);
+        });
+    </script>
 </body>
-
 </html>
