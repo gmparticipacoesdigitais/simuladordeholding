@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Finalizar Assinatura - IRPF</title>
+    <link rel="stylesheet" href="login.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://js.stripe.com/v3/"></script>
+    <style>
+        .pricing-card {
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 40px;
+            margin-bottom: 24px;
+        }
+        .price {
+            font-size: 48px;
+            font-weight: 700;
+            color: #818cf8;
+            margin: 20px 0;
+        }
+        .features {
+            list-style: none;
+            padding: 0;
+            margin: 24px 0;
+        }
+        .features li {
+            color: #cbd5e1;
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .features li i {
+            color: #34d399;
+        }
+        #checkout-button {
+            width: 100%;
+            padding: 16px 24px;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+        }
+        #checkout-button:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 16px rgba(16, 185, 129, 0.5);
+        }
+        #checkout-button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .loading {
+            display: none;
+            text-align: center;
+            color: #94a3b8;
+            margin-top: 20px;
+        }
+        .error-message {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid #ef4444;
+            color: #fca5a5;
+            padding: 12px;
+            border-radius: 8px;
+            margin-top: 16px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="background-pattern"></div>
+
+    <div class="container">
+        <div class="login-card">
+            <div class="card-header">
+                <h1>Finalize sua Assinatura</h1>
+                <p class="subtitle">Assine para ter acesso completo ao estimador de IRPF</p>
+            </div>
+
+            <div class="pricing-card">
+                <h2 style="color: #f8fafc; font-size: 24px; margin-bottom: 8px;">Plano Premium</h2>
+                <p style="color: #94a3b8; font-size: 14px;">Acesso completo ao estimador</p>
+                <div class="price">R$ 29,90<span style="font-size: 16px; color: #94a3b8;">/mês</span></div>
+
+                <ul class="features">
+                    <li><i class="fas fa-check-circle"></i> Cálculo completo do IRPF</li>
+                    <li><i class="fas fa-check-circle"></i> Simulação de deduções</li>
+                    <li><i class="fas fa-check-circle"></i> Comparação de regimes tributários</li>
+                    <li><i class="fas fa-check-circle"></i> Estimativas mensais e anuais</li>
+                    <li><i class="fas fa-check-circle"></i> Suporte prioritário</li>
+                </ul>
+
+                <button id="checkout-button">
+                    <i class="fas fa-credit-card"></i> Assinar Agora
+                </button>
+
+                <div class="loading">
+                    <i class="fas fa-spinner fa-spin"></i> Carregando checkout...
+                </div>
+
+                <div class="error-message" id="error-message"></div>
+            </div>
+
+            <div class="security-badge" style="margin: 0 auto;">
+                <i class="fas fa-lock"></i>
+                <span>Pagamento 100% seguro via Stripe</span>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="checkout.js"></script>
+</body>
+</html>

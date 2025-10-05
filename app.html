@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Estimador de Imposto de Renda 2024 | Corrigido</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .info-icon {
+            cursor: pointer;
+            display: inline-block;
+            margin-left: 8px;
+            position: relative;
+        }
+        .tooltip {
+            visibility: hidden;
+            width: 220px;
+            background-color: #334155;
+            color: #fff;
+            text-align: center;
+            border-radius: 6px;
+            padding: 8px;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            margin-left: -110px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            font-size: 12px;
+            font-weight: 400;
+        }
+        .info-icon:hover .tooltip {
+            visibility: visible;
+            opacity: 1;
+        }
+        .logout-btn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+            transition: all 0.2s ease;
+            z-index: 1000;
+        }
+        .logout-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 16px rgba(239, 68, 68, 0.4);
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen flex flex-col items-center justify-center p-4">
+    <button class="logout-btn" onclick="logout()">
+        <i class="fas fa-sign-out-alt"></i> Sair
+    </button>
+
+    <main class="bg-white w-full max-w-4xl rounded-2xl shadow-xl p-6 md:p-10 my-8">
+        <!-- Cabeçalho da Aplicação -->
+        <div class="text-center mb-8">
+            <h1 class="text-3xl md:text-4xl font-bold text-gray-800">Estimador de Imposto de Renda</h1>
+            <p class="text-gray-500 mt-2">Veja se suas deduções podem te levar à faixa de isenção do Imposto de Renda.</p>
+            <p class="mt-2 text-sm font-semibold text-indigo-600">Baseado na Tabela Progressiva Mais Recente</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <!-- Coluna Esquerda: Campos de Entrada do Usuário -->
+            <div class="space-y-6">
+                <div>
+                    <h2 class="text-xl font-semibold text-gray-700 border-b-2 border-blue-200 pb-2 mb-4">Seus Dados Mensais</h2>
+                    <div class="space-y-4">
+                        <div>
+                            <label for="rendaBruta" class="block mb-2 text-sm font-medium text-gray-700">Renda Bruta Mensal (R$)</label>
+                            <input type="number" id="rendaBruta" class="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-shadow" placeholder="Ex: 5500.00" step="0.01" min="0">
+                        </div>
+                        <div>
+                            <label for="dependentes" class="block mb-2 text-sm font-medium text-gray-700">Número de Dependentes</label>
+                            <input type="number" id="dependentes" class="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-shadow" placeholder="Ex: 2" step="1" min="0" value="0">
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <h2 class="text-xl font-semibold text-gray-700 border-b-2 border-blue-200 pb-2 mb-4">Estimativa de Deduções Mensais</h2>
+                    <p class="text-sm text-gray-500 mb-4">Informe seus gastos mensais que podem ser deduzidos.</p>
+                    <div class="space-y-4">
+                        <div>
+                            <label for="pensaoAlimenticia" class="block mb-2 text-sm font-medium text-gray-700">Pensão Alimentícia Judicial (R$)</label>
+                            <input type="number" id="pensaoAlimenticia" class="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-shadow" placeholder="0.00" step="0.01" min="0" value="0">
+                        </div>
+                        <div>
+                            <label for="despesasMedicas" class="block mb-2 text-sm font-medium text-gray-700">Despesas Médicas (R$)</label>
+                            <input type="number" id="despesasMedicas" class="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-shadow" placeholder="0.00" step="0.01" min="0" value="0">
+                        </div>
+                        <div>
+                            <label for="despesasEducacao" class="block mb-2 text-sm font-medium text-gray-700">
+                                Despesas com Educação (R$)
+                                <span class="info-icon">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                    <span class="tooltip">A dedução anual é limitada. Este campo ajuda a estimar a redução na base de cálculo mensal.</span>
+                                </span>
+                            </label>
+                            <input type="number" id="despesasEducacao" class="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-shadow" placeholder="0.00" step="0.01" min="0" value="0">
+                        </div>
+                         <div>
+                            <label for="previdenciaPrivada" class="block mb-2 text-sm font-medium text-gray-700">
+                                Previdência Privada (PGBL) (R$)
+                                <span class="info-icon">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                    <span class="tooltip">Limitado a 12% da sua renda bruta anual. A simulação usará o limite mensal equivalente.</span>
+                                </span>
+                            </label>
+                            <input type="number" id="previdenciaPrivada" class="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-shadow" placeholder="0.00" step="0.01" min="0" value="0">
+                        </div>
+                    </div>
+                </div>
+
+                <button id="calculateBtn" class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold py-3 px-4 rounded-lg hover:opacity-90 transition-opacity transform hover:scale-101 focus:outline-none focus:ring-4 focus:ring-indigo-300">
+                    Analisar Minha Situação
+                </button>
+            </div>
+
+            <!-- Coluna Direita: Exibição dos Resultados -->
+            <div id="resultado" class="bg-gray-50 rounded-lg p-6 space-y-4 hidden md:block">
+                   <div class="text-center py-10 h-full flex flex-col justify-center">
+                    <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    <h3 class="mt-2 text-lg font-medium text-gray-900">Seu resultado aparecerá aqui</h3>
+                    <p class="mt-1 text-sm text-gray-500">Preencha os campos ao lado e clique para calcular.</p>
+                </div>
+            </div>
+             <!-- Placeholder para resultado em telas pequenas -->
+            <div id="resultado-mobile" class="md:hidden mt-8"></div>
+        </div>
+
+        <!-- Seção de Avisos Legais -->
+        <div class="mt-10 pt-6 border-t border-gray-200">
+            <div class="bg-blue-50 border-l-4 border-blue-400 text-blue-800 p-4 rounded-r-lg" role="alert">
+                <h3 class="font-bold text-lg">Atenção: Entenda a Obrigatoriedade de Declaração</h3>
+                <p class="mt-2 text-sm">Esta é uma simulação de <strong class="font-semibold">cálculo mensal</strong> do imposto. Mesmo que o resultado seja "isento de pagamento", você pode ser <strong class="font-semibold">obrigado(a) a entregar a Declaração de Ajuste Anual (DIRPF)</strong> se, no ano-calendário, você se enquadrar em qualquer uma das seguintes situações (valores referência DIRPF 2024 / ano 2023):</p>
+                <ul class="mt-3 list-disc list-inside space-y-1 text-sm">
+                    <li>Recebeu rendimentos tributáveis (salários, aluguéis) cuja soma foi superior a <strong>R$ 30.639,90</strong>.</li>
+                    <li>Recebeu rendimentos isentos, não tributáveis ou tributados exclusivamente na fonte (FGTS, herança, etc.) cuja soma foi superior a <strong>R$ 200.000,00</strong>.</li>
+                    <li>Tinha, em 31 de dezembro, a posse ou a propriedade de bens ou direitos, de valor total superior a <strong>R$ 800.000,00</strong>.</li>
+                    <li>Obteve ganho de capital na alienação de bens ou direitos.</li>
+                    <li>Realizou operações em bolsas de valores, de mercadorias, de futuros e assemelhadas.</li>
+                </ul>
+                <p class="mt-4 text-xs font-semibold">AVISO LEGAL: Esta ferramenta é para fins educacionais e de estimativa, não substituindo a orientação de um contador ou profissional de finanças.</p>
+            </div>
+        </div>
+    </main>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script type="module" src="app.js"></script>
+</body>
+</html>

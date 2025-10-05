@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Login - IRPF</title>
+    <title>Cadastro - IRPF</title>
     <link rel="stylesheet" href="login.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -16,16 +16,24 @@
     <div class="container">
         <div class="login-card">
             <div class="card-header">
-                <h1>Bem-vindo</h1>
-                <p class="subtitle">Acesse sua conta para continuar</p>
+                <h1>Criar Conta</h1>
+                <p class="subtitle">Preencha seus dados para começar</p>
             </div>
 
-            <form class="login-form" id="email-login-form">
+            <form class="login-form" id="register-form">
+                <div class="input-group">
+                    <label class="input-label">Nome Completo</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-user input-icon"></i>
+                        <input name="nome" placeholder="Seu nome completo" type="text" required>
+                    </div>
+                </div>
+
                 <div class="input-group">
                     <label class="input-label">E-mail</label>
                     <div class="input-wrapper">
                         <i class="fas fa-envelope input-icon"></i>
-                        <input name="e-mail" placeholder="seu@email.com" type="email" required>
+                        <input name="email" placeholder="seu@email.com" type="email" required>
                     </div>
                 </div>
 
@@ -33,34 +41,33 @@
                     <label class="input-label">Senha</label>
                     <div class="input-wrapper">
                         <i class="fas fa-lock input-icon"></i>
-                        <input name="senha" placeholder="••••••••" type="password" required id="password-input">
+                        <input name="senha" placeholder="Mínimo 6 caracteres" type="password" required minlength="6">
                     </div>
                 </div>
 
-                <div class="form-options">
-                    <label class="checkbox-container">
-                        <input type="checkbox" name="remember">
-                        <span class="checkmark"></span>
-                        <span class="checkbox-label">Manter conectado</span>
-                    </label>
-                    <a href="#" class="forgot-password">Esqueceu a senha?</a>
+                <div class="input-group">
+                    <label class="input-label">Confirmar Senha</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-lock input-icon"></i>
+                        <input name="confirmar-senha" placeholder="Digite a senha novamente" type="password" required minlength="6">
+                    </div>
                 </div>
 
                 <button type="submit" class="btn-primary">
-                    <span>Entrar</span>
+                    <span>Criar Conta</span>
                 </button>
 
                 <div class="divider">
                     <span>ou</span>
                 </div>
 
-                <button type="button" class="btn-google" id="google-login-btn">
-                    Continuar com Google
+                <button type="button" class="btn-google" id="google-register-btn">
+                    Cadastrar com Google
                 </button>
             </form>
 
             <div class="card-footer">
-                <p>Não possui uma conta? <a href="register.html" class="signup-link">Criar conta</a></p>
+                <p>Já possui uma conta? <a href="index.html" class="signup-link">Fazer login</a></p>
             </div>
         </div>
 

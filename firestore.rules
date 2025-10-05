@@ -1,0 +1,26 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Regras para a coleção de usuários
+    match /users/{userId} {
+      // Usuários podem ler apenas seus próprios dados
+      allow read: if request.auth != null && request.auth.uid == userId;
+
+      // Apenas autenticados podem criar seu próprio documento
+      allow create: if request.auth != null && request.auth.uid == userId;
+
+      // Usuários não podem atualizar diretamente o status de pagamento
+      // Isso só pode ser feito pelas Cloud Functions
+      allow update: if request.auth != null && request.auth.uid == userId
+                    && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['hasPaid', 'stripeCustomerId', 'subscriptionId']);
+
+      // Não permitir deleção
+      allow delete: if false;
+    }
+
+    // Negar acesso a todas as outras coleções por padrão
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

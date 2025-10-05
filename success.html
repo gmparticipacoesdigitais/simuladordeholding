@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Pagamento Confirmado - IRPF</title>
+    <link rel="stylesheet" href="login.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        .success-icon {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 24px;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: scaleIn 0.5s ease-out;
+        }
+        .success-icon i {
+            color: white;
+            font-size: 40px;
+        }
+        @keyframes scaleIn {
+            from {
+                transform: scale(0);
+                opacity: 0;
+            }
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+        .countdown {
+            color: #818cf8;
+            font-weight: 600;
+            font-size: 18px;
+            margin-top: 16px;
+        }
+    </style>
+</head>
+<body>
+    <div class="background-pattern"></div>
+
+    <div class="container">
+        <div class="login-card">
+            <div class="success-icon">
+                <i class="fas fa-check"></i>
+            </div>
+
+            <div class="card-header">
+                <h1>Pagamento Confirmado!</h1>
+                <p class="subtitle">Sua assinatura foi ativada com sucesso</p>
+            </div>
+
+            <div style="text-align: center; color: #cbd5e1; margin-bottom: 32px;">
+                <p style="margin-bottom: 16px;">Obrigado por assinar! Você já tem acesso completo ao estimador de IRPF.</p>
+                <p class="countdown">Redirecionando em <span id="countdown">3</span> segundos...</p>
+            </div>
+
+            <button class="btn-primary" onclick="window.location.href='app.html'">
+                <span>Acessar Aplicação Agora</span>
+            </button>
+
+            <div class="security-badge" style="margin-top: 24px;">
+                <i class="fas fa-check-circle"></i>
+                <span>Assinatura ativa</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let countdown = 3;
+        const countdownElement = document.getElementById('countdown');
+
+        const interval = setInterval(() => {
+            countdown--;
+            countdownElement.textContent = countdown;
+
+            if (countdown === 0) {
+                clearInterval(interval);
+                window.location.href = 'app.html';
+            }
+        }, 1000);
+    </script>
+</body>
+</html>
