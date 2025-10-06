@@ -1,23 +1,23 @@
-import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js';
-import { getAuth, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js';
-import { getFirestore, doc, getDoc } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js';
-
-// Configuração do Firebase - substituir com suas credenciais
+// Configuração do Firebase - SUBSTITUA COM SUAS CREDENCIAIS
 const firebaseConfig = {
-    apiKey: "YOUR_API_KEY",
-    authDomain: "YOUR_AUTH_DOMAIN",
-    projectId: "YOUR_PROJECT_ID",
-    storageBucket: "YOUR_STORAGE_BUCKET",
-    messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-    appId: "YOUR_APP_ID"
+    apiKey: "AIzaSyBYourAPIKey",
+    authDomain: "your-project.firebaseapp.com",
+    projectId: "your-project-id",
+    storageBucket: "your-project.appspot.com",
+    messagingSenderId: "123456789",
+    appId: "1:123456789:web:abcdef"
 };
 
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
+// Inicializar Firebase
+if (!firebase.apps.length) {
+    firebase.initializeApp(firebaseConfig);
+}
+
+const auth = firebase.auth();
+const db = firebase.firestore();
 
 // Verificar autenticação
-onAuthStateChanged(auth, async (user) => {
+auth.onAuthStateChanged(async (user) => {
     if (!user) {
         window.location.href = 'index.html';
         return;
@@ -25,8 +25,8 @@ onAuthStateChanged(auth, async (user) => {
 
     // Verificar se o usuário pagou
     try {
-        const userDoc = await getDoc(doc(db, 'users', user.uid));
-        if (!userDoc.exists() || !userDoc.data().hasPaid) {
+        const userDoc = await db.collection('users').doc(user.uid).get();
+        if (!userDoc.exists || !userDoc.data().hasPaid) {
             // Redirecionar para página de pagamento
             window.location.href = 'checkout.html';
             return;
@@ -39,7 +39,7 @@ onAuthStateChanged(auth, async (user) => {
 // Função de logout
 window.logout = async function() {
     try {
-        await signOut(auth);
+        await auth.signOut();
         window.location.href = 'index.html';
     } catch (error) {
         console.error('Erro ao fazer logout:', error);

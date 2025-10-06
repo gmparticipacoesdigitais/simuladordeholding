@@ -1,36 +1,31 @@
-import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js';
-import {
-    getAuth,
-    createUserWithEmailAndPassword,
-    signInWithEmailAndPassword,
-    signInWithPopup,
-    GoogleAuthProvider,
-    onAuthStateChanged
-} from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js';
-import { getFirestore, doc, setDoc, getDoc } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js';
-
-// Configuração do Firebase - substituir com suas credenciais
+// Configuração do Firebase - SUBSTITUA COM SUAS CREDENCIAIS
 const firebaseConfig = {
-    apiKey: "YOUR_API_KEY",
-    authDomain: "YOUR_AUTH_DOMAIN",
-    projectId: "YOUR_PROJECT_ID",
-    storageBucket: "YOUR_STORAGE_BUCKET",
-    messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-    appId: "YOUR_APP_ID"
+    apiKey: "AIzaSyBYourAPIKey",
+    authDomain: "your-project.firebaseapp.com",
+    projectId: "your-project-id",
+    storageBucket: "your-project.appspot.com",
+    messagingSenderId: "123456789",
+    appId: "1:123456789:web:abcdef"
 };
 
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
-const googleProvider = new GoogleAuthProvider();
+// Inicializar Firebase
+if (!firebase.apps.length) {
+    firebase.initializeApp(firebaseConfig);
+}
+
+const auth = firebase.auth();
+const db = firebase.firestore();
 
 // Produtos Stripe
 const STRIPE_PRODUCT_ID = 'prod_TAfijhTULkKnag';
 const STRIPE_PRICE_ID = 'price_1SEKNFIPGzIfZaTDXox4NygH';
 
 // Verificar se usuário já está autenticado
-onAuthStateChanged(auth, async (user) => {
-    if (user) {
+auth.onAuthStateChanged(async (user) => {
+    // Só redirecionar se não estiver na página de login ou registro
+    const currentPage = window.location.pathname.split('/').pop() || 'index.html';
+
+    if (user && (currentPage === 'index.html' || currentPage === '')) {
         await checkPaymentAndRedirect(user);
     }
 });
@@ -38,9 +33,9 @@ onAuthStateChanged(auth, async (user) => {
 // Função para verificar pagamento e redirecionar
 async function checkPaymentAndRedirect(user) {
     try {
-        const userDoc = await getDoc(doc(db, 'users', user.uid));
+        const userDoc = await db.collection('users').doc(user.uid).get();
 
-        if (userDoc.exists() && userDoc.data().hasPaid) {
+        if (userDoc.exists && userDoc.data().hasPaid) {
             // Usuário já pagou, vai para a aplicação
             window.location.href = 'app.html';
         } else {
@@ -68,7 +63,7 @@ if (loginForm) {
         submitBtn.innerHTML = '<span>Entrando...</span>';
 
         try {
-            const userCredential = await signInWithEmailAndPassword(auth, email, senha);
+            const userCredential = await auth.signInWithEmailAndPassword(email, senha);
             await checkPaymentAndRedirect(userCredential.user);
         } catch (error) {
             console.error('Erro no login:', error);
@@ -80,6 +75,8 @@ if (loginForm) {
                 errorMessage = 'Senha incorreta. Tente novamente.';
             } else if (error.code === 'auth/invalid-email') {
                 errorMessage = 'E-mail inválido.';
+            } else if (error.code === 'auth/invalid-credential') {
+                errorMessage = 'E-mail ou senha incorretos.';
             }
 
             alert(errorMessage);
@@ -97,17 +94,18 @@ if (googleLoginBtn) {
         googleLoginBtn.textContent = 'Conectando...';
 
         try {
-            const result = await signInWithPopup(auth, googleProvider);
+            const provider = new firebase.auth.GoogleAuthProvider();
+            const result = await auth.signInWithPopup(provider);
 
             // Criar documento do usuário se não existir
-            const userDocRef = doc(db, 'users', result.user.uid);
-            const userDoc = await getDoc(userDocRef);
+            const userDocRef = db.collection('users').doc(result.user.uid);
+            const userDoc = await userDocRef.get();
 
-            if (!userDoc.exists()) {
-                await setDoc(userDocRef, {
+            if (!userDoc.exists) {
+                await userDocRef.set({
                     email: result.user.email,
                     displayName: result.user.displayName,
-                    createdAt: new Date().toISOString(),
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
                     hasPaid: false
                 });
             }
@@ -148,13 +146,13 @@ if (registerForm) {
         submitBtn.innerHTML = '<span>Criando conta...</span>';
 
         try {
-            const userCredential = await createUserWithEmailAndPassword(auth, email, senha);
+            const userCredential = await auth.createUserWithEmailAndPassword(email, senha);
 
             // Criar documento do usuário no Firestore
-            await setDoc(doc(db, 'users', userCredential.user.uid), {
+            await db.collection('users').doc(userCredential.user.uid).set({
                 displayName: nome,
                 email: email,
-                createdAt: new Date().toISOString(),
+                createdAt: firebase.firestore.FieldValue.serverTimestamp(),
                 hasPaid: false
             });
 
@@ -187,17 +185,18 @@ if (googleRegisterBtn) {
         googleRegisterBtn.textContent = 'Conectando...';
 
         try {
-            const result = await signInWithPopup(auth, googleProvider);
+            const provider = new firebase.auth.GoogleAuthProvider();
+            const result = await auth.signInWithPopup(provider);
 
             // Criar documento do usuário
-            const userDocRef = doc(db, 'users', result.user.uid);
-            const userDoc = await getDoc(userDocRef);
+            const userDocRef = db.collection('users').doc(result.user.uid);
+            const userDoc = await userDocRef.get();
 
-            if (!userDoc.exists()) {
-                await setDoc(userDocRef, {
+            if (!userDoc.exists) {
+                await userDocRef.set({
                     email: result.user.email,
                     displayName: result.user.displayName,
-                    createdAt: new Date().toISOString(),
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
                     hasPaid: false
                 });
             }
