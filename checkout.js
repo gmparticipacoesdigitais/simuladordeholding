@@ -1,31 +1,25 @@
-// Configuração do Firebase - SUBSTITUA COM SUAS CREDENCIAIS
-const firebaseConfig = {
-    apiKey: "AIzaSyBYourAPIKey",
-    authDomain: "your-project.firebaseapp.com",
-    projectId: "your-project-id",
-    storageBucket: "your-project.appspot.com",
-    messagingSenderId: "123456789",
-    appId: "1:123456789:web:abcdef"
-};
+// Usar configuração centralizada do Firebase
+const firebaseConfig = window.FIREBASE_CONFIG;
 
 // Inicializar Firebase
-if (!firebase.apps.length) {
-    firebase.initializeApp(firebaseConfig);
+let auth, db;
+try {
+    if (!firebase.apps.length) {
+        firebase.initializeApp(firebaseConfig);
+    }
+    auth = firebase.auth();
+    db = firebase.firestore();
+    console.log('✅ Firebase inicializado com sucesso no checkout');
+} catch (error) {
+    console.error('❌ Erro ao inicializar Firebase:', error);
+    alert('Erro ao inicializar Firebase. Verifique sua configuração.');
 }
 
-const auth = firebase.auth();
-const db = firebase.firestore();
-
-// Configuração do Stripe
-const STRIPE_PUBLISHABLE_KEY = 'pk_test_...'; // Substituir pela sua chave
-const stripe = Stripe(STRIPE_PUBLISHABLE_KEY);
-
-// IDs do produto e preço do Stripe
-const STRIPE_PRODUCT_ID = 'prod_TAfijhTULkKnag';
-const STRIPE_PRICE_ID = 'price_1SEKNFIPGzIfZaTDXox4NygH';
+// Payment Link do Stripe (não precisa de Cloud Functions!)
+const STRIPE_PAYMENT_LINK = window.STRIPE_PAYMENT_LINK || 'https://buy.stripe.com/test_cNi8wQg3BcFm6DN2TQfw402';
 
 const checkoutButton = document.getElementById('checkout-button');
-const loadingDiv = document.querySelector('.loading');
+const loadingDiv = document.getElementById('loading');
 const errorDiv = document.getElementById('error-message');
 
 // Verificar autenticação e status de pagamento
@@ -47,10 +41,11 @@ auth.onAuthStateChanged(async (user) => {
     }
 });
 
-// Criar sessão de checkout do Stripe
+// Redirecionar para Payment Link do Stripe
 checkoutButton.addEventListener('click', async () => {
     const user = auth.currentUser;
     if (!user) {
+        alert('❌ Você precisa estar autenticado para continuar.');
         window.location.href = 'index.html';
         return;
     }
@@ -58,40 +53,47 @@ checkoutButton.addEventListener('click', async () => {
     checkoutButton.disabled = true;
     loadingDiv.style.display = 'block';
     errorDiv.style.display = 'none';
+    checkoutButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Redirecionando...';
 
     try {
-        // Chamar Cloud Function para criar sessão de checkout
-        const cloudFunctionUrl = window.location.origin + '/api/createCheckoutSession';
+        console.log('✅ Redirecionando para Payment Link do Stripe...');
+        console.log('User ID:', user.uid);
+        console.log('Email:', user.email);
 
-        const response = await fetch(cloudFunctionUrl, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                priceId: STRIPE_PRICE_ID,
-                userId: user.uid,
-                userEmail: user.email
-            })
-        });
+        // Salvar informações do usuário no Firestore antes de redirecionar
+        await db.collection('users').doc(user.uid).set({
+            email: user.email,
+            displayName: user.displayName || 'Usuário',
+            pendingPayment: true,
+            paymentInitiatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+        }, { merge: true });
 
-        if (!response.ok) {
-            throw new Error('Erro ao criar sessão de checkout');
-        }
+        console.log('✅ Informações do usuário salvas no Firestore');
 
-        const { sessionId } = await response.json();
+        // Construir URL do Payment Link com parâmetros
+        const successUrl = window.location.origin + '/success.html?session_id={CHECKOUT_SESSION_ID}&uid=' + user.uid;
+        const cancelUrl = window.location.origin + '/checkout.html?uid=' + user.uid;
 
-        // Redirecionar para o Stripe Checkout
-        const { error } = await stripe.redirectToCheckout({ sessionId });
+        // Adicionar client_reference_id e prefill_email ao Payment Link
+        const paymentUrl = new URL(STRIPE_PAYMENT_LINK);
+        paymentUrl.searchParams.set('client_reference_id', user.uid);
+        paymentUrl.searchParams.set('prefilled_email', user.email);
 
-        if (error) {
-            throw error;
-        }
+        console.log('🔗 Redirecionando para:', paymentUrl.toString());
+
+        // Pequeno delay para dar feedback visual
+        setTimeout(() => {
+            window.location.href = paymentUrl.toString();
+        }, 500);
+
     } catch (error) {
-        console.error('Erro:', error);
-        errorDiv.textContent = 'Erro ao processar pagamento. Verifique a configuração das Cloud Functions.';
+        console.error('❌ Erro ao redirecionar:', error);
+
+        errorDiv.innerHTML = '❌ Erro ao salvar informações. Tente novamente.<br>' + error.message;
         errorDiv.style.display = 'block';
         checkoutButton.disabled = false;
+        checkoutButton.innerHTML = '<i class="fas fa-credit-card"></i> Tentar Novamente';
         loadingDiv.style.display = 'none';
     }
 });

@@ -73,7 +73,71 @@
         </div>
     </div>
 
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+
+    <!-- Firebase Config -->
+    <script src="firebase-config.js"></script>
+
     <script>
+        // Inicializar Firebase
+        let auth, db;
+        try {
+            if (!firebase.apps.length) {
+                firebase.initializeApp(window.FIREBASE_CONFIG);
+            }
+            auth = firebase.auth();
+            db = firebase.firestore();
+            console.log('✅ Firebase inicializado na página de sucesso');
+        } catch (error) {
+            console.error('❌ Erro ao inicializar Firebase:', error);
+        }
+
+        // Pegar parâmetros da URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const sessionId = urlParams.get('session_id');
+        const uid = urlParams.get('uid');
+
+        console.log('Session ID:', sessionId);
+        console.log('UID:', uid);
+
+        // Marcar pagamento como concluído no Firestore
+        async function markPaymentComplete() {
+            const user = auth.currentUser;
+            const userId = uid || (user ? user.uid : null);
+
+            if (!userId) {
+                console.error('❌ Usuário não identificado');
+                return;
+            }
+
+            try {
+                console.log('✅ Marcando pagamento como concluído para usuário:', userId);
+
+                await db.collection('users').doc(userId).set({
+                    hasPaid: true,
+                    stripeSessionId: sessionId || 'manual',
+                    paidAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    pendingPayment: false
+                }, { merge: true });
+
+                console.log('✅ Pagamento marcado como concluído no Firestore!');
+            } catch (error) {
+                console.error('❌ Erro ao atualizar Firestore:', error);
+            }
+        }
+
+        // Executar quando autenticado
+        auth.onAuthStateChanged(async (user) => {
+            if (user) {
+                await markPaymentComplete();
+            }
+        });
+
+        // Countdown para redirecionamento
         let countdown = 3;
         const countdownElement = document.getElementById('countdown');
 

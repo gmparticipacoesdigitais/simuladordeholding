@@ -1,24 +1,53 @@
-// Configuração do Firebase - SUBSTITUA COM SUAS CREDENCIAIS
-const firebaseConfig = {
-    apiKey: "AIzaSyBYourAPIKey",
-    authDomain: "your-project.firebaseapp.com",
-    projectId: "your-project-id",
-    storageBucket: "your-project.appspot.com",
-    messagingSenderId: "123456789",
-    appId: "1:123456789:web:abcdef"
-};
+// Usar configuração centralizada do Firebase
+const firebaseConfig = window.FIREBASE_CONFIG;
 
-// Inicializar Firebase
-if (!firebase.apps.length) {
-    firebase.initializeApp(firebaseConfig);
+// Verificar se Firebase está configurado antes de inicializar
+if (!window.isFirebaseConfigured || !window.isFirebaseConfigured()) {
+    const setupFirebase = confirm(
+        '⚠️ Firebase não está configurado!\n\n' +
+        'Para usar esta aplicação, você precisa configurar o Firebase.\n\n' +
+        'Deseja configurar agora?'
+    );
+
+    if (setupFirebase) {
+        const apiKey = prompt('Digite sua Firebase API Key:');
+        const authDomain = prompt('Digite seu Firebase Auth Domain (ex: projeto.firebaseapp.com):');
+        const projectId = prompt('Digite seu Firebase Project ID:');
+        const storageBucket = prompt('Digite seu Firebase Storage Bucket (ex: projeto.appspot.com):');
+        const messagingSenderId = prompt('Digite seu Firebase Messaging Sender ID:');
+        const appId = prompt('Digite seu Firebase App ID:');
+
+        if (apiKey && authDomain && projectId && storageBucket && messagingSenderId && appId) {
+            localStorage.setItem('FIREBASE_API_KEY', apiKey);
+            localStorage.setItem('FIREBASE_AUTH_DOMAIN', authDomain);
+            localStorage.setItem('FIREBASE_PROJECT_ID', projectId);
+            localStorage.setItem('FIREBASE_STORAGE_BUCKET', storageBucket);
+            localStorage.setItem('FIREBASE_MESSAGING_SENDER_ID', messagingSenderId);
+            localStorage.setItem('FIREBASE_APP_ID', appId);
+
+            alert('✅ Configuração salva! Recarregando a página...');
+            window.location.reload();
+        }
+    }
 }
 
-const auth = firebase.auth();
-const db = firebase.firestore();
+// Inicializar Firebase
+let auth, db;
+try {
+    if (!firebase.apps.length) {
+        firebase.initializeApp(firebaseConfig);
+    }
+    auth = firebase.auth();
+    db = firebase.firestore();
+    console.log('✅ Firebase inicializado com sucesso');
+} catch (error) {
+    console.error('❌ Erro ao inicializar Firebase:', error);
+    alert('Erro ao inicializar Firebase. Verifique sua configuração.');
+}
 
 // Produtos Stripe
-const STRIPE_PRODUCT_ID = 'prod_TAfijhTULkKnag';
-const STRIPE_PRICE_ID = 'price_1SEKNFIPGzIfZaTDXox4NygH';
+const STRIPE_PRODUCT_ID = window.STRIPE_PRODUCT_ID;
+const STRIPE_PRICE_ID = window.STRIPE_PRICE_ID;
 
 // Verificar se usuário já está autenticado
 auth.onAuthStateChanged(async (user) => {

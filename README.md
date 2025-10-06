@@ -59,34 +59,43 @@ Sistema completo de autenticação, pagamento e acesso ao estimador de Imposto d
 
 ### 4. Configurar Variáveis de Ambiente
 
-#### Para o frontend (auth.js, checkout.js, app.js):
+**NOVO:** Agora usamos um arquivo de configuração centralizado (`firebase-config.js`) que carrega as credenciais de múltiplas fontes.
 
-Edite os arquivos e substitua as credenciais do Firebase:
+#### Opção 1: Configuração via navegador (Recomendado para testes rápidos)
 
-```javascript
-const firebaseConfig = {
-    apiKey: "SUA_API_KEY",
-    authDomain: "SEU_PROJETO.firebaseapp.com",
-    projectId: "SEU_PROJETO_ID",
-    storageBucket: "SEU_PROJETO.appspot.com",
-    messagingSenderId: "SEU_MESSAGING_ID",
-    appId: "SEU_APP_ID"
-};
-```
+1. Abra o site no navegador
+2. Um prompt aparecerá pedindo suas credenciais do Firebase
+3. Digite as credenciais (serão salvas no localStorage)
 
-Em `checkout.js`, adicione sua chave publicável do Stripe:
+#### Opção 2: Configuração via localStorage (Console do navegador)
+
+Abra o console do navegador (F12) e execute:
 
 ```javascript
-const STRIPE_PUBLISHABLE_KEY = 'pk_test_...';
+localStorage.setItem('FIREBASE_API_KEY', 'AIza...');
+localStorage.setItem('FIREBASE_AUTH_DOMAIN', 'seu-projeto.firebaseapp.com');
+localStorage.setItem('FIREBASE_PROJECT_ID', 'seu-projeto-id');
+localStorage.setItem('FIREBASE_STORAGE_BUCKET', 'seu-projeto.appspot.com');
+localStorage.setItem('FIREBASE_MESSAGING_SENDER_ID', '123456789');
+localStorage.setItem('FIREBASE_APP_ID', '1:123456789:web:abc123');
+localStorage.setItem('STRIPE_PUBLISHABLE_KEY', 'pk_test_...');
 ```
 
-#### Para as Cloud Functions:
+Depois, recarregue a página.
+
+#### Opção 3: Configuração via arquivo .env (Para desenvolvimento com bundler)
 
 Crie um arquivo `.env` na raiz do projeto:
 
 ```bash
 cp .env.example .env
 ```
+
+Edite o arquivo `.env` com suas credenciais reais.
+
+**Nota:** Esta opção requer um bundler como Vite ou Webpack.
+
+#### Para as Cloud Functions:
 
 Configure as variáveis no Firebase:
 
@@ -221,10 +230,7 @@ stripe listen --forward-to localhost:5001/SEU_PROJETO/us-central1/stripeWebhook
 
 ## 📝 Notas Importantes
 
-1. As credenciais do Firebase devem ser substituídas em **3 arquivos**:
-   - `auth.js`
-   - `checkout.js`
-   - `app.js`
+1. **NOVO:** Configuração centralizada em `firebase-config.js` - Agora você só precisa configurar as credenciais em UM lugar (localStorage, variáveis de ambiente, ou via prompt no navegador)
 
 2. Os IDs do Stripe já estão configurados:
    - Produto: `prod_TAfijhTULkKnag`
@@ -233,6 +239,11 @@ stripe listen --forward-to localhost:5001/SEU_PROJETO/us-central1/stripeWebhook
 3. **Não commite** arquivos com credenciais reais no Git
 
 4. Para produção, use as chaves de produção do Stripe (não as de teste)
+
+5. **Ordem de prioridade das configurações:**
+   - Variáveis de ambiente (import.meta.env / process.env)
+   - localStorage do navegador
+   - Fallback para valores padrão (teste)
 
 ## 📄 Licença
 
