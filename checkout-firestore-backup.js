@@ -1,20 +1,15 @@
-// ============================================================================
-// CHECKOUT.JS - Refatorado para usar Realtime Database
-// Sistema de checkout com Payment Link do Stripe
-// ============================================================================
-
 // Usar configuração centralizada do Firebase
 const firebaseConfig = window.FIREBASE_CONFIG;
 
 // Inicializar Firebase
-let auth, database;
+let auth, db;
 try {
     if (!firebase.apps.length) {
         firebase.initializeApp(firebaseConfig);
     }
     auth = firebase.auth();
-    database = firebase.database();
-    console.log('✅ Firebase inicializado com sucesso no checkout (Realtime Database)');
+    db = firebase.firestore();
+    console.log('✅ Firebase inicializado com sucesso no checkout');
 } catch (error) {
     console.error('❌ Erro ao inicializar Firebase:', error);
     alert('Erro ao inicializar Firebase. Verifique sua configuração.');
@@ -27,42 +22,26 @@ const checkoutButton = document.getElementById('checkout-button');
 const loadingDiv = document.getElementById('loading');
 const errorDiv = document.getElementById('error-message');
 
-// ============================================================================
-// VERIFICAR AUTENTICAÇÃO E STATUS DE PAGAMENTO
-// ============================================================================
-
+// Verificar autenticação e status de pagamento
 auth.onAuthStateChanged(async (user) => {
     if (!user) {
-        console.log('❌ Usuário não autenticado, redirecionando para login...');
         window.location.href = 'index.html';
         return;
     }
 
-    console.log('✅ Usuário autenticado:', user.email);
-
     // Verificar se já pagou
     try {
-        const snapshot = await database.ref(`users/${user.uid}`).once('value');
-        const userData = snapshot.val();
-
-        console.log('📊 Dados do usuário:', userData);
-
-        if (userData && userData.hasPaid) {
-            console.log('✅ Usuário já pagou! Redirecionando para app...');
+        const userDoc = await db.collection('users').doc(user.uid).get();
+        if (userDoc.exists && userDoc.data().hasPaid) {
             window.location.href = 'app.html';
             return;
         }
-
-        console.log('💳 Pagamento pendente, mostrando opções de checkout...');
     } catch (error) {
-        console.error('❌ Erro ao verificar pagamento:', error);
+        console.error('Erro ao verificar pagamento:', error);
     }
 });
 
-// ============================================================================
-// REDIRECIONAR PARA PAYMENT LINK DO STRIPE
-// ============================================================================
-
+// Redirecionar para Payment Link do Stripe
 checkoutButton.addEventListener('click', async () => {
     const user = auth.currentUser;
     if (!user) {
@@ -78,23 +57,25 @@ checkoutButton.addEventListener('click', async () => {
 
     try {
         console.log('✅ Redirecionando para Payment Link do Stripe...');
-        console.log('👤 User ID:', user.uid);
-        console.log('📧 Email:', user.email);
+        console.log('User ID:', user.uid);
+        console.log('Email:', user.email);
 
-        // Salvar informações do usuário no Realtime Database antes de redirecionar
-        const userRef = database.ref(`users/${user.uid}`);
-
-        await userRef.update({
+        // Salvar informações do usuário no Firestore antes de redirecionar
+        await db.collection('users').doc(user.uid).set({
             email: user.email,
             displayName: user.displayName || 'Usuário',
             pendingPayment: true,
-            paymentInitiatedAt: firebase.database.ServerValue.TIMESTAMP,
-            updatedAt: firebase.database.ServerValue.TIMESTAMP
-        });
+            paymentInitiatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+        }, { merge: true });
 
-        console.log('✅ Informações do usuário atualizadas no Realtime Database');
+        console.log('✅ Informações do usuário salvas no Firestore');
 
         // Construir URL do Payment Link com parâmetros
+        const successUrl = window.location.origin + '/success.html?session_id={CHECKOUT_SESSION_ID}&uid=' + user.uid;
+        const cancelUrl = window.location.origin + '/checkout.html?uid=' + user.uid;
+
+        // Adicionar client_reference_id e prefill_email ao Payment Link
         const paymentUrl = new URL(STRIPE_PAYMENT_LINK);
         paymentUrl.searchParams.set('client_reference_id', user.uid);
         paymentUrl.searchParams.set('prefilled_email', user.email);

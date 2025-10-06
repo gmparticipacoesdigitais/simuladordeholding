@@ -1,180 +1,53 @@
-// ============================================================================
-// APP.JS - Refatorado para usar Realtime Database
-// Estimador de Imposto de Renda com proteção de autenticação e pagamento
-// ============================================================================
-
-// Usar configuração centralizada do Firebase
-const firebaseConfig = window.FIREBASE_CONFIG;
+// Configuração do Firebase - SUBSTITUA COM SUAS CREDENCIAIS
+const firebaseConfig = {
+    apiKey: "AIzaSyBYourAPIKey",
+    authDomain: "your-project.firebaseapp.com",
+    projectId: "your-project-id",
+    storageBucket: "your-project.appspot.com",
+    messagingSenderId: "123456789",
+    appId: "1:123456789:web:abcdef"
+};
 
 // Inicializar Firebase
-let auth, database;
-try {
-    if (!firebase.apps.length) {
-        firebase.initializeApp(firebaseConfig);
-    }
-    auth = firebase.auth();
-    database = firebase.database();
-    console.log('✅ Firebase inicializado com sucesso no app (Realtime Database)');
-} catch (error) {
-    console.error('❌ Erro ao inicializar Firebase:', error);
-    alert('Erro ao inicializar Firebase. Verifique sua configuração.');
+if (!firebase.apps.length) {
+    firebase.initializeApp(firebaseConfig);
 }
 
-// ============================================================================
-// VERIFICAÇÃO DE AUTENTICAÇÃO E PAGAMENTO
-// ============================================================================
+const auth = firebase.auth();
+const db = firebase.firestore();
 
-let currentUser = null;
-
+// Verificar autenticação
 auth.onAuthStateChanged(async (user) => {
     if (!user) {
-        console.log('❌ Usuário não autenticado, redirecionando para login...');
         window.location.href = 'index.html';
         return;
     }
 
-    console.log('✅ Usuário autenticado:', user.email);
-    currentUser = user;
-
     // Verificar se o usuário pagou
     try {
-        const snapshot = await database.ref(`users/${user.uid}`).once('value');
-        const userData = snapshot.val();
-
-        console.log('📊 Dados do usuário:', userData);
-
-        if (!userData || !userData.hasPaid) {
-            console.log('❌ Usuário não pagou, redirecionando para checkout...');
+        const userDoc = await db.collection('users').doc(user.uid).get();
+        if (!userDoc.exists || !userDoc.data().hasPaid) {
+            // Redirecionar para página de pagamento
             window.location.href = 'checkout.html';
             return;
         }
-
-        console.log('✅ Usuário tem acesso ao app!');
-        initializeApp(user, userData);
-
     } catch (error) {
-        console.error('❌ Erro ao verificar pagamento:', error);
-        alert('Erro ao verificar seu acesso. Redirecionando...');
-        window.location.href = 'checkout.html';
+        console.error('Erro ao verificar pagamento:', error);
     }
 });
 
-// ============================================================================
-// INICIALIZAR APLICAÇÃO
-// ============================================================================
-
-function initializeApp(user, userData) {
-    console.log('🚀 Inicializando aplicação...');
-
-    // Mostrar informações do usuário (opcional)
-    displayUserInfo(user, userData);
-
-    // Carregar dados salvos do usuário (se existirem)
-    loadUserCalculations(user.uid);
-
-    // Setup dos event listeners
-    setupEventListeners(user.uid);
-}
-
-// ============================================================================
-// EXIBIR INFORMAÇÕES DO USUÁRIO
-// ============================================================================
-
-function displayUserInfo(user, userData) {
-    const userName = userData.displayName || user.displayName || user.email.split('@')[0];
-    console.log(`👤 Bem-vindo, ${userName}!`);
-
-    // Você pode adicionar um elemento para mostrar o nome do usuário na interface
-    // Por exemplo:
-    // document.getElementById('user-name').textContent = userName;
-}
-
-// ============================================================================
-// FUNÇÃO DE LOGOUT
-// ============================================================================
-
+// Função de logout
 window.logout = async function() {
     try {
-        console.log('🚪 Fazendo logout...');
         await auth.signOut();
-        console.log('✅ Logout realizado com sucesso');
         window.location.href = 'index.html';
     } catch (error) {
-        console.error('❌ Erro ao fazer logout:', error);
+        console.error('Erro ao fazer logout:', error);
         alert('Erro ao fazer logout. Tente novamente.');
     }
 };
 
-// ============================================================================
-// CARREGAR CÁLCULOS SALVOS DO USUÁRIO
-// ============================================================================
-
-async function loadUserCalculations(uid) {
-    try {
-        const snapshot = await database.ref(`calculations/${uid}/latest`).once('value');
-        const savedData = snapshot.val();
-
-        if (savedData) {
-            console.log('📂 Cálculos salvos encontrados, restaurando...');
-
-            // Restaurar os valores nos campos
-            if (savedData.rendaBruta) document.getElementById('rendaBruta').value = savedData.rendaBruta;
-            if (savedData.dependentes) document.getElementById('dependentes').value = savedData.dependentes;
-            if (savedData.pensaoAlimenticia) document.getElementById('pensaoAlimenticia').value = savedData.pensaoAlimenticia;
-            if (savedData.despesasMedicas) document.getElementById('despesasMedicas').value = savedData.despesasMedicas;
-            if (savedData.despesasEducacao) document.getElementById('despesasEducacao').value = savedData.despesasEducacao;
-            if (savedData.previdenciaPrivada) document.getElementById('previdenciaPrivada').value = savedData.previdenciaPrivada;
-
-            console.log('✅ Dados restaurados!');
-        }
-    } catch (error) {
-        console.error('❌ Erro ao carregar cálculos salvos:', error);
-    }
-}
-
-// ============================================================================
-// SALVAR CÁLCULOS DO USUÁRIO
-// ============================================================================
-
-async function saveUserCalculations(uid, data) {
-    try {
-        const calculationData = {
-            ...data,
-            savedAt: firebase.database.ServerValue.TIMESTAMP
-        };
-
-        await database.ref(`calculations/${uid}`).update({
-            latest: calculationData,
-            lastUpdated: firebase.database.ServerValue.TIMESTAMP
-        });
-
-        // Também salvar no histórico
-        await database.ref(`calculations/${uid}/history`).push(calculationData);
-
-        console.log('💾 Cálculos salvos com sucesso!');
-    } catch (error) {
-        console.error('❌ Erro ao salvar cálculos:', error);
-    }
-}
-
-// ============================================================================
-// SETUP DOS EVENT LISTENERS
-// ============================================================================
-
-function setupEventListeners(uid) {
-    const calculateBtn = document.getElementById('calculateBtn');
-
-    if (calculateBtn) {
-        calculateBtn.addEventListener('click', () => {
-            analisarSituacao(uid);
-        });
-    }
-}
-
-// ============================================================================
-// CONSTANTES TRIBUTÁRIAS (Vigência: FEV/2024)
-// ============================================================================
-
+// --- CONSTANTES TRIBUTÁRIAS (Vigência: FEV/2024) ---
 const DEDUCAO_DEPENDENTE = 189.59;
 const DESCONTO_SIMPLIFICADO_MENSAL = 564.80;
 const LIMITE_ISENCAO_TABELA = 2259.20;
@@ -197,10 +70,7 @@ const TABELA_IRPF_2024 = [
     { limite: Infinity,aliquota: 0.275, deducao: 896.00 }
 ];
 
-// ============================================================================
-// FUNÇÕES UTILITÁRIAS
-// ============================================================================
-
+// --- FUNÇÕES UTILITÁRIAS ---
 function getNumericValue(id) {
     return parseFloat(document.getElementById(id).value) || 0;
 }
@@ -209,10 +79,7 @@ function formatCurrency(value) {
     return value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 }
 
-// ============================================================================
-// FUNÇÕES DE CÁLCULO
-// ============================================================================
-
+// --- FUNÇÕES DE CÁLCULO ---
 function calcularINSS(rendaBruta) {
     if (rendaBruta > TETO_INSS) {
         return CONTRIBUICAO_TETO_INSS;
@@ -236,16 +103,9 @@ function calcularIRPF(baseCalculo) {
     return 0;
 }
 
-// ============================================================================
-// FUNÇÃO PRINCIPAL DE ORQUESTRAÇÃO
-// ============================================================================
-
-function analisarSituacao(uid) {
+// --- FUNÇÃO PRINCIPAL DE ORQUESTRAÇÃO ---
+function analisarSituacao() {
     const rendaBruta = getNumericValue('rendaBruta');
-
-    const resultadoDiv = document.getElementById('resultado');
-    const resultadoMobileDiv = document.getElementById('resultado-mobile');
-
     if (rendaBruta <= 0) {
         const alertHtml = `
             <div class="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 rounded-lg" role="alert">
@@ -293,6 +153,7 @@ function analisarSituacao(uid) {
         impostoDevidoSimplificado = 0;
     }
 
+
     let resultadoFinal;
     if (impostoDevidoCompleto < impostoDevidoSimplificado) {
         resultadoFinal = {
@@ -310,19 +171,6 @@ function analisarSituacao(uid) {
         };
     }
 
-    // Salvar os dados do cálculo
-    if (uid) {
-        saveUserCalculations(uid, {
-            rendaBruta,
-            dependentes,
-            pensaoAlimenticia,
-            despesasMedicas,
-            despesasEducacao,
-            previdenciaPrivada: previdenciaPrivadaInput,
-            ...resultadoFinal
-        });
-    }
-
     exibirResultado({
         rendaBruta, inss, deducaoDependentes,
         outrasDeducoesItens: { pensaoAlimenticia, despesasMedicas, despesasEducacao, previdenciaDedutivel },
@@ -330,10 +178,7 @@ function analisarSituacao(uid) {
     });
 }
 
-// ============================================================================
-// FUNÇÃO DE RENDERIZAÇÃO DO RESULTADO
-// ============================================================================
-
+// --- FUNÇÃO DE RENDERIZAÇÃO DO RESULTADO ---
 function exibirResultado(data) {
     const isento = data.impostoDevido <= 0;
     let html = '';
@@ -420,9 +265,6 @@ function exibirResultado(data) {
         `;
     }
 
-    const resultadoDiv = document.getElementById('resultado');
-    const resultadoMobileDiv = document.getElementById('resultado-mobile');
-
     resultadoDiv.innerHTML = html;
     resultadoMobileDiv.innerHTML = html;
     resultadoDiv.classList.remove('hidden');
@@ -433,4 +275,8 @@ function exibirResultado(data) {
     }
 }
 
-console.log('📱 App.js carregado e pronto!');
+const calculateBtn = document.getElementById('calculateBtn');
+const resultadoDiv = document.getElementById('resultado');
+const resultadoMobileDiv = document.getElementById('resultado-mobile');
+
+calculateBtn.addEventListener('click', analisarSituacao);

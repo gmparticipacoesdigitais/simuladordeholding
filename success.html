@@ -76,21 +76,26 @@
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
 
     <!-- Firebase Config -->
     <script src="firebase-config.js"></script>
 
     <script>
+        // ============================================================================
+        // SUCCESS.HTML - Refatorado para usar Realtime Database
+        // Marca o pagamento como concluído e redireciona para app
+        // ============================================================================
+
         // Inicializar Firebase
-        let auth, db;
+        let auth, database;
         try {
             if (!firebase.apps.length) {
                 firebase.initializeApp(window.FIREBASE_CONFIG);
             }
             auth = firebase.auth();
-            db = firebase.firestore();
-            console.log('✅ Firebase inicializado na página de sucesso');
+            database = firebase.database();
+            console.log('✅ Firebase inicializado na página de sucesso (Realtime Database)');
         } catch (error) {
             console.error('❌ Erro ao inicializar Firebase:', error);
         }
@@ -100,40 +105,58 @@
         const sessionId = urlParams.get('session_id');
         const uid = urlParams.get('uid');
 
-        console.log('Session ID:', sessionId);
-        console.log('UID:', uid);
+        console.log('📊 Parâmetros recebidos:');
+        console.log('   Session ID:', sessionId);
+        console.log('   UID:', uid);
 
-        // Marcar pagamento como concluído no Firestore
+        // Marcar pagamento como concluído no Realtime Database
         async function markPaymentComplete() {
             const user = auth.currentUser;
             const userId = uid || (user ? user.uid : null);
 
             if (!userId) {
                 console.error('❌ Usuário não identificado');
+                alert('Erro: Não foi possível identificar o usuário. Redirecionando...');
+                setTimeout(() => window.location.href = 'index.html', 2000);
                 return;
             }
 
             try {
                 console.log('✅ Marcando pagamento como concluído para usuário:', userId);
 
-                await db.collection('users').doc(userId).set({
+                const userRef = database.ref(`users/${userId}`);
+
+                await userRef.update({
                     hasPaid: true,
                     stripeSessionId: sessionId || 'manual',
-                    paidAt: firebase.firestore.FieldValue.serverTimestamp(),
-                    updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    paidAt: firebase.database.ServerValue.TIMESTAMP,
+                    updatedAt: firebase.database.ServerValue.TIMESTAMP,
                     pendingPayment: false
-                }, { merge: true });
+                });
 
-                console.log('✅ Pagamento marcado como concluído no Firestore!');
+                console.log('🎉 Pagamento marcado como concluído no Realtime Database!');
+
+                // Verificar se foi realmente salvo
+                const snapshot = await userRef.once('value');
+                const userData = snapshot.val();
+                console.log('✅ Verificação - Dados atualizados:', userData);
+
             } catch (error) {
-                console.error('❌ Erro ao atualizar Firestore:', error);
+                console.error('❌ Erro ao atualizar Realtime Database:', error);
+                alert('Erro ao salvar pagamento. Por favor, entre em contato com o suporte.');
             }
         }
 
         // Executar quando autenticado
         auth.onAuthStateChanged(async (user) => {
             if (user) {
+                console.log('✅ Usuário autenticado:', user.email);
                 await markPaymentComplete();
+            } else {
+                console.log('⚠️ Usuário não autenticado, tentando marcar com UID da URL...');
+                if (uid) {
+                    await markPaymentComplete();
+                }
             }
         });
 
@@ -147,6 +170,7 @@
 
             if (countdown === 0) {
                 clearInterval(interval);
+                console.log('➡️ Redirecionando para app.html');
                 window.location.href = 'app.html';
             }
         }, 1000);

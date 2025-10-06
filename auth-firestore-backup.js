@@ -1,8 +1,3 @@
-// ============================================================================
-// AUTH.JS - Refatorado para usar Realtime Database
-// Sistema completo de autenticação com verificação de pagamento
-// ============================================================================
-
 // Usar configuração centralizada do Firebase
 const firebaseConfig = window.FIREBASE_CONFIG;
 
@@ -37,14 +32,14 @@ if (!window.isFirebaseConfigured || !window.isFirebaseConfigured()) {
 }
 
 // Inicializar Firebase
-let auth, database;
+let auth, db;
 try {
     if (!firebase.apps.length) {
         firebase.initializeApp(firebaseConfig);
     }
     auth = firebase.auth();
-    database = firebase.database();
-    console.log('✅ Firebase inicializado com sucesso (Realtime Database)');
+    db = firebase.firestore();
+    console.log('✅ Firebase inicializado com sucesso');
 } catch (error) {
     console.error('❌ Erro ao inicializar Firebase:', error);
     alert('Erro ao inicializar Firebase. Verifique sua configuração.');
@@ -54,64 +49,7 @@ try {
 const STRIPE_PRODUCT_ID = window.STRIPE_PRODUCT_ID;
 const STRIPE_PRICE_ID = window.STRIPE_PRICE_ID;
 
-// ============================================================================
-// FUNÇÕES AUXILIARES
-// ============================================================================
-
-/**
- * Verifica se o usuário já pagou
- * @param {string} uid - ID do usuário
- * @returns {Promise<boolean>}
- */
-async function checkUserPayment(uid) {
-    try {
-        const snapshot = await database.ref(`users/${uid}`).once('value');
-        const userData = snapshot.val();
-
-        console.log('📊 Dados do usuário:', userData);
-
-        return userData && userData.hasPaid === true;
-    } catch (error) {
-        console.error('❌ Erro ao verificar pagamento:', error);
-        return false;
-    }
-}
-
-/**
- * Redireciona o usuário com base no status de pagamento
- * @param {Object} user - Objeto do usuário Firebase
- */
-async function checkPaymentAndRedirect(user) {
-    try {
-        const hasPaid = await checkUserPayment(user.uid);
-
-        const currentPage = window.location.pathname.split('/').pop() || 'index.html';
-
-        console.log(`✅ Usuário: ${user.email}`);
-        console.log(`💳 Status de pagamento: ${hasPaid ? 'PAGO' : 'PENDENTE'}`);
-        console.log(`📄 Página atual: ${currentPage}`);
-
-        // Só redirecionar se estiver na página de login ou registro
-        if (currentPage === 'index.html' || currentPage === '') {
-            if (hasPaid) {
-                console.log('➡️ Redirecionando para app.html');
-                window.location.href = 'app.html';
-            } else {
-                console.log('➡️ Redirecionando para checkout.html');
-                window.location.href = `checkout.html?uid=${user.uid}`;
-            }
-        }
-    } catch (error) {
-        console.error('❌ Erro ao verificar pagamento:', error);
-        // Em caso de erro, redireciona para checkout por segurança
-        window.location.href = `checkout.html?uid=${user.uid}`;
-    }
-}
-
-// ============================================================================
-// VERIFICAR AUTENTICAÇÃO
-// ============================================================================
-
+// Verificar se usuário já está autenticado
 auth.onAuthStateChanged(async (user) => {
     // Só redirecionar se não estiver na página de login ou registro
     const currentPage = window.location.pathname.split('/').pop() || 'index.html';
@@ -121,10 +59,26 @@ auth.onAuthStateChanged(async (user) => {
     }
 });
 
-// ============================================================================
-// LOGIN COM EMAIL E SENHA
-// ============================================================================
+// Função para verificar pagamento e redirecionar
+async function checkPaymentAndRedirect(user) {
+    try {
+        const userDoc = await db.collection('users').doc(user.uid).get();
 
+        if (userDoc.exists && userDoc.data().hasPaid) {
+            // Usuário já pagou, vai para a aplicação
+            window.location.href = 'app.html';
+        } else {
+            // Usuário precisa pagar
+            window.location.href = `checkout.html?uid=${user.uid}`;
+        }
+    } catch (error) {
+        console.error('Erro ao verificar pagamento:', error);
+        // Em caso de erro, redireciona para checkout por segurança
+        window.location.href = `checkout.html?uid=${user.uid}`;
+    }
+}
+
+// Login com email e senha
 const loginForm = document.getElementById('email-login-form');
 if (loginForm) {
     loginForm.addEventListener('submit', async (e) => {
@@ -138,13 +92,10 @@ if (loginForm) {
         submitBtn.innerHTML = '<span>Entrando...</span>';
 
         try {
-            console.log('🔐 Tentando fazer login com:', email);
             const userCredential = await auth.signInWithEmailAndPassword(email, senha);
-            console.log('✅ Login bem-sucedido!');
-
             await checkPaymentAndRedirect(userCredential.user);
         } catch (error) {
-            console.error('❌ Erro no login:', error);
+            console.error('Erro no login:', error);
             let errorMessage = 'Erro ao fazer login. Tente novamente.';
 
             if (error.code === 'auth/user-not-found') {
@@ -164,10 +115,7 @@ if (loginForm) {
     });
 }
 
-// ============================================================================
-// LOGIN COM GOOGLE
-// ============================================================================
-
+// Login com Google
 const googleLoginBtn = document.getElementById('google-login-btn');
 if (googleLoginBtn) {
     googleLoginBtn.addEventListener('click', async () => {
@@ -175,35 +123,25 @@ if (googleLoginBtn) {
         googleLoginBtn.textContent = 'Conectando...';
 
         try {
-            console.log('🔐 Iniciando login com Google...');
             const provider = new firebase.auth.GoogleAuthProvider();
             const result = await auth.signInWithPopup(provider);
 
-            console.log('✅ Login com Google bem-sucedido!');
+            // Criar documento do usuário se não existir
+            const userDocRef = db.collection('users').doc(result.user.uid);
+            const userDoc = await userDocRef.get();
 
-            // Criar/atualizar documento do usuário no Realtime Database
-            const userRef = database.ref(`users/${result.user.uid}`);
-            const snapshot = await userRef.once('value');
-
-            if (!snapshot.exists()) {
-                console.log('📝 Criando novo usuário no database');
-                await userRef.set({
+            if (!userDoc.exists) {
+                await userDocRef.set({
                     email: result.user.email,
                     displayName: result.user.displayName,
-                    createdAt: firebase.database.ServerValue.TIMESTAMP,
-                    hasPaid: false,
-                    provider: 'google'
-                });
-            } else {
-                console.log('✅ Usuário já existe no database');
-                await userRef.update({
-                    lastLogin: firebase.database.ServerValue.TIMESTAMP
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    hasPaid: false
                 });
             }
 
             await checkPaymentAndRedirect(result.user);
         } catch (error) {
-            console.error('❌ Erro no login com Google:', error);
+            console.error('Erro no login com Google:', error);
             alert('Erro ao fazer login com Google. Tente novamente.');
             googleLoginBtn.disabled = false;
             googleLoginBtn.textContent = 'Continuar com Google';
@@ -211,10 +149,7 @@ if (googleLoginBtn) {
     });
 }
 
-// ============================================================================
-// CADASTRO COM EMAIL E SENHA
-// ============================================================================
-
+// Cadastro com email e senha
 const registerForm = document.getElementById('register-form');
 if (registerForm) {
     registerForm.addEventListener('submit', async (e) => {
@@ -240,28 +175,20 @@ if (registerForm) {
         submitBtn.innerHTML = '<span>Criando conta...</span>';
 
         try {
-            console.log('📝 Criando nova conta para:', email);
             const userCredential = await auth.createUserWithEmailAndPassword(email, senha);
 
-            console.log('✅ Conta criada com sucesso!');
-            console.log('📝 Salvando dados no Realtime Database...');
-
-            // Criar documento do usuário no Realtime Database
-            await database.ref(`users/${userCredential.user.uid}`).set({
+            // Criar documento do usuário no Firestore
+            await db.collection('users').doc(userCredential.user.uid).set({
                 displayName: nome,
                 email: email,
-                createdAt: firebase.database.ServerValue.TIMESTAMP,
-                hasPaid: false,
-                provider: 'email'
+                createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                hasPaid: false
             });
-
-            console.log('✅ Dados salvos com sucesso!');
-            console.log('➡️ Redirecionando para checkout...');
 
             // Redirecionar para checkout
             window.location.href = `checkout.html?uid=${userCredential.user.uid}`;
         } catch (error) {
-            console.error('❌ Erro no cadastro:', error);
+            console.error('Erro no cadastro:', error);
             let errorMessage = 'Erro ao criar conta. Tente novamente.';
 
             if (error.code === 'auth/email-already-in-use') {
@@ -279,10 +206,7 @@ if (registerForm) {
     });
 }
 
-// ============================================================================
-// CADASTRO COM GOOGLE
-// ============================================================================
-
+// Cadastro com Google
 const googleRegisterBtn = document.getElementById('google-register-btn');
 if (googleRegisterBtn) {
     googleRegisterBtn.addEventListener('click', async () => {
@@ -290,37 +214,28 @@ if (googleRegisterBtn) {
         googleRegisterBtn.textContent = 'Conectando...';
 
         try {
-            console.log('📝 Iniciando cadastro com Google...');
             const provider = new firebase.auth.GoogleAuthProvider();
             const result = await auth.signInWithPopup(provider);
 
-            console.log('✅ Cadastro com Google bem-sucedido!');
+            // Criar documento do usuário
+            const userDocRef = db.collection('users').doc(result.user.uid);
+            const userDoc = await userDocRef.get();
 
-            // Criar documento do usuário no Realtime Database
-            const userRef = database.ref(`users/${result.user.uid}`);
-            const snapshot = await userRef.once('value');
-
-            if (!snapshot.exists()) {
-                console.log('📝 Criando novo usuário no database');
-                await userRef.set({
+            if (!userDoc.exists) {
+                await userDocRef.set({
                     email: result.user.email,
                     displayName: result.user.displayName,
-                    createdAt: firebase.database.ServerValue.TIMESTAMP,
-                    hasPaid: false,
-                    provider: 'google'
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    hasPaid: false
                 });
             }
 
             await checkPaymentAndRedirect(result.user);
         } catch (error) {
-            console.error('❌ Erro no cadastro com Google:', error);
+            console.error('Erro no cadastro com Google:', error);
             alert('Erro ao cadastrar com Google. Tente novamente.');
             googleRegisterBtn.disabled = false;
             googleRegisterBtn.textContent = 'Cadastrar com Google';
         }
     });
 }
-
-// Exportar funções para uso global
-window.checkUserPayment = checkUserPayment;
-window.checkPaymentAndRedirect = checkPaymentAndRedirect;
