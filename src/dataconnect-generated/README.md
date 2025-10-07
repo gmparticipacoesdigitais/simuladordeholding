@@ -1078,6 +1078,7 @@ The `UpsertUser` mutation requires an argument of type `UpsertUserVariables`, wh
 
 ```typescript
 export interface UpsertUserVariables {
+  id: string;
   email: string;
   displayName?: string | null;
   provider?: string | null;
@@ -1100,6 +1101,7 @@ import { connectorConfig, upsertUser, UpsertUserVariables } from '@dataconnect/g
 
 // The `UpsertUser` mutation requires an argument of type `UpsertUserVariables`:
 const upsertUserVars: UpsertUserVariables = {
+  id: ..., 
   email: ..., 
   displayName: ..., // optional
   provider: ..., // optional
@@ -1109,7 +1111,7 @@ const upsertUserVars: UpsertUserVariables = {
 // You can use the `await` keyword to wait for the promise to resolve.
 const { data } = await upsertUser(upsertUserVars);
 // Variables can be defined inline as well.
-const { data } = await upsertUser({ email: ..., displayName: ..., provider: ..., });
+const { data } = await upsertUser({ id: ..., email: ..., displayName: ..., provider: ..., });
 
 // You can also pass in a `DataConnect` instance to the action shortcut function.
 const dataConnect = getDataConnect(connectorConfig);
@@ -1132,6 +1134,7 @@ import { connectorConfig, upsertUserRef, UpsertUserVariables } from '@dataconnec
 
 // The `UpsertUser` mutation requires an argument of type `UpsertUserVariables`:
 const upsertUserVars: UpsertUserVariables = {
+  id: ..., 
   email: ..., 
   displayName: ..., // optional
   provider: ..., // optional
@@ -1140,7 +1143,7 @@ const upsertUserVars: UpsertUserVariables = {
 // Call the `upsertUserRef()` function to get a reference to the mutation.
 const ref = upsertUserRef(upsertUserVars);
 // Variables can be defined inline as well.
-const ref = upsertUserRef({ email: ..., displayName: ..., provider: ..., });
+const ref = upsertUserRef({ id: ..., email: ..., displayName: ..., provider: ..., });
 
 // You can also pass in a `DataConnect` instance to the `MutationRef` function.
 const dataConnect = getDataConnect(connectorConfig);

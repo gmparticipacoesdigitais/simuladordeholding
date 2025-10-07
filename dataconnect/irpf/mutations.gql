@@ -4,26 +4,24 @@
 
 # Criar ou atualizar usuário
 mutation UpsertUser(
+  $id: String!
   $email: String!
   $displayName: String
   $provider: String
 ) @auth(level: USER) {
   user_upsert(
     data: {
+      id: $id
       email: $email
       displayName: $displayName
       provider: $provider
-      updatedAt: { expr: "request.time" }
     }
   )
 }
 
 # Atualizar último login do usuário
 mutation UpdateUserLogin($userId: String!) @auth(level: USER) {
-  user_update(id: $userId, data: {
-    lastLogin: { expr: "request.time" }
-    updatedAt: { expr: "request.time" }
-  })
+  user_update(id: $userId, data: {})
 }
 
 # Atualizar status de pagamento do usuário
@@ -37,7 +35,6 @@ mutation UpdatePaymentStatus(
     data: {
       hasPaid: $hasPaid
       stripeCustomerId: $stripeCustomerId
-      updatedAt: { expr: "request.time" }
     }
   )
 }
@@ -76,7 +73,6 @@ mutation UpdatePaymentStatus2(
       status: $status
       stripePaymentIntentId: $stripePaymentIntentId
       paymentMethod: $paymentMethod
-      completedAt: { expr: "request.time" }
     }
   )
 }

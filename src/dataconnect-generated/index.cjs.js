@@ -7,102 +7,6 @@ const connectorConfig = {
 };
 exports.connectorConfig = connectorConfig;
 
-const getUserRef = (dcOrVars, vars) => {
-  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
-  dcInstance._useGeneratedSdk();
-  return queryRef(dcInstance, 'GetUser', inputVars);
-}
-getUserRef.operationName = 'GetUser';
-exports.getUserRef = getUserRef;
-
-exports.getUser = function getUser(dcOrVars, vars) {
-  return executeQuery(getUserRef(dcOrVars, vars));
-};
-
-const getUserByEmailRef = (dcOrVars, vars) => {
-  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
-  dcInstance._useGeneratedSdk();
-  return queryRef(dcInstance, 'GetUserByEmail', inputVars);
-}
-getUserByEmailRef.operationName = 'GetUserByEmail';
-exports.getUserByEmailRef = getUserByEmailRef;
-
-exports.getUserByEmail = function getUserByEmail(dcOrVars, vars) {
-  return executeQuery(getUserByEmailRef(dcOrVars, vars));
-};
-
-const checkPaymentStatusRef = (dcOrVars, vars) => {
-  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
-  dcInstance._useGeneratedSdk();
-  return queryRef(dcInstance, 'CheckPaymentStatus', inputVars);
-}
-checkPaymentStatusRef.operationName = 'CheckPaymentStatus';
-exports.checkPaymentStatusRef = checkPaymentStatusRef;
-
-exports.checkPaymentStatus = function checkPaymentStatus(dcOrVars, vars) {
-  return executeQuery(checkPaymentStatusRef(dcOrVars, vars));
-};
-
-const getLatestCalculationRef = (dcOrVars, vars) => {
-  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
-  dcInstance._useGeneratedSdk();
-  return queryRef(dcInstance, 'GetLatestCalculation', inputVars);
-}
-getLatestCalculationRef.operationName = 'GetLatestCalculation';
-exports.getLatestCalculationRef = getLatestCalculationRef;
-
-exports.getLatestCalculation = function getLatestCalculation(dcOrVars, vars) {
-  return executeQuery(getLatestCalculationRef(dcOrVars, vars));
-};
-
-const getCalculationHistoryRef = (dcOrVars, vars) => {
-  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
-  dcInstance._useGeneratedSdk();
-  return queryRef(dcInstance, 'GetCalculationHistory', inputVars);
-}
-getCalculationHistoryRef.operationName = 'GetCalculationHistory';
-exports.getCalculationHistoryRef = getCalculationHistoryRef;
-
-exports.getCalculationHistory = function getCalculationHistory(dcOrVars, vars) {
-  return executeQuery(getCalculationHistoryRef(dcOrVars, vars));
-};
-
-const getUserPaymentsRef = (dcOrVars, vars) => {
-  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
-  dcInstance._useGeneratedSdk();
-  return queryRef(dcInstance, 'GetUserPayments', inputVars);
-}
-getUserPaymentsRef.operationName = 'GetUserPayments';
-exports.getUserPaymentsRef = getUserPaymentsRef;
-
-exports.getUserPayments = function getUserPayments(dcOrVars, vars) {
-  return executeQuery(getUserPaymentsRef(dcOrVars, vars));
-};
-
-const getLatestPaymentRef = (dcOrVars, vars) => {
-  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
-  dcInstance._useGeneratedSdk();
-  return queryRef(dcInstance, 'GetLatestPayment', inputVars);
-}
-getLatestPaymentRef.operationName = 'GetLatestPayment';
-exports.getLatestPaymentRef = getLatestPaymentRef;
-
-exports.getLatestPayment = function getLatestPayment(dcOrVars, vars) {
-  return executeQuery(getLatestPaymentRef(dcOrVars, vars));
-};
-
-const getUserAuditLogsRef = (dcOrVars, vars) => {
-  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
-  dcInstance._useGeneratedSdk();
-  return queryRef(dcInstance, 'GetUserAuditLogs', inputVars);
-}
-getUserAuditLogsRef.operationName = 'GetUserAuditLogs';
-exports.getUserAuditLogsRef = getUserAuditLogsRef;
-
-exports.getUserAuditLogs = function getUserAuditLogs(dcOrVars, vars) {
-  return executeQuery(getUserAuditLogsRef(dcOrVars, vars));
-};
-
 const upsertUserRef = (dcOrVars, vars) => {
   const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
   dcInstance._useGeneratedSdk();
@@ -197,4 +101,100 @@ exports.deleteUserRef = deleteUserRef;
 
 exports.deleteUser = function deleteUser(dcOrVars, vars) {
   return executeMutation(deleteUserRef(dcOrVars, vars));
+};
+
+const getUserRef = (dcOrVars, vars) => {
+  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
+  dcInstance._useGeneratedSdk();
+  return queryRef(dcInstance, 'GetUser', inputVars);
+}
+getUserRef.operationName = 'GetUser';
+exports.getUserRef = getUserRef;
+
+exports.getUser = function getUser(dcOrVars, vars) {
+  return executeQuery(getUserRef(dcOrVars, vars));
+};
+
+const getUserByEmailRef = (dcOrVars, vars) => {
+  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
+  dcInstance._useGeneratedSdk();
+  return queryRef(dcInstance, 'GetUserByEmail', inputVars);
+}
+getUserByEmailRef.operationName = 'GetUserByEmail';
+exports.getUserByEmailRef = getUserByEmailRef;
+
+exports.getUserByEmail = function getUserByEmail(dcOrVars, vars) {
+  return executeQuery(getUserByEmailRef(dcOrVars, vars));
+};
+
+const checkPaymentStatusRef = (dcOrVars, vars) => {
+  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
+  dcInstance._useGeneratedSdk();
+  return queryRef(dcInstance, 'CheckPaymentStatus', inputVars);
+}
+checkPaymentStatusRef.operationName = 'CheckPaymentStatus';
+exports.checkPaymentStatusRef = checkPaymentStatusRef;
+
+exports.checkPaymentStatus = function checkPaymentStatus(dcOrVars, vars) {
+  return executeQuery(checkPaymentStatusRef(dcOrVars, vars));
+};
+
+const getLatestCalculationRef = (dcOrVars, vars) => {
+  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
+  dcInstance._useGeneratedSdk();
+  return queryRef(dcInstance, 'GetLatestCalculation', inputVars);
+}
+getLatestCalculationRef.operationName = 'GetLatestCalculation';
+exports.getLatestCalculationRef = getLatestCalculationRef;
+
+exports.getLatestCalculation = function getLatestCalculation(dcOrVars, vars) {
+  return executeQuery(getLatestCalculationRef(dcOrVars, vars));
+};
+
+const getCalculationHistoryRef = (dcOrVars, vars) => {
+  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
+  dcInstance._useGeneratedSdk();
+  return queryRef(dcInstance, 'GetCalculationHistory', inputVars);
+}
+getCalculationHistoryRef.operationName = 'GetCalculationHistory';
+exports.getCalculationHistoryRef = getCalculationHistoryRef;
+
+exports.getCalculationHistory = function getCalculationHistory(dcOrVars, vars) {
+  return executeQuery(getCalculationHistoryRef(dcOrVars, vars));
+};
+
+const getUserPaymentsRef = (dcOrVars, vars) => {
+  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
+  dcInstance._useGeneratedSdk();
+  return queryRef(dcInstance, 'GetUserPayments', inputVars);
+}
+getUserPaymentsRef.operationName = 'GetUserPayments';
+exports.getUserPaymentsRef = getUserPaymentsRef;
+
+exports.getUserPayments = function getUserPayments(dcOrVars, vars) {
+  return executeQuery(getUserPaymentsRef(dcOrVars, vars));
+};
+
+const getLatestPaymentRef = (dcOrVars, vars) => {
+  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
+  dcInstance._useGeneratedSdk();
+  return queryRef(dcInstance, 'GetLatestPayment', inputVars);
+}
+getLatestPaymentRef.operationName = 'GetLatestPayment';
+exports.getLatestPaymentRef = getLatestPaymentRef;
+
+exports.getLatestPayment = function getLatestPayment(dcOrVars, vars) {
+  return executeQuery(getLatestPaymentRef(dcOrVars, vars));
+};
+
+const getUserAuditLogsRef = (dcOrVars, vars) => {
+  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
+  dcInstance._useGeneratedSdk();
+  return queryRef(dcInstance, 'GetUserAuditLogs', inputVars);
+}
+getUserAuditLogsRef.operationName = 'GetUserAuditLogs';
+exports.getUserAuditLogsRef = getUserAuditLogsRef;
+
+exports.getUserAuditLogs = function getUserAuditLogs(dcOrVars, vars) {
+  return executeQuery(getUserAuditLogsRef(dcOrVars, vars));
 };

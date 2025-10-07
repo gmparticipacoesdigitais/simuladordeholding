@@ -262,6 +262,7 @@ export interface UpsertUserData {
 }
 
 export interface UpsertUserVariables {
+  id: string;
   email: string;
   displayName?: string | null;
   provider?: string | null;
@@ -271,102 +272,6 @@ export interface User_Key {
   id: string;
   __typename?: 'User_Key';
 }
-
-interface GetUserRef {
-  /* Allow users to create refs without passing in DataConnect */
-  (vars: GetUserVariables): QueryRef<GetUserData, GetUserVariables>;
-  /* Allow users to pass in custom DataConnect instances */
-  (dc: DataConnect, vars: GetUserVariables): QueryRef<GetUserData, GetUserVariables>;
-  operationName: string;
-}
-export const getUserRef: GetUserRef;
-
-export function getUser(vars: GetUserVariables): QueryPromise<GetUserData, GetUserVariables>;
-export function getUser(dc: DataConnect, vars: GetUserVariables): QueryPromise<GetUserData, GetUserVariables>;
-
-interface GetUserByEmailRef {
-  /* Allow users to create refs without passing in DataConnect */
-  (vars: GetUserByEmailVariables): QueryRef<GetUserByEmailData, GetUserByEmailVariables>;
-  /* Allow users to pass in custom DataConnect instances */
-  (dc: DataConnect, vars: GetUserByEmailVariables): QueryRef<GetUserByEmailData, GetUserByEmailVariables>;
-  operationName: string;
-}
-export const getUserByEmailRef: GetUserByEmailRef;
-
-export function getUserByEmail(vars: GetUserByEmailVariables): QueryPromise<GetUserByEmailData, GetUserByEmailVariables>;
-export function getUserByEmail(dc: DataConnect, vars: GetUserByEmailVariables): QueryPromise<GetUserByEmailData, GetUserByEmailVariables>;
-
-interface CheckPaymentStatusRef {
-  /* Allow users to create refs without passing in DataConnect */
-  (vars: CheckPaymentStatusVariables): QueryRef<CheckPaymentStatusData, CheckPaymentStatusVariables>;
-  /* Allow users to pass in custom DataConnect instances */
-  (dc: DataConnect, vars: CheckPaymentStatusVariables): QueryRef<CheckPaymentStatusData, CheckPaymentStatusVariables>;
-  operationName: string;
-}
-export const checkPaymentStatusRef: CheckPaymentStatusRef;
-
-export function checkPaymentStatus(vars: CheckPaymentStatusVariables): QueryPromise<CheckPaymentStatusData, CheckPaymentStatusVariables>;
-export function checkPaymentStatus(dc: DataConnect, vars: CheckPaymentStatusVariables): QueryPromise<CheckPaymentStatusData, CheckPaymentStatusVariables>;
-
-interface GetLatestCalculationRef {
-  /* Allow users to create refs without passing in DataConnect */
-  (vars: GetLatestCalculationVariables): QueryRef<GetLatestCalculationData, GetLatestCalculationVariables>;
-  /* Allow users to pass in custom DataConnect instances */
-  (dc: DataConnect, vars: GetLatestCalculationVariables): QueryRef<GetLatestCalculationData, GetLatestCalculationVariables>;
-  operationName: string;
-}
-export const getLatestCalculationRef: GetLatestCalculationRef;
-
-export function getLatestCalculation(vars: GetLatestCalculationVariables): QueryPromise<GetLatestCalculationData, GetLatestCalculationVariables>;
-export function getLatestCalculation(dc: DataConnect, vars: GetLatestCalculationVariables): QueryPromise<GetLatestCalculationData, GetLatestCalculationVariables>;
-
-interface GetCalculationHistoryRef {
-  /* Allow users to create refs without passing in DataConnect */
-  (vars: GetCalculationHistoryVariables): QueryRef<GetCalculationHistoryData, GetCalculationHistoryVariables>;
-  /* Allow users to pass in custom DataConnect instances */
-  (dc: DataConnect, vars: GetCalculationHistoryVariables): QueryRef<GetCalculationHistoryData, GetCalculationHistoryVariables>;
-  operationName: string;
-}
-export const getCalculationHistoryRef: GetCalculationHistoryRef;
-
-export function getCalculationHistory(vars: GetCalculationHistoryVariables): QueryPromise<GetCalculationHistoryData, GetCalculationHistoryVariables>;
-export function getCalculationHistory(dc: DataConnect, vars: GetCalculationHistoryVariables): QueryPromise<GetCalculationHistoryData, GetCalculationHistoryVariables>;
-
-interface GetUserPaymentsRef {
-  /* Allow users to create refs without passing in DataConnect */
-  (vars: GetUserPaymentsVariables): QueryRef<GetUserPaymentsData, GetUserPaymentsVariables>;
-  /* Allow users to pass in custom DataConnect instances */
-  (dc: DataConnect, vars: GetUserPaymentsVariables): QueryRef<GetUserPaymentsData, GetUserPaymentsVariables>;
-  operationName: string;
-}
-export const getUserPaymentsRef: GetUserPaymentsRef;
-
-export function getUserPayments(vars: GetUserPaymentsVariables): QueryPromise<GetUserPaymentsData, GetUserPaymentsVariables>;
-export function getUserPayments(dc: DataConnect, vars: GetUserPaymentsVariables): QueryPromise<GetUserPaymentsData, GetUserPaymentsVariables>;
-
-interface GetLatestPaymentRef {
-  /* Allow users to create refs without passing in DataConnect */
-  (vars: GetLatestPaymentVariables): QueryRef<GetLatestPaymentData, GetLatestPaymentVariables>;
-  /* Allow users to pass in custom DataConnect instances */
-  (dc: DataConnect, vars: GetLatestPaymentVariables): QueryRef<GetLatestPaymentData, GetLatestPaymentVariables>;
-  operationName: string;
-}
-export const getLatestPaymentRef: GetLatestPaymentRef;
-
-export function getLatestPayment(vars: GetLatestPaymentVariables): QueryPromise<GetLatestPaymentData, GetLatestPaymentVariables>;
-export function getLatestPayment(dc: DataConnect, vars: GetLatestPaymentVariables): QueryPromise<GetLatestPaymentData, GetLatestPaymentVariables>;
-
-interface GetUserAuditLogsRef {
-  /* Allow users to create refs without passing in DataConnect */
-  (vars: GetUserAuditLogsVariables): QueryRef<GetUserAuditLogsData, GetUserAuditLogsVariables>;
-  /* Allow users to pass in custom DataConnect instances */
-  (dc: DataConnect, vars: GetUserAuditLogsVariables): QueryRef<GetUserAuditLogsData, GetUserAuditLogsVariables>;
-  operationName: string;
-}
-export const getUserAuditLogsRef: GetUserAuditLogsRef;
-
-export function getUserAuditLogs(vars: GetUserAuditLogsVariables): QueryPromise<GetUserAuditLogsData, GetUserAuditLogsVariables>;
-export function getUserAuditLogs(dc: DataConnect, vars: GetUserAuditLogsVariables): QueryPromise<GetUserAuditLogsData, GetUserAuditLogsVariables>;
 
 interface UpsertUserRef {
   /* Allow users to create refs without passing in DataConnect */
@@ -463,4 +368,100 @@ export const deleteUserRef: DeleteUserRef;
 
 export function deleteUser(vars: DeleteUserVariables): MutationPromise<DeleteUserData, DeleteUserVariables>;
 export function deleteUser(dc: DataConnect, vars: DeleteUserVariables): MutationPromise<DeleteUserData, DeleteUserVariables>;
+
+interface GetUserRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: GetUserVariables): QueryRef<GetUserData, GetUserVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars: GetUserVariables): QueryRef<GetUserData, GetUserVariables>;
+  operationName: string;
+}
+export const getUserRef: GetUserRef;
+
+export function getUser(vars: GetUserVariables): QueryPromise<GetUserData, GetUserVariables>;
+export function getUser(dc: DataConnect, vars: GetUserVariables): QueryPromise<GetUserData, GetUserVariables>;
+
+interface GetUserByEmailRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: GetUserByEmailVariables): QueryRef<GetUserByEmailData, GetUserByEmailVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars: GetUserByEmailVariables): QueryRef<GetUserByEmailData, GetUserByEmailVariables>;
+  operationName: string;
+}
+export const getUserByEmailRef: GetUserByEmailRef;
+
+export function getUserByEmail(vars: GetUserByEmailVariables): QueryPromise<GetUserByEmailData, GetUserByEmailVariables>;
+export function getUserByEmail(dc: DataConnect, vars: GetUserByEmailVariables): QueryPromise<GetUserByEmailData, GetUserByEmailVariables>;
+
+interface CheckPaymentStatusRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: CheckPaymentStatusVariables): QueryRef<CheckPaymentStatusData, CheckPaymentStatusVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars: CheckPaymentStatusVariables): QueryRef<CheckPaymentStatusData, CheckPaymentStatusVariables>;
+  operationName: string;
+}
+export const checkPaymentStatusRef: CheckPaymentStatusRef;
+
+export function checkPaymentStatus(vars: CheckPaymentStatusVariables): QueryPromise<CheckPaymentStatusData, CheckPaymentStatusVariables>;
+export function checkPaymentStatus(dc: DataConnect, vars: CheckPaymentStatusVariables): QueryPromise<CheckPaymentStatusData, CheckPaymentStatusVariables>;
+
+interface GetLatestCalculationRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: GetLatestCalculationVariables): QueryRef<GetLatestCalculationData, GetLatestCalculationVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars: GetLatestCalculationVariables): QueryRef<GetLatestCalculationData, GetLatestCalculationVariables>;
+  operationName: string;
+}
+export const getLatestCalculationRef: GetLatestCalculationRef;
+
+export function getLatestCalculation(vars: GetLatestCalculationVariables): QueryPromise<GetLatestCalculationData, GetLatestCalculationVariables>;
+export function getLatestCalculation(dc: DataConnect, vars: GetLatestCalculationVariables): QueryPromise<GetLatestCalculationData, GetLatestCalculationVariables>;
+
+interface GetCalculationHistoryRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: GetCalculationHistoryVariables): QueryRef<GetCalculationHistoryData, GetCalculationHistoryVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars: GetCalculationHistoryVariables): QueryRef<GetCalculationHistoryData, GetCalculationHistoryVariables>;
+  operationName: string;
+}
+export const getCalculationHistoryRef: GetCalculationHistoryRef;
+
+export function getCalculationHistory(vars: GetCalculationHistoryVariables): QueryPromise<GetCalculationHistoryData, GetCalculationHistoryVariables>;
+export function getCalculationHistory(dc: DataConnect, vars: GetCalculationHistoryVariables): QueryPromise<GetCalculationHistoryData, GetCalculationHistoryVariables>;
+
+interface GetUserPaymentsRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: GetUserPaymentsVariables): QueryRef<GetUserPaymentsData, GetUserPaymentsVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars: GetUserPaymentsVariables): QueryRef<GetUserPaymentsData, GetUserPaymentsVariables>;
+  operationName: string;
+}
+export const getUserPaymentsRef: GetUserPaymentsRef;
+
+export function getUserPayments(vars: GetUserPaymentsVariables): QueryPromise<GetUserPaymentsData, GetUserPaymentsVariables>;
+export function getUserPayments(dc: DataConnect, vars: GetUserPaymentsVariables): QueryPromise<GetUserPaymentsData, GetUserPaymentsVariables>;
+
+interface GetLatestPaymentRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: GetLatestPaymentVariables): QueryRef<GetLatestPaymentData, GetLatestPaymentVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars: GetLatestPaymentVariables): QueryRef<GetLatestPaymentData, GetLatestPaymentVariables>;
+  operationName: string;
+}
+export const getLatestPaymentRef: GetLatestPaymentRef;
+
+export function getLatestPayment(vars: GetLatestPaymentVariables): QueryPromise<GetLatestPaymentData, GetLatestPaymentVariables>;
+export function getLatestPayment(dc: DataConnect, vars: GetLatestPaymentVariables): QueryPromise<GetLatestPaymentData, GetLatestPaymentVariables>;
+
+interface GetUserAuditLogsRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: GetUserAuditLogsVariables): QueryRef<GetUserAuditLogsData, GetUserAuditLogsVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars: GetUserAuditLogsVariables): QueryRef<GetUserAuditLogsData, GetUserAuditLogsVariables>;
+  operationName: string;
+}
+export const getUserAuditLogsRef: GetUserAuditLogsRef;
+
+export function getUserAuditLogs(vars: GetUserAuditLogsVariables): QueryPromise<GetUserAuditLogsData, GetUserAuditLogsVariables>;
+export function getUserAuditLogs(dc: DataConnect, vars: GetUserAuditLogsVariables): QueryPromise<GetUserAuditLogsData, GetUserAuditLogsVariables>;
 

@@ -1,40 +1,9 @@
 // ============================================================================
-// AUTH.JS - Refatorado para usar Realtime Database
+// AUTH.JS - Refatorado para usar Realtime Database e firebase-config.js
 // Sistema completo de autenticação com verificação de pagamento
 // ============================================================================
 
-// Usar configuração centralizada do Firebase
-const firebaseConfig = window.FIREBASE_CONFIG;
-
-// Verificar se Firebase está configurado antes de inicializar
-if (!window.isFirebaseConfigured || !window.isFirebaseConfigured()) {
-    const setupFirebase = confirm(
-        '⚠️ Firebase não está configurado!\n\n' +
-        'Para usar esta aplicação, você precisa configurar o Firebase.\n\n' +
-        'Deseja configurar agora?'
-    );
-
-    if (setupFirebase) {
-        const apiKey = prompt('Digite sua Firebase API Key:');
-        const authDomain = prompt('Digite seu Firebase Auth Domain (ex: projeto.firebaseapp.com):');
-        const projectId = prompt('Digite seu Firebase Project ID:');
-        const storageBucket = prompt('Digite seu Firebase Storage Bucket (ex: projeto.appspot.com):');
-        const messagingSenderId = prompt('Digite seu Firebase Messaging Sender ID:');
-        const appId = prompt('Digite seu Firebase App ID:');
-
-        if (apiKey && authDomain && projectId && storageBucket && messagingSenderId && appId) {
-            localStorage.setItem('FIREBASE_API_KEY', apiKey);
-            localStorage.setItem('FIREBASE_AUTH_DOMAIN', authDomain);
-            localStorage.setItem('FIREBASE_PROJECT_ID', projectId);
-            localStorage.setItem('FIREBASE_STORAGE_BUCKET', storageBucket);
-            localStorage.setItem('FIREBASE_MESSAGING_SENDER_ID', messagingSenderId);
-            localStorage.setItem('FIREBASE_APP_ID', appId);
-
-            alert('✅ Configuração salva! Recarregando a página...');
-            window.location.reload();
-        }
-    }
-}
+import { firebaseConfig, stripeConfig } from './firebase-config.js';
 
 // Inicializar Firebase
 let auth, database;
@@ -51,8 +20,8 @@ try {
 }
 
 // Produtos Stripe
-const STRIPE_PRODUCT_ID = window.STRIPE_PRODUCT_ID;
-const STRIPE_PRICE_ID = window.STRIPE_PRICE_ID;
+const STRIPE_PRODUCT_ID = stripeConfig.productId;
+const STRIPE_PRICE_ID = stripeConfig.priceId;
 
 // ============================================================================
 // FUNÇÕES AUXILIARES
@@ -108,6 +77,21 @@ async function checkPaymentAndRedirect(user) {
     }
 }
 
+/**
+ * Atualiza o lastLogin do usuário no Realtime Database
+ * @param {string} uid - ID do usuário
+ */
+async function updateLastLogin(uid) {
+    try {
+        await database.ref(`users/${uid}`).update({
+            lastLogin: firebase.database.ServerValue.TIMESTAMP
+        });
+        console.log('✅ lastLogin atualizado para o usuário:', uid);
+    } catch (error) {
+        console.error('❌ Erro ao atualizar lastLogin:', error);
+    }
+}
+
 // ============================================================================
 // VERIFICAR AUTENTICAÇÃO
 // ============================================================================
@@ -117,6 +101,8 @@ auth.onAuthStateChanged(async (user) => {
     const currentPage = window.location.pathname.split('/').pop() || 'index.html';
 
     if (user && (currentPage === 'index.html' || currentPage === '')) {
+        // Se o usuário está logado e na página inicial/login, atualiza o lastLogin
+        await updateLastLogin(user.uid);
         await checkPaymentAndRedirect(user);
     }
 });
@@ -142,6 +128,7 @@ if (loginForm) {
             const userCredential = await auth.signInWithEmailAndPassword(email, senha);
             console.log('✅ Login bem-sucedido!');
 
+            await updateLastLogin(userCredential.user.uid);
             await checkPaymentAndRedirect(userCredential.user);
         } catch (error) {
             console.error('❌ Erro no login:', error);
@@ -192,13 +179,12 @@ if (googleLoginBtn) {
                     displayName: result.user.displayName,
                     createdAt: firebase.database.ServerValue.TIMESTAMP,
                     hasPaid: false,
-                    provider: 'google'
+                    provider: 'google',
+                    lastLogin: firebase.database.ServerValue.TIMESTAMP
                 });
             } else {
                 console.log('✅ Usuário já existe no database');
-                await userRef.update({
-                    lastLogin: firebase.database.ServerValue.TIMESTAMP
-                });
+                await updateLastLogin(result.user.uid);
             }
 
             await checkPaymentAndRedirect(result.user);
@@ -252,7 +238,8 @@ if (registerForm) {
                 email: email,
                 createdAt: firebase.database.ServerValue.TIMESTAMP,
                 hasPaid: false,
-                provider: 'email'
+                provider: 'email',
+                lastLogin: firebase.database.ServerValue.TIMESTAMP // Adicionar lastLogin no cadastro inicial
             });
 
             console.log('✅ Dados salvos com sucesso!');
@@ -307,7 +294,8 @@ if (googleRegisterBtn) {
                     displayName: result.user.displayName,
                     createdAt: firebase.database.ServerValue.TIMESTAMP,
                     hasPaid: false,
-                    provider: 'google'
+                    provider: 'google',
+                    lastLogin: firebase.database.ServerValue.TIMESTAMP
                 });
             }
 
