@@ -24,6 +24,7 @@
   },
   "homepage": "https://github.com/seu-usuario/gemini-demo#readme",
   "dependencies": {
+    "@dataconnect/generated": "file:src/dataconnect-generated",
     "@google/genai": "^1.0.1",
     "base64-js": "^1.5.1",
     "markdown-it": "^13.0.2"

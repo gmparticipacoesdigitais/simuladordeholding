@@ -9,4 +9,4 @@ RUN npm install
 # [Linha 5]
 COPY . .
 # [Linha 6]
-CMD [ "node", "main.js" ]
+CMD [.js" ]
