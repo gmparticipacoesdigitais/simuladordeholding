@@ -1,0 +1,156 @@
+# ============================================================================
+# MUTATIONS - Operações de escrita do Sistema IRPF
+# ============================================================================
+
+# Criar ou atualizar usuário
+mutation UpsertUser(
+  $email: String!
+  $displayName: String
+  $provider: String
+) @auth(level: USER) {
+  user_upsert(
+    data: {
+      email: $email
+      displayName: $displayName
+      provider: $provider
+      updatedAt: { expr: "request.time" }
+    }
+  )
+}
+
+# Atualizar último login do usuário
+mutation UpdateUserLogin($userId: String!) @auth(level: USER) {
+  user_update(id: $userId, data: {
+    lastLogin: { expr: "request.time" }
+    updatedAt: { expr: "request.time" }
+  })
+}
+
+# Atualizar status de pagamento do usuário
+mutation UpdatePaymentStatus(
+  $userId: String!
+  $hasPaid: Boolean!
+  $stripeCustomerId: String
+) @auth(level: USER) {
+  user_update(
+    id: $userId
+    data: {
+      hasPaid: $hasPaid
+      stripeCustomerId: $stripeCustomerId
+      updatedAt: { expr: "request.time" }
+    }
+  )
+}
+
+# Criar novo pagamento
+mutation CreatePayment(
+  $userId: String!
+  $amount: Int!
+  $currency: String!
+  $status: String!
+  $stripeSessionId: String
+  $stripePaymentIntentId: String
+  $paymentMethod: String
+) @auth(level: USER) {
+  payment_insert(data: {
+    user: { id: $userId }
+    amount: $amount
+    currency: $currency
+    status: $status
+    stripeSessionId: $stripeSessionId
+    stripePaymentIntentId: $stripePaymentIntentId
+    paymentMethod: $paymentMethod
+  })
+}
+
+# Atualizar status de pagamento
+mutation UpdatePaymentStatus2(
+  $paymentId: UUID!
+  $status: String!
+  $stripePaymentIntentId: String
+  $paymentMethod: String
+) @auth(level: USER) {
+  payment_update(
+    id: $paymentId
+    data: {
+      status: $status
+      stripePaymentIntentId: $stripePaymentIntentId
+      paymentMethod: $paymentMethod
+      completedAt: { expr: "request.time" }
+    }
+  )
+}
+
+# Salvar novo cálculo IRPF
+mutation SaveCalculation(
+  $userId: String!
+  $rendaBruta: Float!
+  $dependentes: Int!
+  $pensaoAlimenticia: Float!
+  $despesasMedicas: Float!
+  $despesasEducacao: Float!
+  $previdenciaPrivada: Float!
+  $inss: Float!
+  $baseCalculo: Float!
+  $impostoDevido: Float!
+  $metodo: String!
+  $totalDeducoes: Float!
+) @auth(level: USER) {
+  # Primeiro, desmarcar todos os cálculos anteriores como não sendo o último
+  calculation_updateMany(
+    where: {
+      user: { id: { eq: $userId } }
+      isLatest: { eq: true }
+    }
+    data: { isLatest: false }
+  )
+
+  # Depois, inserir o novo cálculo como o último
+  calculation_insert(data: {
+    user: { id: $userId }
+    rendaBruta: $rendaBruta
+    dependentes: $dependentes
+    pensaoAlimenticia: $pensaoAlimenticia
+    despesasMedicas: $despesasMedicas
+    despesasEducacao: $despesasEducacao
+    previdenciaPrivada: $previdenciaPrivada
+    inss: $inss
+    baseCalculo: $baseCalculo
+    impostoDevido: $impostoDevido
+    metodo: $metodo
+    totalDeducoes: $totalDeducoes
+    isLatest: true
+  })
+}
+
+# Criar log de auditoria
+mutation CreateAuditLog(
+  $userId: String!
+  $action: String!
+  $details: String
+  $ipAddress: String
+  $userAgent: String
+) @auth(level: USER) {
+  auditLog_insert(data: {
+    user: { id: $userId }
+    action: $action
+    details: $details
+    ipAddress: $ipAddress
+    userAgent: $userAgent
+  })
+}
+
+# Deletar usuário (GDPR compliance)
+mutation DeleteUser($userId: String!) @auth(level: USER) {
+  # Deletar cálculos
+  calculation_deleteMany(where: { user: { id: { eq: $userId } } })
+
+  # Deletar pagamentos
+  payment_deleteMany(where: { user: { id: { eq: $userId } } })
+
+  # Deletar logs
+  auditLog_deleteMany(where: { user: { id: { eq: $userId } } })
+
+  # Deletar usuário
+  user_delete(id: $userId)
+}

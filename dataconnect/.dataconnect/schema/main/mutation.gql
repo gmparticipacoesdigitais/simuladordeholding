@@ -1,31 +1,31 @@
 extend type Mutation {
   """
-  ✨ Insert a single `Movie` into the table and return its key. Columns not specified in `data` will receive defaults (e.g. `null`).
+  ✨ Insert a single `AuditLog` into the table and return its key. Columns not specified in `data` will receive defaults (e.g. `null`).
   """
-  movie_insert(
+  auditLog_insert(
     """
     Data object to insert into the table.
     """
-    data: Movie_Data!
-  ): Movie_KeyOutput! @fdc_generated(from: "Movie", purpose: INSERT_SINGLE)
+    data: AuditLog_Data!
+  ): AuditLog_KeyOutput! @fdc_generated(from: "AuditLog", purpose: INSERT_SINGLE)
   """
-  ✨ Insert a single `MovieMetadata` into the table and return its key. Columns not specified in `data` will receive defaults (e.g. `null`).
+  ✨ Insert a single `Calculation` into the table and return its key. Columns not specified in `data` will receive defaults (e.g. `null`).
   """
-  movieMetadata_insert(
+  calculation_insert(
     """
     Data object to insert into the table.
     """
-    data: MovieMetadata_Data!
-  ): MovieMetadata_KeyOutput! @fdc_generated(from: "MovieMetadata", purpose: INSERT_SINGLE)
+    data: Calculation_Data!
+  ): Calculation_KeyOutput! @fdc_generated(from: "Calculation", purpose: INSERT_SINGLE)
   """
-  ✨ Insert a single `Review` into the table and return its key. Columns not specified in `data` will receive defaults (e.g. `null`).
+  ✨ Insert a single `Payment` into the table and return its key. Columns not specified in `data` will receive defaults (e.g. `null`).
   """
-  review_insert(
+  payment_insert(
     """
     Data object to insert into the table.
     """
-    data: Review_Data!
-  ): Review_KeyOutput! @fdc_generated(from: "Review", purpose: INSERT_SINGLE)
+    data: Payment_Data!
+  ): Payment_KeyOutput! @fdc_generated(from: "Payment", purpose: INSERT_SINGLE)
   """
   ✨ Insert a single `User` into the table and return its key. Columns not specified in `data` will receive defaults (e.g. `null`).
   """
@@ -36,32 +36,32 @@ extend type Mutation {
     data: User_Data!
   ): User_KeyOutput! @fdc_generated(from: "User", purpose: INSERT_SINGLE)
   """
-  ✨ Insert `Movie` objects into the table and return their keys. Columns not specified in `data` will receive defaults (e.g. `null`).
+  ✨ Insert `AuditLog` objects into the table and return their keys. Columns not specified in `data` will receive defaults (e.g. `null`).
   """
-  movie_insertMany(
+  auditLog_insertMany(
     """
     List of data objects to insert into the table.
     """
-    data: [Movie_Data!]!
-  ): [Movie_KeyOutput!]! @fdc_generated(from: "Movie", purpose: INSERT_MULTIPLE)
+    data: [AuditLog_Data!]!
+  ): [AuditLog_KeyOutput!]! @fdc_generated(from: "AuditLog", purpose: INSERT_MULTIPLE)
   """
-  ✨ Insert `MovieMetadata` objects into the table and return their keys. Columns not specified in `data` will receive defaults (e.g. `null`).
+  ✨ Insert `Calculation` objects into the table and return their keys. Columns not specified in `data` will receive defaults (e.g. `null`).
   """
-  movieMetadata_insertMany(
+  calculation_insertMany(
     """
     List of data objects to insert into the table.
     """
-    data: [MovieMetadata_Data!]!
-  ): [MovieMetadata_KeyOutput!]! @fdc_generated(from: "MovieMetadata", purpose: INSERT_MULTIPLE)
+    data: [Calculation_Data!]!
+  ): [Calculation_KeyOutput!]! @fdc_generated(from: "Calculation", purpose: INSERT_MULTIPLE)
   """
-  ✨ Insert `Review` objects into the table and return their keys. Columns not specified in `data` will receive defaults (e.g. `null`).
+  ✨ Insert `Payment` objects into the table and return their keys. Columns not specified in `data` will receive defaults (e.g. `null`).
   """
-  review_insertMany(
+  payment_insertMany(
     """
     List of data objects to insert into the table.
     """
-    data: [Review_Data!]!
-  ): [Review_KeyOutput!]! @fdc_generated(from: "Review", purpose: INSERT_MULTIPLE)
+    data: [Payment_Data!]!
+  ): [Payment_KeyOutput!]! @fdc_generated(from: "Payment", purpose: INSERT_MULTIPLE)
   """
   ✨ Insert `User` objects into the table and return their keys. Columns not specified in `data` will receive defaults (e.g. `null`).
   """
@@ -72,32 +72,32 @@ extend type Mutation {
     data: [User_Data!]!
   ): [User_KeyOutput!]! @fdc_generated(from: "User", purpose: INSERT_MULTIPLE)
   """
-  ✨ Insert or update a single `Movie` into the table, based on the primary key. Returns the key of the newly inserted or existing updated `Movie`.
+  ✨ Insert or update a single `AuditLog` into the table, based on the primary key. Returns the key of the newly inserted or existing updated `AuditLog`.
   """
-  movie_upsert(
+  auditLog_upsert(
     """
     Data object to insert or update if it already exists.
     """
-    data: Movie_Data!
-  ): Movie_KeyOutput! @fdc_generated(from: "Movie", purpose: UPSERT_SINGLE)
+    data: AuditLog_Data!
+  ): AuditLog_KeyOutput! @fdc_generated(from: "AuditLog", purpose: UPSERT_SINGLE)
   """
-  ✨ Insert or update a single `MovieMetadata` into the table, based on the primary key. Returns the key of the newly inserted or existing updated `MovieMetadata`.
+  ✨ Insert or update a single `Calculation` into the table, based on the primary key. Returns the key of the newly inserted or existing updated `Calculation`.
   """
-  movieMetadata_upsert(
+  calculation_upsert(
     """
     Data object to insert or update if it already exists.
     """
-    data: MovieMetadata_Data!
-  ): MovieMetadata_KeyOutput! @fdc_generated(from: "MovieMetadata", purpose: UPSERT_SINGLE)
+    data: Calculation_Data!
+  ): Calculation_KeyOutput! @fdc_generated(from: "Calculation", purpose: UPSERT_SINGLE)
   """
-  ✨ Insert or update a single `Review` into the table, based on the primary key. Returns the key of the newly inserted or existing updated `Review`.
+  ✨ Insert or update a single `Payment` into the table, based on the primary key. Returns the key of the newly inserted or existing updated `Payment`.
   """
-  review_upsert(
+  payment_upsert(
     """
     Data object to insert or update if it already exists.
     """
-    data: Review_Data!
-  ): Review_KeyOutput! @fdc_generated(from: "Review", purpose: UPSERT_SINGLE)
+    data: Payment_Data!
+  ): Payment_KeyOutput! @fdc_generated(from: "Payment", purpose: UPSERT_SINGLE)
   """
   ✨ Insert or update a single `User` into the table, based on the primary key. Returns the key of the newly inserted or existing updated `User`.
   """
@@ -108,32 +108,32 @@ extend type Mutation {
     data: User_Data!
   ): User_KeyOutput! @fdc_generated(from: "User", purpose: UPSERT_SINGLE)
   """
-  ✨ Insert or update `Movie` objects into the table, based on the primary key. Returns the key of the newly inserted or existing updated `Movie`.
+  ✨ Insert or update `AuditLog` objects into the table, based on the primary key. Returns the key of the newly inserted or existing updated `AuditLog`.
   """
-  movie_upsertMany(
+  auditLog_upsertMany(
     """
     List of data objects to insert or update if it already exists.
     """
-    data: [Movie_Data!]!
-  ): [Movie_KeyOutput!]! @fdc_generated(from: "Movie", purpose: UPSERT_MULTIPLE)
+    data: [AuditLog_Data!]!
+  ): [AuditLog_KeyOutput!]! @fdc_generated(from: "AuditLog", purpose: UPSERT_MULTIPLE)
   """
-  ✨ Insert or update `MovieMetadata` objects into the table, based on the primary key. Returns the key of the newly inserted or existing updated `MovieMetadata`.
+  ✨ Insert or update `Calculation` objects into the table, based on the primary key. Returns the key of the newly inserted or existing updated `Calculation`.
   """
-  movieMetadata_upsertMany(
+  calculation_upsertMany(
     """
     List of data objects to insert or update if it already exists.
     """
-    data: [MovieMetadata_Data!]!
-  ): [MovieMetadata_KeyOutput!]! @fdc_generated(from: "MovieMetadata", purpose: UPSERT_MULTIPLE)
+    data: [Calculation_Data!]!
+  ): [Calculation_KeyOutput!]! @fdc_generated(from: "Calculation", purpose: UPSERT_MULTIPLE)
   """
-  ✨ Insert or update `Review` objects into the table, based on the primary key. Returns the key of the newly inserted or existing updated `Review`.
+  ✨ Insert or update `Payment` objects into the table, based on the primary key. Returns the key of the newly inserted or existing updated `Payment`.
   """
-  review_upsertMany(
+  payment_upsertMany(
     """
     List of data objects to insert or update if it already exists.
     """
-    data: [Review_Data!]!
-  ): [Review_KeyOutput!]! @fdc_generated(from: "Review", purpose: UPSERT_MULTIPLE)
+    data: [Payment_Data!]!
+  ): [Payment_KeyOutput!]! @fdc_generated(from: "Payment", purpose: UPSERT_MULTIPLE)
   """
   ✨ Insert or update `User` objects into the table, based on the primary key. Returns the key of the newly inserted or existing updated `User`.
   """
@@ -144,9 +144,9 @@ extend type Mutation {
     data: [User_Data!]!
   ): [User_KeyOutput!]! @fdc_generated(from: "User", purpose: UPSERT_MULTIPLE)
   """
-  ✨ Update a single `Movie` based on `id`, `key` or `first`, setting columns specified in `data`. Returns the key of the updated `Movie` or `null` if not found.
+  ✨ Update a single `AuditLog` based on `id`, `key` or `first`, setting columns specified in `data`. Returns the key of the updated `AuditLog` or `null` if not found.
   """
-  movie_update(
+  auditLog_update(
     """
     The unique ID of the object.
     """
@@ -155,22 +155,22 @@ extend type Mutation {
     """
     The key used to identify the object.
     """
-    key: Movie_Key
+    key: AuditLog_Key
 
     """
     Fetch the first row based on the filters and ordering.
     """
-    first: Movie_FirstRow
+    first: AuditLog_FirstRow
 
     """
     Data object containing fields to be updated.
     """
-    data: Movie_Data!
-  ): Movie_KeyOutput @fdc_generated(from: "Movie", purpose: UPDATE_SINGLE)
+    data: AuditLog_Data!
+  ): AuditLog_KeyOutput @fdc_generated(from: "AuditLog", purpose: UPDATE_SINGLE)
   """
-  ✨ Update a single `MovieMetadata` based on `id`, `key` or `first`, setting columns specified in `data`. Returns the key of the updated `MovieMetadata` or `null` if not found.
+  ✨ Update a single `Calculation` based on `id`, `key` or `first`, setting columns specified in `data`. Returns the key of the updated `Calculation` or `null` if not found.
   """
-  movieMetadata_update(
+  calculation_update(
     """
     The unique ID of the object.
     """
@@ -179,37 +179,42 @@ extend type Mutation {
     """
     The key used to identify the object.
     """
-    key: MovieMetadata_Key
+    key: Calculation_Key
 
     """
     Fetch the first row based on the filters and ordering.
     """
-    first: MovieMetadata_FirstRow
+    first: Calculation_FirstRow
 
     """
     Data object containing fields to be updated.
     """
-    data: MovieMetadata_Data!
-  ): MovieMetadata_KeyOutput @fdc_generated(from: "MovieMetadata", purpose: UPDATE_SINGLE)
+    data: Calculation_Data!
+  ): Calculation_KeyOutput @fdc_generated(from: "Calculation", purpose: UPDATE_SINGLE)
   """
-  ✨ Update a single `Review` based on `id`, `key` or `first`, setting columns specified in `data`. Returns the key of the updated `Review` or `null` if not found.
+  ✨ Update a single `Payment` based on `id`, `key` or `first`, setting columns specified in `data`. Returns the key of the updated `Payment` or `null` if not found.
   """
-  review_update(
+  payment_update(
+    """
+    The unique ID of the object.
+    """
+    id: UUID
+
     """
     The key used to identify the object.
     """
-    key: Review_Key
+    key: Payment_Key
 
     """
     Fetch the first row based on the filters and ordering.
     """
-    first: Review_FirstRow
+    first: Payment_FirstRow
 
     """
     Data object containing fields to be updated.
     """
-    data: Review_Data!
-  ): Review_KeyOutput @fdc_generated(from: "Review", purpose: UPDATE_SINGLE)
+    data: Payment_Data!
+  ): Payment_KeyOutput @fdc_generated(from: "Payment", purpose: UPDATE_SINGLE)
   """
   ✨ Update a single `User` based on `id`, `key` or `first`, setting columns specified in `data`. Returns the key of the updated `User` or `null` if not found.
   """
@@ -240,13 +245,13 @@ extend type Mutation {
     data: User_Data!
   ): User_KeyOutput @fdc_generated(from: "User", purpose: UPDATE_SINGLE)
   """
-  ✨ Update `Movie` objects matching `where` conditions (or `all`, if true) according to `data`. Returns the number of rows updated.
+  ✨ Update `AuditLog` objects matching `where` conditions (or `all`, if true) according to `data`. Returns the number of rows updated.
   """
-  movie_updateMany(
+  auditLog_updateMany(
     """
     Filter condition to specify which rows to update.
     """
-    where: Movie_Filter
+    where: AuditLog_Filter
 
     """
     Set to true to update all rows.
@@ -256,16 +261,16 @@ extend type Mutation {
     """
     Data object containing fields to update.
     """
-    data: Movie_Data!
-  ): Int! @fdc_generated(from: "Movie", purpose: UPDATE_MULTIPLE)
+    data: AuditLog_Data!
+  ): Int! @fdc_generated(from: "AuditLog", purpose: UPDATE_MULTIPLE)
   """
-  ✨ Update `MovieMetadata` objects matching `where` conditions (or `all`, if true) according to `data`. Returns the number of rows updated.
+  ✨ Update `Calculation` objects matching `where` conditions (or `all`, if true) according to `data`. Returns the number of rows updated.
   """
-  movieMetadata_updateMany(
+  calculation_updateMany(
     """
     Filter condition to specify which rows to update.
     """
-    where: MovieMetadata_Filter
+    where: Calculation_Filter
 
     """
     Set to true to update all rows.
@@ -275,16 +280,16 @@ extend type Mutation {
     """
     Data object containing fields to update.
     """
-    data: MovieMetadata_Data!
-  ): Int! @fdc_generated(from: "MovieMetadata", purpose: UPDATE_MULTIPLE)
+    data: Calculation_Data!
+  ): Int! @fdc_generated(from: "Calculation", purpose: UPDATE_MULTIPLE)
   """
-  ✨ Update `Review` objects matching `where` conditions (or `all`, if true) according to `data`. Returns the number of rows updated.
+  ✨ Update `Payment` objects matching `where` conditions (or `all`, if true) according to `data`. Returns the number of rows updated.
   """
-  review_updateMany(
+  payment_updateMany(
     """
     Filter condition to specify which rows to update.
     """
-    where: Review_Filter
+    where: Payment_Filter
 
     """
     Set to true to update all rows.
@@ -294,8 +299,8 @@ extend type Mutation {
     """
     Data object containing fields to update.
     """
-    data: Review_Data!
-  ): Int! @fdc_generated(from: "Review", purpose: UPDATE_MULTIPLE)
+    data: Payment_Data!
+  ): Int! @fdc_generated(from: "Payment", purpose: UPDATE_MULTIPLE)
   """
   ✨ Update `User` objects matching `where` conditions (or `all`, if true) according to `data`. Returns the number of rows updated.
   """
@@ -316,9 +321,9 @@ extend type Mutation {
     data: User_Data!
   ): Int! @fdc_generated(from: "User", purpose: UPDATE_MULTIPLE)
   """
-  ✨ Delete a single `Movie` based on `id`, `key` or `first` and return its key (or `null` if not found).
+  ✨ Delete a single `AuditLog` based on `id`, `key` or `first` and return its key (or `null` if not found).
   """
-  movie_delete(
+  auditLog_delete(
     """
     The unique ID of the object.
     """
@@ -327,17 +332,17 @@ extend type Mutation {
     """
     The key used to identify the object.
     """
-    key: Movie_Key
+    key: AuditLog_Key
 
     """
     Fetch the first row based on the filters and ordering.
     """
-    first: Movie_FirstRow
-  ): Movie_KeyOutput @fdc_generated(from: "Movie", purpose: DELETE_SINGLE)
+    first: AuditLog_FirstRow
+  ): AuditLog_KeyOutput @fdc_generated(from: "AuditLog", purpose: DELETE_SINGLE)
   """
-  ✨ Delete a single `MovieMetadata` based on `id`, `key` or `first` and return its key (or `null` if not found).
+  ✨ Delete a single `Calculation` based on `id`, `key` or `first` and return its key (or `null` if not found).
   """
-  movieMetadata_delete(
+  calculation_delete(
     """
     The unique ID of the object.
     """
@@ -346,27 +351,32 @@ extend type Mutation {
     """
     The key used to identify the object.
     """
-    key: MovieMetadata_Key
+    key: Calculation_Key
 
     """
     Fetch the first row based on the filters and ordering.
     """
-    first: MovieMetadata_FirstRow
-  ): MovieMetadata_KeyOutput @fdc_generated(from: "MovieMetadata", purpose: DELETE_SINGLE)
+    first: Calculation_FirstRow
+  ): Calculation_KeyOutput @fdc_generated(from: "Calculation", purpose: DELETE_SINGLE)
   """
-  ✨ Delete a single `Review` based on `id`, `key` or `first` and return its key (or `null` if not found).
+  ✨ Delete a single `Payment` based on `id`, `key` or `first` and return its key (or `null` if not found).
   """
-  review_delete(
+  payment_delete(
+    """
+    The unique ID of the object.
+    """
+    id: UUID
+
     """
     The key used to identify the object.
     """
-    key: Review_Key
+    key: Payment_Key
 
     """
     Fetch the first row based on the filters and ordering.
     """
-    first: Review_FirstRow
-  ): Review_KeyOutput @fdc_generated(from: "Review", purpose: DELETE_SINGLE)
+    first: Payment_FirstRow
+  ): Payment_KeyOutput @fdc_generated(from: "Payment", purpose: DELETE_SINGLE)
   """
   ✨ Delete a single `User` based on `id`, `key` or `first` and return its key (or `null` if not found).
   """
@@ -392,47 +402,47 @@ extend type Mutation {
     first: User_FirstRow
   ): User_KeyOutput @fdc_generated(from: "User", purpose: DELETE_SINGLE)
   """
-  ✨ Delete `Movie` objects matching `where` conditions (or `all`, if true). Returns the number of rows deleted.
+  ✨ Delete `AuditLog` objects matching `where` conditions (or `all`, if true). Returns the number of rows deleted.
   """
-  movie_deleteMany(
+  auditLog_deleteMany(
     """
     Filter condition to specify which rows to delete.
     """
-    where: Movie_Filter
+    where: AuditLog_Filter
 
     """
     Set to true to delete all rows.
     """
     all: Boolean = false
-  ): Int! @fdc_generated(from: "Movie", purpose: DELETE_MULTIPLE)
+  ): Int! @fdc_generated(from: "AuditLog", purpose: DELETE_MULTIPLE)
   """
-  ✨ Delete `MovieMetadata` objects matching `where` conditions (or `all`, if true). Returns the number of rows deleted.
+  ✨ Delete `Calculation` objects matching `where` conditions (or `all`, if true). Returns the number of rows deleted.
   """
-  movieMetadata_deleteMany(
+  calculation_deleteMany(
     """
     Filter condition to specify which rows to delete.
     """
-    where: MovieMetadata_Filter
+    where: Calculation_Filter
 
     """
     Set to true to delete all rows.
     """
     all: Boolean = false
-  ): Int! @fdc_generated(from: "MovieMetadata", purpose: DELETE_MULTIPLE)
+  ): Int! @fdc_generated(from: "Calculation", purpose: DELETE_MULTIPLE)
   """
-  ✨ Delete `Review` objects matching `where` conditions (or `all`, if true). Returns the number of rows deleted.
+  ✨ Delete `Payment` objects matching `where` conditions (or `all`, if true). Returns the number of rows deleted.
   """
-  review_deleteMany(
+  payment_deleteMany(
     """
     Filter condition to specify which rows to delete.
     """
-    where: Review_Filter
+    where: Payment_Filter
 
     """
     Set to true to delete all rows.
     """
     all: Boolean = false
-  ): Int! @fdc_generated(from: "Review", purpose: DELETE_MULTIPLE)
+  ): Int! @fdc_generated(from: "Payment", purpose: DELETE_MULTIPLE)
   """
   ✨ Delete `User` objects matching `where` conditions (or `all`, if true). Returns the number of rows deleted.
   """

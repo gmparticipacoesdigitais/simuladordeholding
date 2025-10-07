@@ -15,3 +15,185 @@ I1007 01:25:39.542683   41606 installsdk.go:55] Package @dataconnect/generated i
 I1007 01:25:39.542759   41606 load.go:109] Finished reloading
 I1007 01:25:39.560897   41606 dev.go:102] Listening on address (HTTP + gRPC): 127.0.0.1:50001
 I1007 01:25:39.663186   41606 engine.go:169] [/emulator/irpf-login b7d5] ExecuteGraphqlRead IntrospectionQuery: succeeded. 
+I1007 01:33:39.546523   41606 load.go:31] Reloading schema and connectors...
+W1007 01:33:39.651930   41606 control.go:68] [/emulator/irpf-login b7d5] connector "example" has errors: example/mutations.gql:6:3: Cannot query field "movie_insert" on type "Mutation". Did you mean "user_insert"?
+example/mutations.gql:12:44: Field "username" is not defined by type "User_Data".
+example/mutations.gql:18:3: Cannot query field "review_upsert" on type "Mutation". Did you mean "user_upsert" or "payment_upsert"?
+example/mutations.gql:32:3: Cannot query field "review_delete" on type "Mutation". Did you mean "user_delete" or "payment_delete"?
+example/queries.gql:6:3: Cannot query field "movies" on type "Query".
+example/queries.gql:18:5: Cannot query field "username" on type "User".
+example/queries.gql:27:5: Cannot query field "username" on type "User".
+example/queries.gql:30:5: Cannot query field "reviews_on_user" on type "User". Did you mean "payments_on_user" or "auditLogs_on_user"?
+example/queries.gql:44:3: Cannot query field "movie" on type "Query".
+example/queries.gql:68:3: Cannot query field "movies" on type "Query".
+
+sources: example/mutations.gql [1243B] example/queries.gql [1801B] 
+I1007 01:33:39.652012   41606 control.go:94] [/emulator/irpf-login b7d5] UpdateResources(): done
+Schema: sources: schema/schema.gql [2228B] 
+Connector "example": sources: example/mutations.gql [1243B] example/queries.gql [1801B] 
+E1007 01:33:39.660220   41606 load.go:73] Could not load sources: 
+Errors: example/mutations.gql:6:3: Cannot query field "movie_insert" on type "Mutation". Did you mean "user_insert"?
+example/mutations.gql:12:44: Field "username" is not defined by type "User_Data".
+example/mutations.gql:18:3: Cannot query field "review_upsert" on type "Mutation". Did you mean "user_upsert" or "payment_upsert"?
+example/mutations.gql:32:3: Cannot query field "review_delete" on type "Mutation". Did you mean "user_delete" or "payment_delete"?
+example/queries.gql:6:3: Cannot query field "movies" on type "Query".
+example/queries.gql:18:5: Cannot query field "username" on type "User".
+example/queries.gql:27:5: Cannot query field "username" on type "User".
+example/queries.gql:30:5: Cannot query field "reviews_on_user" on type "User". Did you mean "payments_on_user" or "auditLogs_on_user"?
+example/queries.gql:44:3: Cannot query field "movie" on type "Query".
+example/queries.gql:68:3: Cannot query field "movies" on type "Query".
+I1007 01:33:39.663206   41606 collector.go:107] schema extensions wrote into "/home/user/irpf-login/dataconnect/.dataconnect/schema"
+Generated sources: prelude.gql [73251B] main/mutation.gql [13895B] main/implicit.gql [782B] main/input.gql [60530B] main/relation.gql [31642B] main/query.gql [5188B] 
+I1007 01:33:39.667412   41606 load.go:74] Finished reloading
+I1007 01:35:09.546321   41606 load.go:31] Reloading schema and connectors...
+W1007 01:35:09.602028   41606 control.go:68] [/emulator/irpf-login b7d5] connector "irpf" has errors: irpf/mutations.gql:172:19: Expected Name, found <Invalid>
+
+sources: irpf/mutations.gql [4212B] irpf/queries.gql [2835B] 
+I1007 01:35:09.602103   41606 control.go:94] [/emulator/irpf-login b7d5] UpdateResources(): done
+Connector "irpf": sources: irpf/queries.gql [2835B] irpf/mutations.gql [4212B] 
+E1007 01:35:09.613819   41606 load.go:73] Could not load sources: 
+Errors: irpf/mutations.gql:172:19: Expected Name, found <Invalid>
+I1007 01:35:09.617453   41606 collector.go:107] schema extensions wrote into "/home/user/irpf-login/dataconnect/.dataconnect/schema"
+Generated sources: main/relation.gql [31642B] main/query.gql [5188B] main/mutation.gql [13895B] prelude.gql [73251B] main/implicit.gql [782B] main/input.gql [60530B] 
+I1007 01:35:09.617495   41606 load.go:74] Finished reloading
+I1007 01:36:19.555942   41606 load.go:31] Reloading schema and connectors...
+W1007 01:36:19.664458   41606 control.go:68] [/emulator/irpf-login b7d5] connector "irpf" has errors: irpf/mutations.gql:19:5: Cannot query field "id" on type "User_KeyOutput".
+irpf/mutations.gql:20:5: Cannot query field "email" on type "User_KeyOutput".
+irpf/mutations.gql:21:5: Cannot query field "displayName" on type "User_KeyOutput".
+irpf/mutations.gql:22:5: Cannot query field "provider" on type "User_KeyOutput".
+irpf/mutations.gql:23:5: Cannot query field "hasPaid" on type "User_KeyOutput".
+irpf/mutations.gql:24:5: Cannot query field "createdAt" on type "User_KeyOutput".
+irpf/mutations.gql:25:5: Cannot query field "updatedAt" on type "User_KeyOutput".
+irpf/mutations.gql:11:3: Field "user_upsert" must not have a selection since type "User_KeyOutput" has no subfields.
+irpf/mutations.gql:35:5: Cannot query field "id" on type "User_KeyOutput".
+irpf/mutations.gql:36:5: Cannot query field "lastLogin" on type "User_KeyOutput".
+irpf/mutations.gql:37:5: Cannot query field "updatedAt" on type "User_KeyOutput".
+irpf/mutations.gql:31:3: Field "user_update" must not have a selection since type "User_KeyOutput" has no subfields.
+irpf/mutations.gql:55:5: Cannot query field "id" on type "User_KeyOutput".
+irpf/mutations.gql:56:5: Cannot query field "hasPaid" on type "User_KeyOutput".
+irpf/mutations.gql:57:5: Cannot query field "stripeCustomerId" on type "User_KeyOutput".
+irpf/mutations.gql:58:5: Cannot query field "updatedAt" on type "User_KeyOutput".
+irpf/mutations.gql:47:3: Field "user_update" must not have a selection since type "User_KeyOutput" has no subfields.
+irpf/mutations.gql:81:5: Cannot query field "id" on type "Payment_KeyOutput".
+irpf/mutations.gql:82:5: Cannot query field "user" on type "Payment_KeyOutput".
+irpf/mutations.gql:86:5: Cannot query field "amount" on type "Payment_KeyOutput".
+irpf/mutations.gql:87:5: Cannot query field "currency" on type "Payment_KeyOutput".
+irpf/mutations.gql:88:5: Cannot query field "status" on type "Payment_KeyOutput".
+irpf/mutations.gql:89:5: Cannot query field "createdAt" on type "Payment_KeyOutput".
+irpf/mutations.gql:72:3: Field "payment_insert" must not have a selection since type "Payment_KeyOutput" has no subfields.
+irpf/mutations.gql:109:5: Cannot query field "id" on type "Payment_KeyOutput".
+irpf/mutations.gql:110:5: Cannot query field "status" on type "Payment_KeyOutput".
+irpf/mutations.gql:111:5: Cannot query field "completedAt" on type "Payment_KeyOutput".
+irpf/mutations.gql:100:3: Field "payment_update" must not have a selection since type "Payment_KeyOutput" has no subfields.
+irpf/mutations.gql:155:5: Cannot query field "id" on type "Calculation_KeyOutput".
+irpf/mutations.gql:156:5: Cannot query field "rendaBruta" on type "Calculation_KeyOutput".
+irpf/mutations.gql:157:5: Cannot query field "impostoDevido" on type "Calculation_KeyOutput".
+irpf/mutations.gql:158:5: Cannot query field "metodo" on type "Calculation_KeyOutput".
+irpf/mutations.gql:159:5: Cannot query field "createdAt" on type "Calculation_KeyOutput".
+irpf/mutations.gql:140:3: Field "calculation_insert" must not have a selection since type "Calculation_KeyOutput" has no subfields.
+irpf/mutations.gql:178:5: Cannot query field "id" on type "AuditLog_KeyOutput".
+irpf/mutations.gql:179:5: Cannot query field "action" on type "AuditLog_KeyOutput".
+irpf/mutations.gql:180:5: Cannot query field "createdAt" on type "AuditLog_KeyOutput".
+irpf/mutations.gql:171:3: Field "auditLog_insert" must not have a selection since type "AuditLog_KeyOutput" has no subfields.
+irpf/mutations.gql:197:5: Cannot query field "id" on type "User_KeyOutput".
+irpf/mutations.gql:196:3: Field "user_delete" must not have a selection since type "User_KeyOutput" has no subfields.
+
+sources: irpf/mutations.gql [4196B] irpf/queries.gql [2835B] 
+I1007 01:36:19.666140   41606 control.go:94] [/emulator/irpf-login b7d5] UpdateResources(): done
+Connector "irpf": sources: irpf/mutations.gql [4196B] irpf/queries.gql [2835B] 
+E1007 01:36:19.680028   41606 load.go:73] Could not load sources: 
+Errors: irpf/mutations.gql:19:5: Cannot query field "id" on type "User_KeyOutput".
+irpf/mutations.gql:20:5: Cannot query field "email" on type "User_KeyOutput".
+irpf/mutations.gql:21:5: Cannot query field "displayName" on type "User_KeyOutput".
+irpf/mutations.gql:22:5: Cannot query field "provider" on type "User_KeyOutput".
+irpf/mutations.gql:23:5: Cannot query field "hasPaid" on type "User_KeyOutput".
+irpf/mutations.gql:24:5: Cannot query field "createdAt" on type "User_KeyOutput".
+irpf/mutations.gql:25:5: Cannot query field "updatedAt" on type "User_KeyOutput".
+irpf/mutations.gql:11:3: Field "user_upsert" must not have a selection since type "User_KeyOutput" has no subfields.
+irpf/mutations.gql:35:5: Cannot query field "id" on type "User_KeyOutput".
+irpf/mutations.gql:36:5: Cannot query field "lastLogin" on type "User_KeyOutput".
+irpf/mutations.gql:37:5: Cannot query field "updatedAt" on type "User_KeyOutput".
+irpf/mutations.gql:31:3: Field "user_update" must not have a selection since type "User_KeyOutput" has no subfields.
+irpf/mutations.gql:55:5: Cannot query field "id" on type "User_KeyOutput".
+irpf/mutations.gql:56:5: Cannot query field "hasPaid" on type "User_KeyOutput".
+irpf/mutations.gql:57:5: Cannot query field "stripeCustomerId" on type "User_KeyOutput".
+irpf/mutations.gql:58:5: Cannot query field "updatedAt" on type "User_KeyOutput".
+irpf/mutations.gql:47:3: Field "user_update" must not have a selection since type "User_KeyOutput" has no subfields.
+irpf/mutations.gql:81:5: Cannot query field "id" on type "Payment_KeyOutput".
+irpf/mutations.gql:82:5: Cannot query field "user" on type "Payment_KeyOutput".
+irpf/mutations.gql:86:5: Cannot query field "amount" on type "Payment_KeyOutput".
+irpf/mutations.gql:87:5: Cannot query field "currency" on type "Payment_KeyOutput".
+irpf/mutations.gql:88:5: Cannot query field "status" on type "Payment_KeyOutput".
+irpf/mutations.gql:89:5: Cannot query field "createdAt" on type "Payment_KeyOutput".
+irpf/mutations.gql:72:3: Field "payment_insert" must not have a selection since type "Payment_KeyOutput" has no subfields.
+irpf/mutations.gql:109:5: Cannot query field "id" on type "Payment_KeyOutput".
+irpf/mutations.gql:110:5: Cannot query field "status" on type "Payment_KeyOutput".
+irpf/mutations.gql:111:5: Cannot query field "completedAt" on type "Payment_KeyOutput".
+irpf/mutations.gql:100:3: Field "payment_update" must not have a selection since type "Payment_KeyOutput" has no subfields.
+irpf/mutations.gql:155:5: Cannot query field "id" on type "Calculation_KeyOutput".
+irpf/mutations.gql:156:5: Cannot query field "rendaBruta" on type "Calculation_KeyOutput".
+irpf/mutations.gql:157:5: Cannot query field "impostoDevido" on type "Calculation_KeyOutput".
+irpf/mutations.gql:158:5: Cannot query field "metodo" on type "Calculation_KeyOutput".
+irpf/mutations.gql:159:5: Cannot query field "createdAt" on type "Calculation_KeyOutput".
+irpf/mutations.gql:140:3: Field "calculation_insert" must not have a selection since type "Calculation_KeyOutput" has no subfields.
+irpf/mutations.gql:178:5: Cannot query field "id" on type "AuditLog_KeyOutput".
+irpf/mutations.gql:179:5: Cannot query field "action" on type "AuditLog_KeyOutput".
+irpf/mutations.gql:180:5: Cannot query field "createdAt" on type "AuditLog_KeyOutput".
+irpf/mutations.gql:171:3: Field "auditLog_insert" must not have a selection since type "AuditLog_KeyOutput" has no subfields.
+irpf/mutations.gql:197:5: Cannot query field "id" on type "User_KeyOutput".
+irpf/mutations.gql:196:3: Field "user_delete" must not have a selection since type "User_KeyOutput" has no subfields.
+I1007 01:36:19.687414   41606 collector.go:107] schema extensions wrote into "/home/user/irpf-login/dataconnect/.dataconnect/schema"
+Generated sources: main/input.gql [60530B] main/relation.gql [31642B] prelude.gql [73251B] main/query.gql [5188B] main/mutation.gql [13895B] main/implicit.gql [782B] 
+I1007 01:36:19.687455   41606 load.go:74] Finished reloading
+I1007 01:36:49.552889   41606 load.go:31] Reloading schema and connectors...
+W1007 01:36:49.617314   41606 control.go:68] [/emulator/irpf-login b7d5] connector "irpf" has errors: irpf/mutations.gql:124:5: Cannot query field "id" on type "Calculation_KeyOutput".
+irpf/mutations.gql:125:5: Cannot query field "rendaBruta" on type "Calculation_KeyOutput".
+irpf/mutations.gql:126:5: Cannot query field "impostoDevido" on type "Calculation_KeyOutput".
+irpf/mutations.gql:127:5: Cannot query field "metodo" on type "Calculation_KeyOutput".
+irpf/mutations.gql:128:5: Cannot query field "createdAt" on type "Calculation_KeyOutput".
+irpf/mutations.gql:109:3: Field "calculation_insert" must not have a selection since type "Calculation_KeyOutput" has no subfields.
+irpf/mutations.gql:147:5: Cannot query field "id" on type "AuditLog_KeyOutput".
+irpf/mutations.gql:148:5: Cannot query field "action" on type "AuditLog_KeyOutput".
+irpf/mutations.gql:149:5: Cannot query field "createdAt" on type "AuditLog_KeyOutput".
+irpf/mutations.gql:140:3: Field "auditLog_insert" must not have a selection since type "AuditLog_KeyOutput" has no subfields.
+irpf/mutations.gql:166:5: Cannot query field "id" on type "User_KeyOutput".
+irpf/mutations.gql:165:3: Field "user_delete" must not have a selection since type "User_KeyOutput" has no subfields.
+
+sources: irpf/mutations.gql [3863B] irpf/queries.gql [2835B] 
+I1007 01:36:49.617384   41606 control.go:94] [/emulator/irpf-login b7d5] UpdateResources(): done
+Connector "irpf": sources: irpf/mutations.gql [3863B] irpf/queries.gql [2835B] 
+E1007 01:36:49.622131   41606 load.go:73] Could not load sources: 
+Errors: irpf/mutations.gql:124:5: Cannot query field "id" on type "Calculation_KeyOutput".
+irpf/mutations.gql:125:5: Cannot query field "rendaBruta" on type "Calculation_KeyOutput".
+irpf/mutations.gql:126:5: Cannot query field "impostoDevido" on type "Calculation_KeyOutput".
+irpf/mutations.gql:127:5: Cannot query field "metodo" on type "Calculation_KeyOutput".
+irpf/mutations.gql:128:5: Cannot query field "createdAt" on type "Calculation_KeyOutput".
+irpf/mutations.gql:109:3: Field "calculation_insert" must not have a selection since type "Calculation_KeyOutput" has no subfields.
+irpf/mutations.gql:147:5: Cannot query field "id" on type "AuditLog_KeyOutput".
+irpf/mutations.gql:148:5: Cannot query field "action" on type "AuditLog_KeyOutput".
+irpf/mutations.gql:149:5: Cannot query field "createdAt" on type "AuditLog_KeyOutput".
+irpf/mutations.gql:140:3: Field "auditLog_insert" must not have a selection since type "AuditLog_KeyOutput" has no subfields.
+irpf/mutations.gql:166:5: Cannot query field "id" on type "User_KeyOutput".
+irpf/mutations.gql:165:3: Field "user_delete" must not have a selection since type "User_KeyOutput" has no subfields.
+I1007 01:36:49.623377   41606 collector.go:107] schema extensions wrote into "/home/user/irpf-login/dataconnect/.dataconnect/schema"
+Generated sources: main/query.gql [5188B] main/mutation.gql [13895B] main/implicit.gql [782B] main/input.gql [60530B] main/relation.gql [31642B] prelude.gql [73251B] 
+I1007 01:36:49.623409   41606 load.go:74] Finished reloading
+I1007 01:37:09.546371   41606 load.go:31] Reloading schema and connectors...
+W1007 01:37:09.614958   41606 control.go:68] [/emulator/irpf-login b7d5] connector "irpf" has errors: irpf/mutations.gql:11:3: mutation.UpsertUser.user_upsert (data.updatedAt: Timestamp): unexpected value: map[expr:request.time] with type: map[string]interface {}
+irpf/mutations.gql:23:3: mutation.UpdateUserLogin.user_update (data.lastLogin: Timestamp): unexpected value: map[expr:request.time] with type: map[string]interface {}
+irpf/mutations.gql:23:3: mutation.UpdateUserLogin.user_update (data.updatedAt: Timestamp): unexpected value: map[expr:request.time] with type: map[string]interface {}
+irpf/mutations.gql:35:3: mutation.UpdatePaymentStatus.user_update (data.updatedAt: Timestamp): unexpected value: map[expr:request.time] with type: map[string]interface {}
+irpf/mutations.gql:73:3: mutation.UpdatePaymentStatus2.payment_update (data.completedAt: Timestamp): unexpected value: map[expr:request.time] with type: map[string]interface {}
+
+sources: irpf/mutations.gql [3741B] irpf/queries.gql [2835B] 
+I1007 01:37:09.615029   41606 control.go:94] [/emulator/irpf-login b7d5] UpdateResources(): done
+Connector "irpf": sources: irpf/mutations.gql [3741B] irpf/queries.gql [2835B] 
+E1007 01:37:09.622600   41606 load.go:73] Could not load sources: 
+Errors: irpf/mutations.gql:11:3: mutation.UpsertUser.user_upsert (data.updatedAt: Timestamp): unexpected value: map[expr:request.time] with type: map[string]interface {}
+irpf/mutations.gql:23:3: mutation.UpdateUserLogin.user_update (data.lastLogin: Timestamp): unexpected value: map[expr:request.time] with type: map[string]interface {}
+irpf/mutations.gql:23:3: mutation.UpdateUserLogin.user_update (data.updatedAt: Timestamp): unexpected value: map[expr:request.time] with type: map[string]interface {}
+irpf/mutations.gql:35:3: mutation.UpdatePaymentStatus.user_update (data.updatedAt: Timestamp): unexpected value: map[expr:request.time] with type: map[string]interface {}
+irpf/mutations.gql:73:3: mutation.UpdatePaymentStatus2.payment_update (data.completedAt: Timestamp): unexpected value: map[expr:request.time] with type: map[string]interface {}
+I1007 01:37:09.629872   41606 collector.go:107] schema extensions wrote into "/home/user/irpf-login/dataconnect/.dataconnect/schema"
+Generated sources: main/mutation.gql [13895B] main/implicit.gql [782B] prelude.gql [73251B] main/input.gql [60530B] main/relation.gql [31642B] main/query.gql [5188B] 
+I1007 01:37:09.629911   41606 load.go:74] Finished reloading

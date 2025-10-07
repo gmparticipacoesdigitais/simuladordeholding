@@ -1,8 +1,8 @@
 extend type Query {
   """
-  ✨ Look up a single `Movie` based on `id`, `key` or `first` and return selected fields (or `null` if not found).
+  ✨ Look up a single `AuditLog` based on `id`, `key` or `first` and return selected fields (or `null` if not found).
   """
-  movie(
+  auditLog(
     """
     The unique ID of the object.
     """
@@ -11,17 +11,17 @@ extend type Query {
     """
     The key used to identify the object.
     """
-    key: Movie_Key
+    key: AuditLog_Key
 
     """
     Fetch the first row based on the filters and ordering.
     """
-    first: Movie_FirstRow
-  ): Movie @fdc_generated(from: "Movie", purpose: QUERY_SINGLE)
+    first: AuditLog_FirstRow
+  ): AuditLog @fdc_generated(from: "AuditLog", purpose: QUERY_SINGLE)
   """
-  ✨ Look up a single `MovieMetadata` based on `id`, `key` or `first` and return selected fields (or `null` if not found).
+  ✨ Look up a single `Calculation` based on `id`, `key` or `first` and return selected fields (or `null` if not found).
   """
-  movieMetadata(
+  calculation(
     """
     The unique ID of the object.
     """
@@ -30,27 +30,32 @@ extend type Query {
     """
     The key used to identify the object.
     """
-    key: MovieMetadata_Key
+    key: Calculation_Key
 
     """
     Fetch the first row based on the filters and ordering.
     """
-    first: MovieMetadata_FirstRow
-  ): MovieMetadata @fdc_generated(from: "MovieMetadata", purpose: QUERY_SINGLE)
+    first: Calculation_FirstRow
+  ): Calculation @fdc_generated(from: "Calculation", purpose: QUERY_SINGLE)
   """
-  ✨ Look up a single `Review` based on `id`, `key` or `first` and return selected fields (or `null` if not found).
+  ✨ Look up a single `Payment` based on `id`, `key` or `first` and return selected fields (or `null` if not found).
   """
-  review(
+  payment(
+    """
+    The unique ID of the object.
+    """
+    id: UUID
+
     """
     The key used to identify the object.
     """
-    key: Review_Key
+    key: Payment_Key
 
     """
     Fetch the first row based on the filters and ordering.
     """
-    first: Review_FirstRow
-  ): Review @fdc_generated(from: "Review", purpose: QUERY_SINGLE)
+    first: Payment_FirstRow
+  ): Payment @fdc_generated(from: "Payment", purpose: QUERY_SINGLE)
   """
   ✨ Look up a single `User` based on `id`, `key` or `first` and return selected fields (or `null` if not found).
   """
@@ -76,18 +81,18 @@ extend type Query {
     first: User_FirstRow
   ): User @fdc_generated(from: "User", purpose: QUERY_SINGLE)
   """
-  ✨ List `Movie` objects in the table and return selected fields, optionally filtered by `where` conditions
+  ✨ List `AuditLog` objects in the table and return selected fields, optionally filtered by `where` conditions
   """
-  movies(
+  auditLogs(
     """
     Filter condition to narrow down the query results.
     """
-    where: Movie_Filter
+    where: AuditLog_Filter
 
     """
     Order the query results by specific fields.
     """
-    orderBy: [Movie_Order!]
+    orderBy: [AuditLog_Order!]
 
     """
     Number of rows to skip before starting to return the results.
@@ -107,21 +112,21 @@ extend type Query {
     """
     Filter condition to apply to the groups of aggregate queries.
     """
-    having: Movie_Having
-  ): [Movie!]! @fdc_generated(from: "Movie", purpose: QUERY_MULTIPLE)
+    having: AuditLog_Having
+  ): [AuditLog!]! @fdc_generated(from: "AuditLog", purpose: QUERY_MULTIPLE)
   """
-  ✨ List `MovieMetadata` objects in the table and return selected fields, optionally filtered by `where` conditions
+  ✨ List `Calculation` objects in the table and return selected fields, optionally filtered by `where` conditions
   """
-  movieMetadatas(
+  calculations(
     """
     Filter condition to narrow down the query results.
     """
-    where: MovieMetadata_Filter
+    where: Calculation_Filter
 
     """
     Order the query results by specific fields.
     """
-    orderBy: [MovieMetadata_Order!]
+    orderBy: [Calculation_Order!]
 
     """
     Number of rows to skip before starting to return the results.
@@ -141,21 +146,21 @@ extend type Query {
     """
     Filter condition to apply to the groups of aggregate queries.
     """
-    having: MovieMetadata_Having
-  ): [MovieMetadata!]! @fdc_generated(from: "MovieMetadata", purpose: QUERY_MULTIPLE)
+    having: Calculation_Having
+  ): [Calculation!]! @fdc_generated(from: "Calculation", purpose: QUERY_MULTIPLE)
   """
-  ✨ List `Review` objects in the table and return selected fields, optionally filtered by `where` conditions
+  ✨ List `Payment` objects in the table and return selected fields, optionally filtered by `where` conditions
   """
-  reviews(
+  payments(
     """
     Filter condition to narrow down the query results.
     """
-    where: Review_Filter
+    where: Payment_Filter
 
     """
     Order the query results by specific fields.
     """
-    orderBy: [Review_Order!]
+    orderBy: [Payment_Order!]
 
     """
     Number of rows to skip before starting to return the results.
@@ -175,8 +180,8 @@ extend type Query {
     """
     Filter condition to apply to the groups of aggregate queries.
     """
-    having: Review_Having
-  ): [Review!]! @fdc_generated(from: "Review", purpose: QUERY_MULTIPLE)
+    having: Payment_Having
+  ): [Payment!]! @fdc_generated(from: "Payment", purpose: QUERY_MULTIPLE)
   """
   ✨ List `User` objects in the table and return selected fields, optionally filtered by `where` conditions
   """

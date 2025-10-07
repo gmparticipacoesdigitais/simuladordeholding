@@ -1,0 +1,145 @@
+# ============================================================================
+# QUERIES - Consultas do Sistema IRPF
+# ============================================================================
+
+# Buscar usuário por ID (Firebase Auth UID)
+query GetUser($userId: String!) @auth(level: USER) {
+  user(id: $userId) {
+    id
+    email
+    displayName
+    provider
+    hasPaid
+    stripeCustomerId
+    createdAt
+    lastLogin
+    updatedAt
+  }
+}
+
+# Buscar usuário por email
+query GetUserByEmail($email: String!) @auth(level: USER) {
+  users(where: { email: { eq: $email } }, limit: 1) {
+    id
+    email
+    displayName
+    provider
+    hasPaid
+    stripeCustomerId
+    createdAt
+    lastLogin
+  }
+}
+
+# Verificar status de pagamento do usuário
+query CheckPaymentStatus($userId: String!) @auth(level: USER) {
+  user(id: $userId) {
+    id
+    email
+    hasPaid
+    stripeCustomerId
+  }
+}
+
+# Buscar último cálculo do usuário
+query GetLatestCalculation($userId: String!) @auth(level: USER) {
+  calculations(
+    where: {
+      user: { id: { eq: $userId } }
+      isLatest: { eq: true }
+    }
+    orderBy: { createdAt: DESC }
+    limit: 1
+  ) {
+    id
+    rendaBruta
+    dependentes
+    pensaoAlimenticia
+    despesasMedicas
+    despesasEducacao
+    previdenciaPrivada
+    inss
+    baseCalculo
+    impostoDevido
+    metodo
+    totalDeducoes
+    createdAt
+  }
+}
+
+# Buscar histórico de cálculos do usuário
+query GetCalculationHistory($userId: String!, $limit: Int = 10) @auth(level: USER) {
+  calculations(
+    where: { user: { id: { eq: $userId } } }
+    orderBy: { createdAt: DESC }
+    limit: $limit
+  ) {
+    id
+    rendaBruta
+    dependentes
+    pensaoAlimenticia
+    despesasMedicas
+    despesasEducacao
+    previdenciaPrivada
+    inss
+    baseCalculo
+    impostoDevido
+    metodo
+    totalDeducoes
+    createdAt
+    isLatest
+  }
+}
+
+# Buscar pagamentos do usuário
+query GetUserPayments($userId: String!) @auth(level: USER) {
+  payments(
+    where: { user: { id: { eq: $userId } } }
+    orderBy: { createdAt: DESC }
+  ) {
+    id
+    stripeSessionId
+    stripePaymentIntentId
+    amount
+    currency
+    status
+    paymentMethod
+    createdAt
+    completedAt
+  }
+}
+
+# Buscar último pagamento do usuário
+query GetLatestPayment($userId: String!) @auth(level: USER) {
+  payments(
+    where: { user: { id: { eq: $userId } } }
+    orderBy: { createdAt: DESC }
+    limit: 1
+  ) {
+    id
+    stripeSessionId
+    stripePaymentIntentId
+    amount
+    currency
+    status
+    paymentMethod
+    createdAt
+    completedAt
+  }
+}
+
+# Buscar logs de auditoria do usuário
+query GetUserAuditLogs($userId: String!, $limit: Int = 20) @auth(level: USER) {
+  auditLogs(
+    where: { user: { id: { eq: $userId } } }
+    orderBy: { createdAt: DESC }
+    limit: $limit
+  ) {
+    id
+    action
+    details
+    ipAddress
+    userAgent
+    createdAt
+  }
+}
