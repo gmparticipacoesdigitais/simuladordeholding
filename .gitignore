@@ -13,6 +13,7 @@ functions/node_modules/
 firebase-debug.log
 firestore-debug.log
 ui-debug.log
+dataconnect-debug.log
 
 # Arquivos de log
 npm-debug.log*

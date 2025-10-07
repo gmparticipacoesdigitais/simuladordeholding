@@ -1,8 +1,8 @@
 {
-  "name": "gemini-demo",
+  "name": "irpf-login",
   "version": "1.0.0",
-  "description": "Demonstração de projeto com a API Gemini.",
-  "main": "main.js",
+  "description": "Calculadora de Imposto de Renda com autenticação Firebase e pagamento Stripe",
+  "main": "index.html",
   "scripts": {
     "start": "vite",
     "build": "vite build",
@@ -10,24 +10,22 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/seu-usuario/gemini-demo.git"
+    "url": "git+https://github.com/seu-usuario/irpf-login.git"
   },
   "keywords": [
-    "gemini",
-    "api",
-    "demo"
+    "irpf",
+    "imposto-de-renda",
+    "firebase",
+    "stripe"
   ],
-  "author": "Seu Nome <seu-email@exemplo.com>",
+  "author": "IRPF Team",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/seu-usuario/gemini-demo/issues"
+    "url": "https://github.com/seu-usuario/irpf-login/issues"
   },
-  "homepage": "https://github.com/seu-usuario/gemini-demo#readme",
+  "homepage": "https://github.com/seu-usuario/irpf-login#readme",
   "dependencies": {
-    "@dataconnect/generated": "file:src/dataconnect-generated",
-    "@google/genai": "^1.0.1",
-    "base64-js": "^1.5.1",
-    "markdown-it": "^13.0.2"
+    "@dataconnect/generated": "file:src/dataconnect-generated"
   },
   "devDependencies": {
     "vite": "^6.3.5"
