@@ -1,6 +1,6 @@
 specVersion: "v1"
 serviceId: "irpf-login"
-location: "southamerica-east1"
+location: "us-central1"
 schema:
   source: "./schema"
   datasource:

@@ -1,17 +1,17 @@
-I1007 00:27:57.740438   29844 load.go:31] Reloading schema and connectors...
-I1007 00:27:57.919841   29844 control.go:94] [/emulator/irpf-login 7a6e] UpdateResources(): done
+I1007 01:09:50.125591   38518 load.go:31] Reloading schema and connectors...
+I1007 01:09:50.313705   38518 control.go:94] [/emulator/irpf-login ff2b] UpdateResources(): done
 Schema: sources: schema/schema.gql [1992B] 
 Connector "example": sources: example/mutations.gql [1243B] example/queries.gql [1801B] 
-I1007 00:27:58.087578   29844 codegen.go:82] [connector "example" javascriptSdk] Generating sources into "/home/user/irpf-login/src/dataconnect-generated"
-I1007 00:27:58.134758   29844 codegen.go:82] [connector "example" javascriptSdk] Generating sources into "/home/user/irpf-login/functions/src/dataconnect-generated"
-I1007 00:27:58.181218   29844 collector.go:107] schema extensions wrote into "/home/user/irpf-login/dataconnect/.dataconnect/schema"
-Generated sources: main/mutation.gql [13679B] main/implicit.gql [1261B] prelude.gql [73251B] main/input.gql [28173B] main/relation.gql [13746B] main/query.gql [5099B] 
-I1007 00:27:58.187597   29844 collector.go:107] connector "example" javascriptSdk wrote into "/home/user/irpf-login/src/dataconnect-generated"
-Generated sources: esm/index.esm.js [3570B] esm/package.json [17B] index.cjs.js [4060B] package.json [637B] README.md [40804B] index.d.ts [8025B] 
-I1007 00:27:58.225588   29844 installsdk.go:55] Package @dataconnect/generated is already installed. Skipping installation
-I1007 00:27:58.233469   29844 collector.go:107] connector "example" javascriptSdk wrote into "/home/user/irpf-login/functions/src/dataconnect-generated"
-Generated sources: README.md [40804B] index.d.ts [8025B] esm/index.esm.js [3570B] esm/package.json [17B] index.cjs.js [4060B] package.json [637B] 
-I1007 00:27:58.260390   29844 installsdk.go:55] Package @dataconnect/generated is already installed. Skipping installation
-I1007 00:27:58.260457   29844 load.go:109] Finished reloading
-I1007 00:27:58.329740   29844 dev.go:102] Listening on address (HTTP + gRPC): 127.0.0.1:50001
-I1007 00:27:58.467521   29844 engine.go:169] [/emulator/irpf-login 7a6e] ExecuteGraphqlRead IntrospectionQuery: succeeded. 
+I1007 01:09:50.508262   38518 codegen.go:82] [connector "example" javascriptSdk] Generating sources into "/home/user/irpf-login/src/dataconnect-generated"
+I1007 01:09:50.581990   38518 codegen.go:82] [connector "example" javascriptSdk] Generating sources into "/home/user/irpf-login/functions/src/dataconnect-generated"
+I1007 01:09:50.630798   38518 collector.go:107] schema extensions wrote into "/home/user/irpf-login/dataconnect/.dataconnect/schema"
+Generated sources: main/relation.gql [13746B] main/query.gql [5099B] main/mutation.gql [13679B] main/implicit.gql [1261B] main/input.gql [28173B] prelude.gql [73251B] 
+I1007 01:09:50.637449   38518 collector.go:107] connector "example" javascriptSdk wrote into "/home/user/irpf-login/src/dataconnect-generated"
+Generated sources: README.md [40804B] index.d.ts [8025B] esm/index.esm.js [3563B] esm/package.json [17B] index.cjs.js [4053B] package.json [637B] 
+I1007 01:09:50.637983   38518 installsdk.go:55] Package @dataconnect/generated is already installed. Skipping installation
+I1007 01:09:50.701455   38518 collector.go:107] connector "example" javascriptSdk wrote into "/home/user/irpf-login/functions/src/dataconnect-generated"
+Generated sources: esm/package.json [17B] index.cjs.js [4053B] package.json [637B] README.md [40804B] index.d.ts [8025B] esm/index.esm.js [3563B] 
+I1007 01:09:50.718130   38518 installsdk.go:55] Package @dataconnect/generated is already installed. Skipping installation
+I1007 01:09:50.729023   38518 load.go:109] Finished reloading
+I1007 01:09:50.760573   38518 dev.go:102] Listening on address (HTTP + gRPC): 127.0.0.1:50001
+I1007 01:09:51.018349   38518 engine.go:169] [/emulator/irpf-login ff2b] ExecuteGraphqlRead IntrospectionQuery: succeeded. 

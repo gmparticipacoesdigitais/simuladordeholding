@@ -23,7 +23,7 @@
   },
   "firestore": {
     "database": "(default)",
-    "location": "southamerica-east1",
+    "location": "us-central1",
     "rules": "firestore.rules",
     "indexes": "firestore.indexes.json"
   },
