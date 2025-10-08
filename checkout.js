@@ -3,8 +3,7 @@
 // Sistema de checkout com Payment Link do Stripe
 // ============================================================================
 
-// Usar configuração centralizada do Firebase
-const firebaseConfig = window.FIREBASE_CONFIG;
+import { firebaseConfig, stripeConfig } from './firebase-config.js';
 
 // Inicializar Firebase
 let auth, database;
@@ -14,14 +13,16 @@ try {
     }
     auth = firebase.auth();
     database = firebase.database();
-    console.log('✅ Firebase inicializado com sucesso no checkout (Realtime Database)');
+    console.log('✅ Firebase inicializado com sucesso no checkout');
+    console.log('🔑 Project ID:', firebaseConfig.projectId);
 } catch (error) {
     console.error('❌ Erro ao inicializar Firebase:', error);
     alert('Erro ao inicializar Firebase. Verifique sua configuração.');
 }
 
-// Payment Link do Stripe (não precisa de Cloud Functions!)
-const STRIPE_PAYMENT_LINK = window.STRIPE_PAYMENT_LINK || 'https://buy.stripe.com/test_cNi8wQg3BcFm6DN2TQfw402';
+// Payment Link do Stripe
+const STRIPE_PAYMENT_LINK = stripeConfig.paymentLink;
+console.log('💳 Payment Link configurado:', STRIPE_PAYMENT_LINK ? 'Sim' : 'Não');
 
 const checkoutButton = document.getElementById('checkout-button');
 const loadingDiv = document.getElementById('loading');
@@ -66,8 +67,11 @@ auth.onAuthStateChanged(async (user) => {
 checkoutButton.addEventListener('click', async () => {
     const user = auth.currentUser;
     if (!user) {
-        alert('❌ Você precisa estar autenticado para continuar.');
-        window.location.href = 'index.html';
+        errorDiv.innerHTML = '❌ Você precisa estar autenticado para continuar.';
+        errorDiv.style.display = 'block';
+        setTimeout(() => {
+            window.location.href = 'index.html';
+        }, 2000);
         return;
     }
 
@@ -77,9 +81,15 @@ checkoutButton.addEventListener('click', async () => {
     checkoutButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Redirecionando...';
 
     try {
-        console.log('✅ Redirecionando para Payment Link do Stripe...');
+        console.log('✅ Preparando redirecionamento para Stripe...');
         console.log('👤 User ID:', user.uid);
         console.log('📧 Email:', user.email);
+        console.log('🔗 Payment Link:', STRIPE_PAYMENT_LINK);
+
+        // Validar se o Payment Link está configurado
+        if (!STRIPE_PAYMENT_LINK || STRIPE_PAYMENT_LINK === 'SEU_LINK_DE_PAGAMENTO_DO_STRIPE') {
+            throw new Error('Payment Link do Stripe não configurado. Verifique firebase-config.js');
+        }
 
         // Salvar informações do usuário no Realtime Database antes de redirecionar
         const userRef = database.ref(`users/${user.uid}`);
@@ -92,24 +102,30 @@ checkoutButton.addEventListener('click', async () => {
             updatedAt: firebase.database.ServerValue.TIMESTAMP
         });
 
-        console.log('✅ Informações do usuário atualizadas no Realtime Database');
+        console.log('✅ Informações salvas no Realtime Database');
 
         // Construir URL do Payment Link com parâmetros
         const paymentUrl = new URL(STRIPE_PAYMENT_LINK);
         paymentUrl.searchParams.set('client_reference_id', user.uid);
         paymentUrl.searchParams.set('prefilled_email', user.email);
 
-        console.log('🔗 Redirecionando para:', paymentUrl.toString());
+        console.log('🔗 URL completa:', paymentUrl.toString());
+        console.log('✅ Redirecionando em 1 segundo...');
 
         // Pequeno delay para dar feedback visual
         setTimeout(() => {
             window.location.href = paymentUrl.toString();
-        }, 500);
+        }, 1000);
 
     } catch (error) {
-        console.error('❌ Erro ao redirecionar:', error);
+        console.error('❌ Erro ao processar checkout:', error);
 
-        errorDiv.innerHTML = '❌ Erro ao salvar informações. Tente novamente.<br>' + error.message;
+        let errorMessage = 'Erro ao processar pagamento. Tente novamente.';
+        if (error.message.includes('Payment Link')) {
+            errorMessage = 'Payment Link não configurado. Entre em contato com o suporte.';
+        }
+
+        errorDiv.innerHTML = `❌ ${errorMessage}<br><small>${error.message}</small>`;
         errorDiv.style.display = 'block';
         checkoutButton.disabled = false;
         checkoutButton.innerHTML = '<i class="fas fa-credit-card"></i> Tentar Novamente';

@@ -141,15 +141,31 @@ const STRIPE_PRICE_ID = stripeConfig.priceId;
 // ============================================================================
 
 /**
- * Verifica se o usuário já pagou usando Data Connect
+ * Verifica se o usuário já pagou usando Realtime Database
  * @param {string} uid - ID do usuário
  * @returns {Promise<boolean>}
  */
 async function checkUserPayment(uid) {
     try {
-        const hasPaid = await checkPaymentStatus(uid);
-        console.log('📊 Status de pagamento:', hasPaid ? 'PAGO' : 'PENDENTE');
-        return hasPaid;
+        // Tentar buscar do Realtime Database primeiro
+        const database = firebase.database();
+        const snapshot = await database.ref(`users/${uid}`).once('value');
+        const userData = snapshot.val();
+
+        if (userData && userData.hasPaid) {
+            console.log('📊 Status de pagamento (Realtime DB):', 'PAGO');
+            return true;
+        }
+
+        // Fallback: tentar Data Connect
+        try {
+            const hasPaid = await checkPaymentStatus(uid);
+            console.log('📊 Status de pagamento (Data Connect):', hasPaid ? 'PAGO' : 'PENDENTE');
+            return hasPaid;
+        } catch (dcError) {
+            console.warn('⚠️ Data Connect não disponível, usando apenas Realtime DB');
+            return false;
+        }
     } catch (error) {
         console.error('❌ Erro ao verificar pagamento:', error);
         return false;

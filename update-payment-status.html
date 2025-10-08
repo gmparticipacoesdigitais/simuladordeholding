@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Atualizar Status de Pagamento - Admin</title>
+    <link rel="stylesheet" href="login.css">
+    <style>
+        .admin-panel {
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            color: #cbd5e1;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+        input, select {
+            width: 100%;
+            padding: 12px;
+            background: rgba(30, 41, 59, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            color: white;
+            font-family: 'Inter', sans-serif;
+        }
+        button {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        button:hover {
+            transform: translateY(-1px);
+        }
+        .status {
+            padding: 12px;
+            border-radius: 8px;
+            margin-top: 20px;
+            display: none;
+        }
+        .success { background: rgba(16, 185, 129, 0.2); border: 1px solid #10b981; color: #34d399; }
+        .error { background: rgba(239, 68, 68, 0.2); border: 1px solid #ef4444; color: #fca5a5; }
+    </style>
+</head>
+<body>
+    <div class="background-pattern"></div>
+    <div class="container">
+        <div class="admin-panel">
+            <h1 style="color: white; margin-bottom: 10px;">🔧 Painel Admin</h1>
+            <p style="color: #94a3b8; margin-bottom: 30px;">Atualizar status de pagamento do usuário</p>
+
+            <div class="form-group">
+                <label>Email do Usuário:</label>
+                <input type="email" id="userEmail" placeholder="usuario@exemplo.com" required>
+            </div>
+
+            <div class="form-group">
+                <label>Status de Pagamento:</label>
+                <select id="paymentStatus">
+                    <option value="true">✅ Pago</option>
+                    <option value="false">❌ Não Pago</option>
+                </select>
+            </div>
+
+            <button onclick="updatePaymentStatus()">Atualizar Status</button>
+            <button onclick="getCurrentUser()" style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);">Ver Usuário Logado</button>
+
+            <div id="status" class="status"></div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+
+    <script type="module">
+        import { firebaseConfig } from './firebase-config.js';
+
+        // Inicializar Firebase
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+
+        const auth = firebase.auth();
+        const database = firebase.database();
+
+        window.getCurrentUser = function() {
+            const user = auth.currentUser;
+            const statusDiv = document.getElementById('status');
+
+            if (user) {
+                document.getElementById('userEmail').value = user.email;
+                statusDiv.className = 'status success';
+                statusDiv.style.display = 'block';
+                statusDiv.innerHTML = `✅ Usuário logado: ${user.email}<br>UID: ${user.uid}`;
+            } else {
+                statusDiv.className = 'status error';
+                statusDiv.style.display = 'block';
+                statusDiv.innerHTML = '❌ Nenhum usuário logado. Faça login primeiro.';
+            }
+        };
+
+        window.updatePaymentStatus = async function() {
+            const email = document.getElementById('userEmail').value;
+            const hasPaid = document.getElementById('paymentStatus').value === 'true';
+            const statusDiv = document.getElementById('status');
+
+            if (!email) {
+                statusDiv.className = 'status error';
+                statusDiv.style.display = 'block';
+                statusDiv.innerHTML = '❌ Por favor, informe o email do usuário';
+                return;
+            }
+
+            try {
+                statusDiv.className = 'status';
+                statusDiv.style.display = 'block';
+                statusDiv.innerHTML = '⏳ Buscando usuário...';
+
+                // Buscar usuário por email
+                const usersRef = database.ref('users');
+                const snapshot = await usersRef.orderByChild('email').equalTo(email).once('value');
+
+                if (!snapshot.exists()) {
+                    statusDiv.className = 'status error';
+                    statusDiv.innerHTML = '❌ Usuário não encontrado com este email';
+                    return;
+                }
+
+                // Atualizar status
+                const userData = snapshot.val();
+                const uid = Object.keys(userData)[0];
+
+                await database.ref(`users/${uid}`).update({
+                    hasPaid: hasPaid,
+                    paymentUpdatedAt: firebase.database.ServerValue.TIMESTAMP
+                });
+
+                statusDiv.className = 'status success';
+                statusDiv.innerHTML = `✅ Status atualizado com sucesso!<br>UID: ${uid}<br>Status: ${hasPaid ? 'PAGO' : 'NÃO PAGO'}`;
+
+            } catch (error) {
+                console.error('Erro:', error);
+                statusDiv.className = 'status error';
+                statusDiv.innerHTML = `❌ Erro: ${error.message}`;
+            }
+        };
+
+        // Auto-preencher se houver usuário logado
+        auth.onAuthStateChanged((user) => {
+            if (user) {
+                document.getElementById('userEmail').value = user.email;
+            }
+        });
+    </script>
+</body>
+</html>
