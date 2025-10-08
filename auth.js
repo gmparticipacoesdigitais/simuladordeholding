@@ -35,6 +35,103 @@ function checkFirebaseInit() {
     return true;
 }
 
+// ============================================================================
+// SISTEMA DE NOTIFICAÇÕES
+// ============================================================================
+
+/**
+ * Mostrar notificação visual na página
+ * @param {string} message - Mensagem a exibir
+ * @param {string} type - 'success', 'error', 'info', 'warning'
+ */
+function showNotification(message, type = 'info') {
+    // Criar elemento de notificação se não existir
+    let notification = document.getElementById('notification-toast');
+    if (!notification) {
+        notification = document.createElement('div');
+        notification.id = 'notification-toast';
+        notification.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            min-width: 300px;
+            max-width: 500px;
+            padding: 16px 20px;
+            border-radius: 8px;
+            color: white;
+            font-family: 'Inter', sans-serif;
+            font-size: 14px;
+            font-weight: 500;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            z-index: 10000;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            animation: slideIn 0.3s ease;
+        `;
+        document.body.appendChild(notification);
+    }
+
+    // Definir cores baseado no tipo
+    const colors = {
+        success: '#10b981',
+        error: '#ef4444',
+        info: '#3b82f6',
+        warning: '#f59e0b'
+    };
+
+    const icons = {
+        success: '✅',
+        error: '❌',
+        info: 'ℹ️',
+        warning: '⚠️'
+    };
+
+    notification.style.backgroundColor = colors[type] || colors.info;
+    notification.innerHTML = `
+        <span style="font-size: 20px;">${icons[type] || icons.info}</span>
+        <span>${message}</span>
+    `;
+    notification.style.display = 'flex';
+
+    // Adicionar animação CSS se não existir
+    if (!document.getElementById('notification-styles')) {
+        const style = document.createElement('style');
+        style.id = 'notification-styles';
+        style.textContent = `
+            @keyframes slideIn {
+                from {
+                    transform: translateX(400px);
+                    opacity: 0;
+                }
+                to {
+                    transform: translateX(0);
+                    opacity: 1;
+                }
+            }
+            @keyframes slideOut {
+                from {
+                    transform: translateX(0);
+                    opacity: 1;
+                }
+                to {
+                    transform: translateX(400px);
+                    opacity: 0;
+                }
+            }
+        `;
+        document.head.appendChild(style);
+    }
+
+    // Remover após 5 segundos
+    setTimeout(() => {
+        notification.style.animation = 'slideOut 0.3s ease';
+        setTimeout(() => {
+            notification.style.display = 'none';
+        }, 300);
+    }, 5000);
+}
+
 // Produtos Stripe
 const STRIPE_PRODUCT_ID = stripeConfig.productId;
 const STRIPE_PRICE_ID = stripeConfig.priceId;
@@ -120,7 +217,7 @@ if (loginForm) {
 
         // Validação básica
         if (!email || !senha) {
-            alert('❌ Por favor, preencha todos os campos.');
+            showNotification('Por favor, preencha todos os campos.', 'warning');
             return;
         }
 
@@ -133,9 +230,15 @@ if (loginForm) {
             const userCredential = await auth.signInWithEmailAndPassword(email, senha);
             console.log('✅ Login bem-sucedido!');
 
+            showNotification('Login realizado com sucesso!', 'success');
+
             await updateUserLogin(userCredential.user.uid);
             await createAuditLog(userCredential.user.uid, 'LOGIN_SUCCESS', `Email: ${email}`);
-            await checkPaymentAndRedirect(userCredential.user);
+
+            // Pequeno delay para mostrar a notificação antes de redirecionar
+            setTimeout(() => {
+                checkPaymentAndRedirect(userCredential.user);
+            }, 800);
         } catch (error) {
             console.error('❌ Erro no login:', error);
             console.error('Código do erro:', error.code);
@@ -144,20 +247,20 @@ if (loginForm) {
             let errorMessage = 'Erro ao fazer login. Tente novamente.';
 
             if (error.code === 'auth/user-not-found') {
-                errorMessage = '❌ Usuário não encontrado. Verifique seu e-mail ou crie uma conta.';
+                errorMessage = 'Usuário não encontrado. Verifique seu e-mail ou crie uma conta.';
             } else if (error.code === 'auth/wrong-password') {
-                errorMessage = '❌ Senha incorreta. Tente novamente.';
+                errorMessage = 'Senha incorreta. Tente novamente.';
             } else if (error.code === 'auth/invalid-email') {
-                errorMessage = '❌ E-mail inválido. Verifique o formato do e-mail.';
+                errorMessage = 'E-mail inválido. Verifique o formato do e-mail.';
             } else if (error.code === 'auth/invalid-credential') {
-                errorMessage = '❌ E-mail ou senha incorretos. Verifique seus dados.';
+                errorMessage = 'E-mail ou senha incorretos. Verifique seus dados.';
             } else if (error.code === 'auth/too-many-requests') {
-                errorMessage = '❌ Muitas tentativas de login. Aguarde alguns minutos e tente novamente.';
+                errorMessage = 'Muitas tentativas de login. Aguarde alguns minutos e tente novamente.';
             } else if (error.code === 'auth/network-request-failed') {
-                errorMessage = '❌ Erro de conexão. Verifique sua internet e tente novamente.';
+                errorMessage = 'Erro de conexão. Verifique sua internet e tente novamente.';
             }
 
-            alert(errorMessage);
+            showNotification(errorMessage, 'error');
             await createAuditLog(email, 'LOGIN_FAILED', `Error: ${error.code} - ${error.message}`).catch(e => console.error('Erro ao registrar auditoria:', e));
             submitBtn.disabled = false;
             submitBtn.innerHTML = '<span>Entrar</span>';
@@ -194,7 +297,7 @@ if (googleLoginBtn) {
             await checkPaymentAndRedirect(result.user);
         } catch (error) {
             console.error('❌ Erro no login com Google:', error);
-            alert('Erro ao fazer login com Google. Tente novamente.');
+            showNotification('Erro ao fazer login com Google. Tente novamente.', 'error');
             googleLoginBtn.disabled = false;
             googleLoginBtn.textContent = 'Continuar com Google';
         }
@@ -218,17 +321,17 @@ if (registerForm) {
 
         // Validação
         if (!nome || !email || !senha || !confirmarSenha) {
-            alert('❌ Por favor, preencha todos os campos.');
+            showNotification('Por favor, preencha todos os campos.', 'warning');
             return;
         }
 
         if (senha !== confirmarSenha) {
-            alert('❌ As senhas não coincidem. Tente novamente.');
+            showNotification('As senhas não coincidem. Tente novamente.', 'warning');
             return;
         }
 
         if (senha.length < 6) {
-            alert('❌ A senha deve ter no mínimo 6 caracteres.');
+            showNotification('A senha deve ter no mínimo 6 caracteres.', 'warning');
             return;
         }
 
@@ -241,6 +344,8 @@ if (registerForm) {
             const userCredential = await auth.createUserWithEmailAndPassword(email, senha);
 
             console.log('✅ Conta criada com sucesso!');
+            showNotification('Conta criada com sucesso! Redirecionando...', 'success');
+
             console.log('📝 Salvando dados no Data Connect...');
 
             // Criar usuário no Data Connect
@@ -252,8 +357,10 @@ if (registerForm) {
             console.log('✅ Dados salvos com sucesso!');
             console.log('➡️ Redirecionando para checkout...');
 
-            // Redirecionar para checkout
-            window.location.href = `checkout.html?uid=${userCredential.user.uid}`;
+            // Redirecionar para checkout após 1 segundo
+            setTimeout(() => {
+                window.location.href = `checkout.html?uid=${userCredential.user.uid}`;
+            }, 1000);
         } catch (error) {
             console.error('❌ Erro no cadastro:', error);
             console.error('Código do erro:', error.code);
@@ -262,16 +369,16 @@ if (registerForm) {
             let errorMessage = 'Erro ao criar conta. Tente novamente.';
 
             if (error.code === 'auth/email-already-in-use') {
-                errorMessage = '❌ Este e-mail já está cadastrado. Faça login na página inicial.';
+                errorMessage = 'Este e-mail já está cadastrado. Faça login na página inicial.';
             } else if (error.code === 'auth/invalid-email') {
-                errorMessage = '❌ E-mail inválido. Verifique o formato do e-mail.';
+                errorMessage = 'E-mail inválido. Verifique o formato do e-mail.';
             } else if (error.code === 'auth/weak-password') {
-                errorMessage = '❌ Senha muito fraca. Use no mínimo 6 caracteres.';
+                errorMessage = 'Senha muito fraca. Use no mínimo 6 caracteres.';
             } else if (error.code === 'auth/network-request-failed') {
-                errorMessage = '❌ Erro de conexão. Verifique sua internet e tente novamente.';
+                errorMessage = 'Erro de conexão. Verifique sua internet e tente novamente.';
             }
 
-            alert(errorMessage);
+            showNotification(errorMessage, 'error');
             await createAuditLog(email, 'REGISTER_FAILED', `Error: ${error.code} - ${error.message}`).catch(e => console.error('Erro ao registrar auditoria:', e));
             submitBtn.disabled = false;
             submitBtn.innerHTML = '<span>Criar Conta</span>';
@@ -308,7 +415,7 @@ if (googleRegisterBtn) {
             await checkPaymentAndRedirect(result.user);
         } catch (error) {
             console.error('❌ Erro no cadastro com Google:', error);
-            alert('Erro ao cadastrar com Google. Tente novamente.');
+            showNotification('Erro ao cadastrar com Google. Tente novamente.', 'error');
             googleRegisterBtn.disabled = false;
             googleRegisterBtn.textContent = 'Cadastrar com Google';
         }
