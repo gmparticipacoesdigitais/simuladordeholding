@@ -1,13 +1,13 @@
-I1007 23:43:23.046126   40412 load.go:31] Reloading schema and connectors...
-W1007 23:43:23.321872   40412 control.go:68] [/emulator/irpf-login ba9c] connector "irpf" has errors: irpf/mutations.gql:11:3: mutation.UpsertUser.user_upsert (data: User_Data): key id is required in upsert but is not set in data
+I1008 23:40:51.710072     672 load.go:31] Reloading schema and connectors...
+W1008 23:40:52.003553     672 control.go:68] [/emulator/irpf-login df83] connector "irpf" has errors: irpf/mutations.gql:11:3: mutation.UpsertUser.user_upsert (data: User_Data): key id is required in upsert but is not set in data
 
 sources: irpf/mutations.gql [3530B] irpf/queries.gql [2835B] 
-I1007 23:43:23.326284   40412 control.go:94] [/emulator/irpf-login ba9c] UpdateResources(): done
+I1008 23:40:52.019115     672 control.go:94] [/emulator/irpf-login df83] UpdateResources(): done
 Schema: sources: schema/schema.gql [2228B] 
 Connector "irpf": sources: irpf/mutations.gql [3530B] irpf/queries.gql [2835B] 
-E1007 23:43:23.364238   40412 load.go:73] Could not load sources: 
+E1008 23:40:52.047742     672 load.go:73] Could not load sources: 
 Errors: irpf/mutations.gql:11:3: mutation.UpsertUser.user_upsert (data: User_Data): key id is required in upsert but is not set in data
-I1007 23:43:23.368677   40412 collector.go:107] schema extensions wrote into "/home/user/irpf-login/dataconnect/.dataconnect/schema"
-Generated sources: main/mutation.gql [13895B] prelude.gql [73251B] main/implicit.gql [782B] main/input.gql [60530B] main/relation.gql [31642B] main/query.gql [5188B] 
-I1007 23:43:23.369922   40412 load.go:74] Finished reloading
-I1007 23:43:23.406339   40412 dev.go:102] Listening on address (HTTP + gRPC): 127.0.0.1:50001
+I1008 23:40:52.058877     672 collector.go:107] schema extensions wrote into "/home/user/irpf-login/dataconnect/.dataconnect/schema"
+Generated sources: main/query.gql [5188B] main/mutation.gql [13895B] prelude.gql [73251B] main/implicit.gql [782B] main/input.gql [60530B] main/relation.gql [31642B] 
+I1008 23:40:52.061373     672 load.go:74] Finished reloading
+I1008 23:40:52.077974     672 dev.go:102] Listening on address (HTTP + gRPC): 127.0.0.1:50001

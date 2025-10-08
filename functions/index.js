@@ -1,138 +1,376 @@
+// ============================================================================
+// FIREBASE CLOUD FUNCTIONS - Sistema de Pagamento com Stripe
+// Integração completa e robusta usando stripe-service.js
+// ============================================================================
+
 const functions = require('firebase-functions');
 const admin = require('firebase-admin');
-const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+const {
+  CheckoutSessionService,
+  SubscriptionService,
+  WebhookProcessor,
+  Logger
+} = require('./stripe-service');
 
 admin.initializeApp();
 
-// IDs do produto e preço do Stripe
-const STRIPE_PRICE_ID = 'price_1SEKNFIPGzIfZaTDXox4NygH';
+// ============================================================================
+// CORS MIDDLEWARE
+// ============================================================================
 
-// Criar sessão de checkout do Stripe
+const setCorsHeaders = (res) => {
+  res.set('Access-Control-Allow-Origin', '*');
+  res.set('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  res.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  res.set('Access-Control-Max-Age', '3600');
+};
+
+// ============================================================================
+// CREATE CHECKOUT SESSION
+// Cria sessão de checkout do Stripe com tratamento robusto de erros
+// ============================================================================
+
 exports.createCheckoutSession = functions.https.onRequest(async (req, res) => {
-    // Habilitar CORS
-    res.set('Access-Control-Allow-Origin', '*');
-    res.set('Access-Control-Allow-Methods', 'POST, OPTIONS');
-    res.set('Access-Control-Allow-Headers', 'Content-Type');
+  setCorsHeaders(res);
 
-    if (req.method === 'OPTIONS') {
-        res.status(204).send('');
-        return;
+  if (req.method === 'OPTIONS') {
+    res.status(204).send('');
+    return;
+  }
+
+  if (req.method !== 'POST') {
+    res.status(405).json({ error: 'Method Not Allowed' });
+    return;
+  }
+
+  try {
+    const { userId, userEmail, userName, priceId, trialDays } = req.body;
+
+    // Validações
+    if (!userId || !userEmail) {
+      Logger.warn('Requisição de checkout com dados incompletos', { userId, userEmail });
+      res.status(400).json({
+        error: 'Dados incompletos',
+        details: 'userId e userEmail são obrigatórios'
+      });
+      return;
     }
 
-    if (req.method !== 'POST') {
-        res.status(405).send('Method Not Allowed');
-        return;
+    // Validar formato de email
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(userEmail)) {
+      res.status(400).json({
+        error: 'Email inválido',
+        details: 'Forneça um endereço de email válido'
+      });
+      return;
     }
 
-    try {
-        const { priceId, userId, userEmail } = req.body;
+    const origin = req.headers.origin || req.headers.referer || 'http://localhost';
 
-        if (!userId || !userEmail) {
-            res.status(400).send('Dados incompletos');
-            return;
-        }
+    // Criar sessão usando o serviço
+    const session = await CheckoutSessionService.createSession(
+      userId,
+      userEmail,
+      userName,
+      {
+        priceId,
+        trialDays,
+        origin,
+        successUrl: `${origin}/success.html?session_id={CHECKOUT_SESSION_ID}`,
+        cancelUrl: `${origin}/checkout.html`
+      }
+    );
 
-        // Criar sessão de checkout
-        const session = await stripe.checkout.sessions.create({
-            payment_method_types: ['card'],
-            mode: 'subscription',
-            line_items: [
-                {
-                    price: priceId || STRIPE_PRICE_ID,
-                    quantity: 1,
-                },
-            ],
-            customer_email: userEmail,
-            metadata: {
-                userId: userId,
-            },
-            success_url: `${req.headers.origin || 'http://localhost'}/success.html?session_id={CHECKOUT_SESSION_ID}`,
-            cancel_url: `${req.headers.origin || 'http://localhost'}/checkout.html`,
-        });
+    Logger.info('Sessão de checkout criada com sucesso', {
+      userId,
+      sessionId: session.id
+    });
 
-        res.status(200).json({ sessionId: session.id });
-    } catch (error) {
-        console.error('Erro ao criar sessão:', error);
-        res.status(500).send('Erro ao criar sessão de checkout');
-    }
+    res.status(200).json({
+      success: true,
+      sessionId: session.id,
+      url: session.url
+    });
+
+  } catch (error) {
+    Logger.error('Erro ao criar sessão de checkout', {
+      error: error.message,
+      stack: error.stack
+    });
+
+    res.status(500).json({
+      error: 'Erro ao criar sessão de checkout',
+      details: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
+  }
 });
 
-// Webhook do Stripe para processar eventos
+// ============================================================================
+// STRIPE WEBHOOK
+// Processa eventos do Stripe com validação de assinatura
+// ============================================================================
+
 exports.stripeWebhook = functions.https.onRequest(async (req, res) => {
-    const sig = req.headers['stripe-signature'];
-    const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
+  const signature = req.headers['stripe-signature'];
 
-    let event;
+  if (!signature) {
+    Logger.warn('Webhook recebido sem assinatura');
+    res.status(400).json({ error: 'Missing stripe-signature header' });
+    return;
+  }
 
-    try {
-        event = stripe.webhooks.constructEvent(req.rawBody, sig, webhookSecret);
-    } catch (err) {
-        console.error('Erro ao verificar webhook:', err.message);
-        res.status(400).send(`Webhook Error: ${err.message}`);
-        return;
+  let event;
+
+  try {
+    // Construir e validar evento
+    event = WebhookProcessor.constructEvent(req.rawBody, signature);
+    Logger.info('Webhook recebido e validado', { type: event.type, id: event.id });
+  } catch (error) {
+    Logger.error('Falha na validação do webhook', { error: error.message });
+    res.status(400).json({ error: error.message });
+    return;
+  }
+
+  try {
+    // Processar evento
+    await WebhookProcessor.processEvent(event);
+
+    res.status(200).json({ received: true, processed: true });
+  } catch (error) {
+    Logger.error('Erro ao processar webhook', {
+      type: event.type,
+      id: event.id,
+      error: error.message
+    });
+
+    // Retornar 200 mesmo com erro para evitar retries desnecessários do Stripe
+    // O erro já foi logado e pode ser investigado
+    res.status(200).json({ received: true, processed: false });
+  }
+});
+
+// ============================================================================
+// CREATE BILLING PORTAL SESSION
+// Cria sessão do Customer Portal para gerenciamento de assinatura
+// ============================================================================
+
+exports.createPortalSession = functions.https.onRequest(async (req, res) => {
+  setCorsHeaders(res);
+
+  if (req.method === 'OPTIONS') {
+    res.status(204).send('');
+    return;
+  }
+
+  if (req.method !== 'POST') {
+    res.status(405).json({ error: 'Method Not Allowed' });
+    return;
+  }
+
+  try {
+    const { userId } = req.body;
+
+    if (!userId) {
+      res.status(400).json({ error: 'userId é obrigatório' });
+      return;
     }
 
-    // Processar eventos do Stripe
-    switch (event.type) {
-        case 'checkout.session.completed':
-            const session = event.data.object;
-            const userId = session.metadata.userId;
+    // Buscar dados do usuário
+    const snapshot = await admin.database().ref(`users/${userId}`).once('value');
+    const userData = snapshot.val();
 
-            if (userId && session.payment_status === 'paid') {
-                try {
-                    // Atualizar o documento do usuário no Firestore
-                    await admin.firestore().collection('users').doc(userId).set({
-                        hasPaid: true,
-                        stripeCustomerId: session.customer,
-                        subscriptionId: session.subscription,
-                        paidAt: admin.firestore.FieldValue.serverTimestamp(),
-                    }, { merge: true });
-
-                    console.log(`Pagamento confirmado para usuário ${userId}`);
-                } catch (error) {
-                    console.error('Erro ao atualizar usuário:', error);
-                }
-            }
-            break;
-
-        case 'customer.subscription.updated':
-        case 'customer.subscription.deleted':
-            const subscription = event.data.object;
-
-            try {
-                // Buscar usuário pelo customer ID
-                const usersSnapshot = await admin.firestore()
-                    .collection('users')
-                    .where('stripeCustomerId', '==', subscription.customer)
-                    .limit(1)
-                    .get();
-
-                if (!usersSnapshot.empty) {
-                    const userDoc = usersSnapshot.docs[0];
-                    const isActive = subscription.status === 'active';
-
-                    await userDoc.ref.update({
-                        hasPaid: isActive,
-                        subscriptionStatus: subscription.status,
-                        updatedAt: admin.firestore.FieldValue.serverTimestamp(),
-                    });
-
-                    console.log(`Assinatura atualizada: ${subscription.status}`);
-                }
-            } catch (error) {
-                console.error('Erro ao atualizar assinatura:', error);
-            }
-            break;
-
-        case 'invoice.payment_failed':
-            const invoice = event.data.object;
-            console.log('Pagamento falhou:', invoice.customer);
-            // Aqui você pode enviar um email ao usuário notificando sobre a falha
-            break;
-
-        default:
-            console.log(`Evento não tratado: ${event.type}`);
+    if (!userData || !userData.stripeCustomerId) {
+      Logger.warn('Usuário sem customer ID do Stripe', { userId });
+      res.status(404).json({
+        error: 'Cliente não encontrado',
+        details: 'Você precisa ter uma assinatura ativa'
+      });
+      return;
     }
 
-    res.status(200).json({ received: true });
+    const origin = req.headers.origin || req.headers.referer || 'http://localhost';
+    const returnUrl = `${origin}/account.html`;
+
+    // Criar sessão do portal
+    const session = await SubscriptionService.createBillingPortalSession(
+      userData.stripeCustomerId,
+      returnUrl
+    );
+
+    Logger.info('Portal de cobrança criado', { userId, customerId: userData.stripeCustomerId });
+
+    res.status(200).json({
+      success: true,
+      url: session.url
+    });
+
+  } catch (error) {
+    Logger.error('Erro ao criar portal de cobrança', {
+      error: error.message,
+      stack: error.stack
+    });
+
+    res.status(500).json({
+      error: 'Erro ao criar portal de cobrança',
+      details: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
+  }
+});
+
+// ============================================================================
+// GET SUBSCRIPTION STATUS
+// Retorna status detalhado da assinatura do usuário
+// ============================================================================
+
+exports.getSubscriptionStatus = functions.https.onRequest(async (req, res) => {
+  setCorsHeaders(res);
+
+  if (req.method === 'OPTIONS') {
+    res.status(204).send('');
+    return;
+  }
+
+  if (req.method !== 'GET') {
+    res.status(405).json({ error: 'Method Not Allowed' });
+    return;
+  }
+
+  try {
+    const userId = req.query.userId;
+
+    if (!userId) {
+      res.status(400).json({ error: 'userId é obrigatório' });
+      return;
+    }
+
+    // Buscar dados do usuário
+    const snapshot = await admin.database().ref(`users/${userId}`).once('value');
+    const userData = snapshot.val();
+
+    if (!userData) {
+      res.status(404).json({ error: 'Usuário não encontrado' });
+      return;
+    }
+
+    // Buscar detalhes da assinatura no Stripe se existir
+    let subscriptionDetails = null;
+    if (userData.subscriptionId) {
+      try {
+        const subscription = await SubscriptionService.getSubscription(userData.subscriptionId);
+        subscriptionDetails = {
+          id: subscription.id,
+          status: subscription.status,
+          currentPeriodStart: new Date(subscription.current_period_start * 1000).toISOString(),
+          currentPeriodEnd: new Date(subscription.current_period_end * 1000).toISOString(),
+          cancelAtPeriodEnd: subscription.cancel_at_period_end,
+          cancelAt: subscription.cancel_at ? new Date(subscription.cancel_at * 1000).toISOString() : null,
+        };
+      } catch (error) {
+        Logger.warn('Erro ao buscar assinatura no Stripe', {
+          userId,
+          subscriptionId: userData.subscriptionId,
+          error: error.message
+        });
+      }
+    }
+
+    res.status(200).json({
+      success: true,
+      user: {
+        hasPaid: userData.hasPaid || false,
+        subscriptionStatus: userData.subscriptionStatus,
+        subscriptionId: userData.subscriptionId,
+        stripeCustomerId: userData.stripeCustomerId,
+        lastPaymentStatus: userData.lastPaymentStatus,
+        cancelAtPeriodEnd: userData.cancelAtPeriodEnd,
+      },
+      subscription: subscriptionDetails
+    });
+
+  } catch (error) {
+    Logger.error('Erro ao buscar status de assinatura', {
+      error: error.message,
+      stack: error.stack
+    });
+
+    res.status(500).json({
+      error: 'Erro ao buscar status de assinatura',
+      details: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
+  }
+});
+
+// ============================================================================
+// CANCEL SUBSCRIPTION
+// Cancela assinatura do usuário
+// ============================================================================
+
+exports.cancelSubscription = functions.https.onRequest(async (req, res) => {
+  setCorsHeaders(res);
+
+  if (req.method === 'OPTIONS') {
+    res.status(204).send('');
+    return;
+  }
+
+  if (req.method !== 'POST') {
+    res.status(405).json({ error: 'Method Not Allowed' });
+    return;
+  }
+
+  try {
+    const { userId, immediate } = req.body;
+
+    if (!userId) {
+      res.status(400).json({ error: 'userId é obrigatório' });
+      return;
+    }
+
+    // Buscar dados do usuário
+    const snapshot = await admin.database().ref(`users/${userId}`).once('value');
+    const userData = snapshot.val();
+
+    if (!userData || !userData.subscriptionId) {
+      res.status(404).json({
+        error: 'Assinatura não encontrada',
+        details: 'Você não possui uma assinatura ativa'
+      });
+      return;
+    }
+
+    // Cancelar assinatura
+    const cancelAtPeriodEnd = !immediate;
+    const subscription = await SubscriptionService.cancelSubscription(
+      userData.subscriptionId,
+      cancelAtPeriodEnd
+    );
+
+    Logger.info('Assinatura cancelada por requisição do usuário', {
+      userId,
+      subscriptionId: userData.subscriptionId,
+      immediate
+    });
+
+    res.status(200).json({
+      success: true,
+      subscription: {
+        id: subscription.id,
+        status: subscription.status,
+        cancelAtPeriodEnd: subscription.cancel_at_period_end,
+        cancelAt: subscription.cancel_at ? new Date(subscription.cancel_at * 1000).toISOString() : null,
+      }
+    });
+
+  } catch (error) {
+    Logger.error('Erro ao cancelar assinatura', {
+      error: error.message,
+      stack: error.stack
+    });
+
+    res.status(500).json({
+      error: 'Erro ao cancelar assinatura',
+      details: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
+  }
 });

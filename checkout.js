@@ -1,9 +1,10 @@
 // ============================================================================
-// CHECKOUT.JS - Refatorado para usar Realtime Database
-// Sistema de checkout com Payment Link do Stripe
+// CHECKOUT.JS - Sistema de Checkout Melhorado com Stripe
+// Integração completa usando Cloud Functions e helpers
 // ============================================================================
 
 import { firebaseConfig, stripeConfig } from './firebase-config.js';
+import { StripeHelper, UIManager, ErrorHandler } from './stripe-helper.js';
 
 // Inicializar Firebase
 let auth, database;
@@ -14,19 +15,21 @@ try {
     auth = firebase.auth();
     database = firebase.database();
     console.log('✅ Firebase inicializado com sucesso no checkout');
-    console.log('🔑 Project ID:', firebaseConfig.projectId);
 } catch (error) {
     console.error('❌ Erro ao inicializar Firebase:', error);
     alert('Erro ao inicializar Firebase. Verifique sua configuração.');
 }
 
-// Payment Link do Stripe
-const STRIPE_PAYMENT_LINK = stripeConfig.paymentLink;
-console.log('💳 Payment Link configurado:', STRIPE_PAYMENT_LINK ? 'Sim' : 'Não');
+// Inicializar helper do Stripe
+const stripeHelper = new StripeHelper();
 
+// Elementos do DOM
 const checkoutButton = document.getElementById('checkout-button');
 const loadingDiv = document.getElementById('loading');
 const errorDiv = document.getElementById('error-message');
+
+// Controle de método de checkout
+let checkoutMethod = 'checkout_session'; // 'checkout_session' ou 'payment_link'
 
 // ============================================================================
 // VERIFICAR AUTENTICAÇÃO E STATUS DE PAGAMENTO
@@ -50,51 +53,98 @@ auth.onAuthStateChanged(async (user) => {
 
         if (userData && userData.hasPaid) {
             console.log('✅ Usuário já pagou! Redirecionando para app...');
-            window.location.href = 'app.html';
+            UIManager.showNotification('Você já possui uma assinatura ativa!', 'success');
+            setTimeout(() => {
+                window.location.href = 'app.html';
+            }, 1500);
             return;
         }
 
         console.log('💳 Pagamento pendente, mostrando opções de checkout...');
+
+        // Verificar se existe checkout pendente
+        if (userData && userData.pendingCheckoutSessionId) {
+            showPendingCheckoutWarning();
+        }
+
     } catch (error) {
         console.error('❌ Erro ao verificar pagamento:', error);
+        ErrorHandler.handle(error, 'verificação de pagamento');
     }
 });
 
 // ============================================================================
-// REDIRECIONAR PARA PAYMENT LINK DO STRIPE
+// MOSTRAR AVISO DE CHECKOUT PENDENTE
 // ============================================================================
 
-checkoutButton.addEventListener('click', async () => {
-    const user = auth.currentUser;
-    if (!user) {
-        errorDiv.innerHTML = '❌ Você precisa estar autenticado para continuar.';
-        errorDiv.style.display = 'block';
-        setTimeout(() => {
-            window.location.href = 'index.html';
-        }, 2000);
-        return;
-    }
+function showPendingCheckoutWarning() {
+    errorDiv.innerHTML = `
+        <i class="fas fa-info-circle"></i>
+        Você tem um checkout em andamento. Se não completou o pagamento, você pode iniciar um novo.
+    `;
+    errorDiv.style.display = 'block';
+    errorDiv.style.background = 'rgba(251, 146, 60, 0.1)';
+    errorDiv.style.borderColor = '#fb923c';
+    errorDiv.style.color = '#fdba74';
+}
 
-    checkoutButton.disabled = true;
-    loadingDiv.style.display = 'block';
-    errorDiv.style.display = 'none';
-    checkoutButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Redirecionando...';
+// ============================================================================
+// PROCESSAR CHECKOUT VIA CHECKOUT SESSION (MÉTODO RECOMENDADO)
+// ============================================================================
 
+async function processCheckoutSession(user) {
     try {
-        console.log('✅ Preparando redirecionamento para Stripe...');
-        console.log('👤 User ID:', user.uid);
-        console.log('📧 Email:', user.email);
-        console.log('🔗 Payment Link:', STRIPE_PAYMENT_LINK);
+        console.log('🎯 Processando checkout via Checkout Session...');
 
-        // Validar se o Payment Link está configurado
-        if (!STRIPE_PAYMENT_LINK || STRIPE_PAYMENT_LINK === 'SEU_LINK_DE_PAGAMENTO_DO_STRIPE') {
-            throw new Error('Payment Link do Stripe não configurado. Verifique firebase-config.js');
+        // Validar dados do usuário
+        if (!user.email) {
+            throw new Error('Email do usuário não encontrado');
         }
 
-        // Salvar informações do usuário no Realtime Database antes de redirecionar
-        const userRef = database.ref(`users/${user.uid}`);
+        // Salvar informações do usuário no banco antes de redirecionar
+        await database.ref(`users/${user.uid}`).update({
+            email: user.email,
+            displayName: user.displayName || 'Usuário',
+            pendingPayment: true,
+            checkoutInitiatedAt: firebase.database.ServerValue.TIMESTAMP,
+            updatedAt: firebase.database.ServerValue.TIMESTAMP
+        });
 
-        await userRef.update({
+        console.log('✅ Informações salvas no banco');
+
+        // Criar checkout session usando o helper
+        await stripeHelper.redirectToCheckout(
+            user.uid,
+            user.email,
+            user.displayName || 'Usuário',
+            {
+                priceId: stripeConfig.priceId
+            }
+        );
+
+    } catch (error) {
+        console.error('❌ Erro ao processar checkout session:', error);
+        throw error;
+    }
+}
+
+// ============================================================================
+// PROCESSAR CHECKOUT VIA PAYMENT LINK (MÉTODO ALTERNATIVO)
+// ============================================================================
+
+async function processPaymentLink(user) {
+    try {
+        console.log('🔗 Processando checkout via Payment Link...');
+
+        // Validar se o Payment Link está configurado
+        const PAYMENT_LINK = stripeConfig.paymentLink;
+
+        if (!PAYMENT_LINK || PAYMENT_LINK.includes('SEU_LINK')) {
+            throw new Error('Payment Link não configurado corretamente');
+        }
+
+        // Salvar informações do usuário no banco
+        await database.ref(`users/${user.uid}`).update({
             email: user.email,
             displayName: user.displayName || 'Usuário',
             pendingPayment: true,
@@ -102,33 +152,137 @@ checkoutButton.addEventListener('click', async () => {
             updatedAt: firebase.database.ServerValue.TIMESTAMP
         });
 
-        console.log('✅ Informações salvas no Realtime Database');
+        console.log('✅ Informações salvas no banco');
 
         // Construir URL do Payment Link com parâmetros
-        const paymentUrl = new URL(STRIPE_PAYMENT_LINK);
+        const paymentUrl = new URL(PAYMENT_LINK);
         paymentUrl.searchParams.set('client_reference_id', user.uid);
         paymentUrl.searchParams.set('prefilled_email', user.email);
 
-        console.log('🔗 URL completa:', paymentUrl.toString());
-        console.log('✅ Redirecionando em 1 segundo...');
+        console.log('🔗 Redirecionando para Payment Link...');
 
-        // Pequeno delay para dar feedback visual
+        // Redirecionar
         setTimeout(() => {
             window.location.href = paymentUrl.toString();
-        }, 1000);
+        }, 800);
 
     } catch (error) {
-        console.error('❌ Erro ao processar checkout:', error);
+        console.error('❌ Erro ao processar payment link:', error);
+        throw error;
+    }
+}
 
-        let errorMessage = 'Erro ao processar pagamento. Tente novamente.';
-        if (error.message.includes('Payment Link')) {
-            errorMessage = 'Payment Link não configurado. Entre em contato com o suporte.';
+// ============================================================================
+// HANDLER DO BOTÃO DE CHECKOUT
+// ============================================================================
+
+checkoutButton.addEventListener('click', async () => {
+    const user = auth.currentUser;
+
+    if (!user) {
+        UIManager.showNotification('Você precisa estar autenticado para continuar', 'error');
+        setTimeout(() => {
+            window.location.href = 'index.html';
+        }, 2000);
+        return;
+    }
+
+    // Desabilitar botão e mostrar loading
+    UIManager.setButtonLoading(checkoutButton, true);
+    loadingDiv.style.display = 'block';
+    errorDiv.style.display = 'none';
+
+    try {
+        console.log('🚀 Iniciando processo de checkout...');
+        console.log('👤 Usuário:', user.email);
+        console.log('📋 Método:', checkoutMethod);
+
+        // Escolher método de checkout
+        if (checkoutMethod === 'checkout_session') {
+            await processCheckoutSession(user);
+        } else {
+            await processPaymentLink(user);
         }
 
-        errorDiv.innerHTML = `❌ ${errorMessage}<br><small>${error.message}</small>`;
+        // Se chegou aqui sem redirecionar, mostrar mensagem
+        UIManager.showNotification('Redirecionando para pagamento...', 'info');
+
+    } catch (error) {
+        console.error('❌ Erro no processo de checkout:', error);
+
+        // Determinar mensagem de erro
+        let errorMessage = 'Erro ao processar pagamento. Tente novamente.';
+
+        if (error.message.includes('Payment Link')) {
+            errorMessage = 'Sistema de pagamento não configurado corretamente. Entre em contato com o suporte.';
+        } else if (error.message.includes('email')) {
+            errorMessage = 'Email do usuário inválido. Verifique suas informações.';
+        } else if (error.message.includes('Network') || error.message.includes('fetch')) {
+            errorMessage = 'Erro de conexão. Verifique sua internet e tente novamente.';
+        }
+
+        // Mostrar erro
+        errorDiv.innerHTML = `
+            <i class="fas fa-exclamation-circle"></i>
+            <strong>Erro:</strong> ${errorMessage}
+            ${error.message ? `<br><small style="opacity: 0.8;">${error.message}</small>` : ''}
+        `;
         errorDiv.style.display = 'block';
-        checkoutButton.disabled = false;
+        errorDiv.style.background = 'rgba(239, 68, 68, 0.1)';
+        errorDiv.style.borderColor = '#ef4444';
+
+        // Notificação
+        ErrorHandler.handle(error, 'checkout');
+
+        // Restaurar botão
+        UIManager.setButtonLoading(checkoutButton, false);
         checkoutButton.innerHTML = '<i class="fas fa-credit-card"></i> Tentar Novamente';
         loadingDiv.style.display = 'none';
     }
 });
+
+// ============================================================================
+// DETECÇÃO AUTOMÁTICA DO MELHOR MÉTODO
+// ============================================================================
+
+(async function detectCheckoutMethod() {
+    try {
+        // Tentar usar Checkout Session por padrão (mais robusto)
+        checkoutMethod = 'checkout_session';
+        console.log('✅ Método de checkout definido:', checkoutMethod);
+
+        // Se Payment Link estiver configurado e for preferido, usar ele
+        if (stripeConfig.preferPaymentLink && stripeConfig.paymentLink) {
+            checkoutMethod = 'payment_link';
+            console.log('🔄 Usando Payment Link (preferência configurada)');
+        }
+    } catch (error) {
+        console.error('❌ Erro ao detectar método:', error);
+    }
+})();
+
+// ============================================================================
+// LISTENER PARA MUDANÇAS NO STATUS DE PAGAMENTO
+// ============================================================================
+
+auth.onAuthStateChanged((user) => {
+    if (user) {
+        // Observar mudanças em tempo real
+        const userRef = database.ref(`users/${user.uid}`);
+
+        userRef.on('value', (snapshot) => {
+            const userData = snapshot.val();
+
+            if (userData && userData.hasPaid) {
+                console.log('🎉 Pagamento detectado! Redirecionando...');
+                UIManager.showNotification('Pagamento confirmado! Redirecionando...', 'success');
+
+                setTimeout(() => {
+                    window.location.href = 'app.html';
+                }, 1500);
+            }
+        });
+    }
+});
+
+console.log('✅ Checkout.js inicializado com sucesso');
