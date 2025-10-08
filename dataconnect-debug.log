@@ -1,12 +1,23 @@
-I1007 20:06:35.004022     715 load.go:31] Reloading schema and connectors...
-I1007 20:06:35.121858     715 control.go:94] [/emulator/irpf-login c955] UpdateResources(): done
+I1007 20:13:05.319410    2088 load.go:31] Reloading schema and connectors...
+I1007 20:13:05.640253    2088 control.go:94] [/emulator/irpf-login 5ba4] UpdateResources(): done
 Schema: sources: schema/schema.gql [2228B] 
 Connector "irpf": sources: irpf/mutations.gql [3559B] irpf/queries.gql [2835B] 
-I1007 20:06:35.239757     715 codegen.go:82] [connector "irpf" javascriptSdk] Generating sources into "/home/user/irpf-login/src/dataconnect-generated"
-I1007 20:06:35.262198     715 collector.go:107] schema extensions wrote into "/home/user/irpf-login/dataconnect/.dataconnect/schema"
-Generated sources: main/query.gql [5188B] main/mutation.gql [13895B] prelude.gql [73251B] main/implicit.gql [782B] main/input.gql [60530B] main/relation.gql [31642B] 
-I1007 20:06:35.263745     715 collector.go:107] connector "irpf" javascriptSdk wrote into "/home/user/irpf-login/src/dataconnect-generated"
-Generated sources: index.cjs.js [7997B] package.json [634B] README.md [81528B] index.d.ts [17380B] esm/index.esm.js [6956B] esm/package.json [17B] 
-I1007 20:06:35.263794     715 installsdk.go:138] generate.javascriptSdk.packageJsonDir is not specified, skipping automatic installation of JS package
-I1007 20:06:35.263843     715 load.go:109] Finished reloading
-I1007 20:06:35.277030     715 dev.go:102] Listening on address (HTTP + gRPC): 127.0.0.1:50001
+I1007 20:13:05.938975    2088 codegen.go:82] [connector "irpf" javascriptSdk] Generating sources into "/home/user/irpf-login/src/dataconnect-generated"
+I1007 20:13:05.976745    2088 collector.go:107] schema extensions wrote into "/home/user/irpf-login/dataconnect/.dataconnect/schema"
+Generated sources: main/implicit.gql [782B] main/input.gql [60530B] main/relation.gql [31642B] prelude.gql [73251B] main/query.gql [5188B] main/mutation.gql [13895B] 
+I1007 20:13:05.980814    2088 collector.go:107] connector "irpf" javascriptSdk wrote into "/home/user/irpf-login/src/dataconnect-generated"
+Generated sources: index.d.ts [17380B] esm/index.esm.js [6956B] esm/package.json [17B] index.cjs.js [7997B] package.json [634B] README.md [81528B] 
+I1007 20:13:05.981177    2088 installsdk.go:138] generate.javascriptSdk.packageJsonDir is not specified, skipping automatic installation of JS package
+I1007 20:13:05.981213    2088 load.go:109] Finished reloading
+I1007 20:13:05.993897    2088 dev.go:102] Listening on address (HTTP + gRPC): 127.0.0.1:50001
+I1007 21:34:15.994269    2088 load.go:31] Reloading schema and connectors...
+W1007 21:34:16.148757    2088 control.go:68] [/emulator/irpf-login 5ba4] connector "irpf" has errors: irpf/mutations.gql:11:3: mutation.UpsertUser.user_upsert (data: User_Data): key id is required in upsert but is not set in data
+
+sources: irpf/mutations.gql [3530B] irpf/queries.gql [2835B] 
+I1007 21:34:16.150402    2088 control.go:94] [/emulator/irpf-login 5ba4] UpdateResources(): done
+Connector "irpf": sources: irpf/queries.gql [2835B] irpf/mutations.gql [3530B] 
+E1007 21:34:16.158613    2088 load.go:73] Could not load sources: 
+Errors: irpf/mutations.gql:11:3: mutation.UpsertUser.user_upsert (data: User_Data): key id is required in upsert but is not set in data
+I1007 21:34:16.171884    2088 collector.go:107] schema extensions wrote into "/home/user/irpf-login/dataconnect/.dataconnect/schema"
+Generated sources: main/mutation.gql [13895B] main/implicit.gql [782B] main/input.gql [60530B] main/relation.gql [31642B] main/query.gql [5188B] prelude.gql [73251B] 
+I1007 21:34:16.171935    2088 load.go:74] Finished reloading

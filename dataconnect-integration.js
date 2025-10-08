@@ -38,12 +38,11 @@ import {
 
 /**
  * Buscar ou criar usuário no Data Connect
- * @param {string} userId - Firebase Auth UID
  * @param {string} email
  * @param {string} displayName
  * @param {string} provider - 'email' ou 'google'
  */
-export async function upsertUser(userId, email, displayName, provider) {
+export async function upsertUser(email, displayName, provider) {
   try {
     await UpsertUser({
       email,

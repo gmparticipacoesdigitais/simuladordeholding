@@ -4,14 +4,12 @@
 
 # Criar ou atualizar usuário
 mutation UpsertUser(
-  $id: String!
   $email: String!
   $displayName: String
   $provider: String
 ) @auth(level: USER) {
   user_upsert(
     data: {
-      id: $id
       email: $email
       displayName: $displayName
       provider: $provider

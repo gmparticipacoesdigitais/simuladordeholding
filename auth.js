@@ -1,22 +1,38 @@
 // ============================================================================
-// AUTH.JS - Refatorado para usar Realtime Database e firebase-config.js
-// Sistema completo de autenticação com verificação de pagamento
+// AUTH.JS - Sistema de autenticação com Firebase Data Connect + Stripe
 // ============================================================================
 
 import { firebaseConfig, stripeConfig } from './firebase-config.js';
+import {
+    upsertUser,
+    checkPaymentStatus,
+    updateUserLogin,
+    createAuditLog
+} from './dataconnect-integration.js';
 
 // Inicializar Firebase
-let auth, database;
+let auth;
+let isFirebaseInitialized = false;
+
 try {
     if (!firebase.apps.length) {
         firebase.initializeApp(firebaseConfig);
     }
     auth = firebase.auth();
-    database = firebase.database();
-    console.log('✅ Firebase inicializado com sucesso (Realtime Database)');
+    isFirebaseInitialized = true;
+    console.log('✅ Firebase inicializado com sucesso');
+    console.log('🔑 Project ID:', firebaseConfig.projectId);
 } catch (error) {
     console.error('❌ Erro ao inicializar Firebase:', error);
-    alert('Erro ao inicializar Firebase. Verifique sua configuração.');
+    alert('❌ Erro ao inicializar Firebase. Verifique sua configuração e recarregue a página.');
+}
+
+// Verificar se Firebase está inicializado antes de qualquer operação
+function checkFirebaseInit() {
+    if (!isFirebaseInitialized || !auth) {
+        throw new Error('Firebase não está inicializado');
+    }
+    return true;
 }
 
 // Produtos Stripe
@@ -28,18 +44,15 @@ const STRIPE_PRICE_ID = stripeConfig.priceId;
 // ============================================================================
 
 /**
- * Verifica se o usuário já pagou
+ * Verifica se o usuário já pagou usando Data Connect
  * @param {string} uid - ID do usuário
  * @returns {Promise<boolean>}
  */
 async function checkUserPayment(uid) {
     try {
-        const snapshot = await database.ref(`users/${uid}`).once('value');
-        const userData = snapshot.val();
-
-        console.log('📊 Dados do usuário:', userData);
-
-        return userData && userData.hasPaid === true;
+        const hasPaid = await checkPaymentStatus(uid);
+        console.log('📊 Status de pagamento:', hasPaid ? 'PAGO' : 'PENDENTE');
+        return hasPaid;
     } catch (error) {
         console.error('❌ Erro ao verificar pagamento:', error);
         return false;
@@ -53,7 +66,6 @@ async function checkUserPayment(uid) {
 async function checkPaymentAndRedirect(user) {
     try {
         const hasPaid = await checkUserPayment(user.uid);
-
         const currentPage = window.location.pathname.split('/').pop() || 'index.html';
 
         console.log(`✅ Usuário: ${user.email}`);
@@ -77,32 +89,18 @@ async function checkPaymentAndRedirect(user) {
     }
 }
 
-/**
- * Atualiza o lastLogin do usuário no Realtime Database
- * @param {string} uid - ID do usuário
- */
-async function updateLastLogin(uid) {
-    try {
-        await database.ref(`users/${uid}`).update({
-            lastLogin: firebase.database.ServerValue.TIMESTAMP
-        });
-        console.log('✅ lastLogin atualizado para o usuário:', uid);
-    } catch (error) {
-        console.error('❌ Erro ao atualizar lastLogin:', error);
-    }
-}
-
 // ============================================================================
 // VERIFICAR AUTENTICAÇÃO
 // ============================================================================
 
 auth.onAuthStateChanged(async (user) => {
-    // Só redirecionar se não estiver na página de login ou registro
     const currentPage = window.location.pathname.split('/').pop() || 'index.html';
 
     if (user && (currentPage === 'index.html' || currentPage === '')) {
-        // Se o usuário está logado e na página inicial/login, atualiza o lastLogin
-        await updateLastLogin(user.uid);
+        // Atualizar último login no Data Connect
+        await updateUserLogin(user.uid);
+        // Log de auditoria
+        await createAuditLog(user.uid, 'LOGIN', `Login from ${currentPage}`);
         await checkPaymentAndRedirect(user);
     }
 });
@@ -116,35 +114,51 @@ if (loginForm) {
     loginForm.addEventListener('submit', async (e) => {
         e.preventDefault();
 
-        const email = loginForm.querySelector('input[name="e-mail"]').value;
+        const email = loginForm.querySelector('input[name="e-mail"]').value.trim();
         const senha = loginForm.querySelector('input[name="senha"]').value;
         const submitBtn = loginForm.querySelector('button[type="submit"]');
+
+        // Validação básica
+        if (!email || !senha) {
+            alert('❌ Por favor, preencha todos os campos.');
+            return;
+        }
 
         submitBtn.disabled = true;
         submitBtn.innerHTML = '<span>Entrando...</span>';
 
         try {
+            checkFirebaseInit();
             console.log('🔐 Tentando fazer login com:', email);
             const userCredential = await auth.signInWithEmailAndPassword(email, senha);
             console.log('✅ Login bem-sucedido!');
 
-            await updateLastLogin(userCredential.user.uid);
+            await updateUserLogin(userCredential.user.uid);
+            await createAuditLog(userCredential.user.uid, 'LOGIN_SUCCESS', `Email: ${email}`);
             await checkPaymentAndRedirect(userCredential.user);
         } catch (error) {
             console.error('❌ Erro no login:', error);
+            console.error('Código do erro:', error.code);
+            console.error('Mensagem do erro:', error.message);
+
             let errorMessage = 'Erro ao fazer login. Tente novamente.';
 
             if (error.code === 'auth/user-not-found') {
-                errorMessage = 'Usuário não encontrado. Verifique seu e-mail.';
+                errorMessage = '❌ Usuário não encontrado. Verifique seu e-mail ou crie uma conta.';
             } else if (error.code === 'auth/wrong-password') {
-                errorMessage = 'Senha incorreta. Tente novamente.';
+                errorMessage = '❌ Senha incorreta. Tente novamente.';
             } else if (error.code === 'auth/invalid-email') {
-                errorMessage = 'E-mail inválido.';
+                errorMessage = '❌ E-mail inválido. Verifique o formato do e-mail.';
             } else if (error.code === 'auth/invalid-credential') {
-                errorMessage = 'E-mail ou senha incorretos.';
+                errorMessage = '❌ E-mail ou senha incorretos. Verifique seus dados.';
+            } else if (error.code === 'auth/too-many-requests') {
+                errorMessage = '❌ Muitas tentativas de login. Aguarde alguns minutos e tente novamente.';
+            } else if (error.code === 'auth/network-request-failed') {
+                errorMessage = '❌ Erro de conexão. Verifique sua internet e tente novamente.';
             }
 
             alert(errorMessage);
+            await createAuditLog(email, 'LOGIN_FAILED', `Error: ${error.code} - ${error.message}`).catch(e => console.error('Erro ao registrar auditoria:', e));
             submitBtn.disabled = false;
             submitBtn.innerHTML = '<span>Entrar</span>';
         }
@@ -168,25 +182,15 @@ if (googleLoginBtn) {
 
             console.log('✅ Login com Google bem-sucedido!');
 
-            // Criar/atualizar documento do usuário no Realtime Database
-            const userRef = database.ref(`users/${result.user.uid}`);
-            const snapshot = await userRef.once('value');
+            // Criar/atualizar usuário no Data Connect
+            await upsertUser(
+                result.user.email,
+                result.user.displayName,
+                'google'
+            );
 
-            if (!snapshot.exists()) {
-                console.log('📝 Criando novo usuário no database');
-                await userRef.set({
-                    email: result.user.email,
-                    displayName: result.user.displayName,
-                    createdAt: firebase.database.ServerValue.TIMESTAMP,
-                    hasPaid: false,
-                    provider: 'google',
-                    lastLogin: firebase.database.ServerValue.TIMESTAMP
-                });
-            } else {
-                console.log('✅ Usuário já existe no database');
-                await updateLastLogin(result.user.uid);
-            }
-
+            await updateUserLogin(result.user.uid);
+            await createAuditLog(result.user.uid, 'GOOGLE_LOGIN', `Email: ${result.user.email}`);
             await checkPaymentAndRedirect(result.user);
         } catch (error) {
             console.error('❌ Erro no login com Google:', error);
@@ -206,19 +210,25 @@ if (registerForm) {
     registerForm.addEventListener('submit', async (e) => {
         e.preventDefault();
 
-        const nome = registerForm.querySelector('input[name="nome"]').value;
-        const email = registerForm.querySelector('input[name="email"]').value;
+        const nome = registerForm.querySelector('input[name="nome"]').value.trim();
+        const email = registerForm.querySelector('input[name="email"]').value.trim();
         const senha = registerForm.querySelector('input[name="senha"]').value;
         const confirmarSenha = registerForm.querySelector('input[name="confirmar-senha"]').value;
         const submitBtn = registerForm.querySelector('button[type="submit"]');
 
+        // Validação
+        if (!nome || !email || !senha || !confirmarSenha) {
+            alert('❌ Por favor, preencha todos os campos.');
+            return;
+        }
+
         if (senha !== confirmarSenha) {
-            alert('As senhas não coincidem. Tente novamente.');
+            alert('❌ As senhas não coincidem. Tente novamente.');
             return;
         }
 
         if (senha.length < 6) {
-            alert('A senha deve ter no mínimo 6 caracteres.');
+            alert('❌ A senha deve ter no mínimo 6 caracteres.');
             return;
         }
 
@@ -226,21 +236,18 @@ if (registerForm) {
         submitBtn.innerHTML = '<span>Criando conta...</span>';
 
         try {
+            checkFirebaseInit();
             console.log('📝 Criando nova conta para:', email);
             const userCredential = await auth.createUserWithEmailAndPassword(email, senha);
 
             console.log('✅ Conta criada com sucesso!');
-            console.log('📝 Salvando dados no Realtime Database...');
+            console.log('📝 Salvando dados no Data Connect...');
 
-            // Criar documento do usuário no Realtime Database
-            await database.ref(`users/${userCredential.user.uid}`).set({
-                displayName: nome,
-                email: email,
-                createdAt: firebase.database.ServerValue.TIMESTAMP,
-                hasPaid: false,
-                provider: 'email',
-                lastLogin: firebase.database.ServerValue.TIMESTAMP // Adicionar lastLogin no cadastro inicial
-            });
+            // Criar usuário no Data Connect
+            await upsertUser(email, nome, 'email');
+
+            await updateUserLogin(userCredential.user.uid);
+            await createAuditLog(userCredential.user.uid, 'REGISTER', `New user: ${email}`);
 
             console.log('✅ Dados salvos com sucesso!');
             console.log('➡️ Redirecionando para checkout...');
@@ -249,17 +256,23 @@ if (registerForm) {
             window.location.href = `checkout.html?uid=${userCredential.user.uid}`;
         } catch (error) {
             console.error('❌ Erro no cadastro:', error);
+            console.error('Código do erro:', error.code);
+            console.error('Mensagem do erro:', error.message);
+
             let errorMessage = 'Erro ao criar conta. Tente novamente.';
 
             if (error.code === 'auth/email-already-in-use') {
-                errorMessage = 'Este e-mail já está cadastrado. Faça login.';
+                errorMessage = '❌ Este e-mail já está cadastrado. Faça login na página inicial.';
             } else if (error.code === 'auth/invalid-email') {
-                errorMessage = 'E-mail inválido.';
+                errorMessage = '❌ E-mail inválido. Verifique o formato do e-mail.';
             } else if (error.code === 'auth/weak-password') {
-                errorMessage = 'Senha muito fraca. Use no mínimo 6 caracteres.';
+                errorMessage = '❌ Senha muito fraca. Use no mínimo 6 caracteres.';
+            } else if (error.code === 'auth/network-request-failed') {
+                errorMessage = '❌ Erro de conexão. Verifique sua internet e tente novamente.';
             }
 
             alert(errorMessage);
+            await createAuditLog(email, 'REGISTER_FAILED', `Error: ${error.code} - ${error.message}`).catch(e => console.error('Erro ao registrar auditoria:', e));
             submitBtn.disabled = false;
             submitBtn.innerHTML = '<span>Criar Conta</span>';
         }
@@ -283,22 +296,15 @@ if (googleRegisterBtn) {
 
             console.log('✅ Cadastro com Google bem-sucedido!');
 
-            // Criar documento do usuário no Realtime Database
-            const userRef = database.ref(`users/${result.user.uid}`);
-            const snapshot = await userRef.once('value');
+            // Criar usuário no Data Connect
+            await upsertUser(
+                result.user.email,
+                result.user.displayName,
+                'google'
+            );
 
-            if (!snapshot.exists()) {
-                console.log('📝 Criando novo usuário no database');
-                await userRef.set({
-                    email: result.user.email,
-                    displayName: result.user.displayName,
-                    createdAt: firebase.database.ServerValue.TIMESTAMP,
-                    hasPaid: false,
-                    provider: 'google',
-                    lastLogin: firebase.database.ServerValue.TIMESTAMP
-                });
-            }
-
+            await updateUserLogin(result.user.uid);
+            await createAuditLog(result.user.uid, 'GOOGLE_REGISTER', `Email: ${result.user.email}`);
             await checkPaymentAndRedirect(result.user);
         } catch (error) {
             console.error('❌ Erro no cadastro com Google:', error);

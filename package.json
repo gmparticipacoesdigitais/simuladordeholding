@@ -4,6 +4,7 @@
   "description": "Calculadora de Imposto de Renda com autenticação Firebase e pagamento Stripe",
   "main": "index.html",
   "scripts": {
+    "dev": "vite",
     "start": "vite",
     "build": "vite build",
     "serve": "vite preview"
