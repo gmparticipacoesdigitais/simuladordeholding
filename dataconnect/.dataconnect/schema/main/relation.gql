@@ -538,6 +538,24 @@ extend type Payment {
     distinct: Boolean = false
   ): Int! @fdc_generated(from: "Payment.currency", purpose: QUERY_COUNT)
   """
+  ✨ Count the number of rows in the `Payment` table where the `customer` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
+  """
+  customer_count(
+    """
+    Set to true to count the number of distinct values.
+    """
+    distinct: Boolean = false
+  ): Int! @fdc_generated(from: "Payment.customer", purpose: QUERY_COUNT)
+  """
+  ✨ Count the number of rows in the `Payment` table where the `description` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
+  """
+  description_count(
+    """
+    Set to true to count the number of distinct values.
+    """
+    distinct: Boolean = false
+  ): Int! @fdc_generated(from: "Payment.description", purpose: QUERY_COUNT)
+  """
   ✨ Count the number of rows in the `Payment` table where the `id` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
   """
   id_count(
@@ -546,6 +564,15 @@ extend type Payment {
     """
     distinct: Boolean = false
   ): Int! @fdc_generated(from: "Payment.id", purpose: QUERY_COUNT)
+  """
+  ✨ Count the number of rows in the `Payment` table where the `invoiceId` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
+  """
+  invoiceId_count(
+    """
+    Set to true to count the number of distinct values.
+    """
+    distinct: Boolean = false
+  ): Int! @fdc_generated(from: "Payment.invoiceId", purpose: QUERY_COUNT)
   """
   ✨ Count the number of rows in the `Payment` table where the `paymentMethod` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
   """
@@ -582,6 +609,24 @@ extend type Payment {
     """
     distinct: Boolean = false
   ): Int! @fdc_generated(from: "Payment.stripeSessionId", purpose: QUERY_COUNT)
+  """
+  ✨ Count the number of rows in the `Payment` table where the `subscription` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
+  """
+  subscription_count(
+    """
+    Set to true to count the number of distinct values.
+    """
+    distinct: Boolean = false
+  ): Int! @fdc_generated(from: "Payment.subscription", purpose: QUERY_COUNT)
+  """
+  ✨ Count the number of rows in the `Payment` table where the `type` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
+  """
+  type_count(
+    """
+    Set to true to count the number of distinct values.
+    """
+    distinct: Boolean = false
+  ): Int! @fdc_generated(from: "Payment.type", purpose: QUERY_COUNT)
   """
   ✨ Count the number of rows in the `Payment` table where the `userId` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
   """
@@ -746,6 +791,24 @@ extend type User {
   """
   _count: Int! @fdc_generated(from: "User.", purpose: QUERY_COUNT)
   """
+  ✨ Count the number of rows in the `User` table where the `cancelAtPeriodEnd` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
+  """
+  cancelAtPeriodEnd_count(
+    """
+    Set to true to count the number of distinct values.
+    """
+    distinct: Boolean = false
+  ): Int! @fdc_generated(from: "User.cancelAtPeriodEnd", purpose: QUERY_COUNT)
+  """
+  ✨ Count the number of rows in the `User` table where the `checkoutInitiatedAt` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
+  """
+  checkoutInitiatedAt_count(
+    """
+    Set to true to count the number of distinct values.
+    """
+    distinct: Boolean = false
+  ): Int! @fdc_generated(from: "User.checkoutInitiatedAt", purpose: QUERY_COUNT)
+  """
   ✨ Count the number of rows in the `User` table where the `createdAt` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
   """
   createdAt_count(
@@ -800,6 +863,60 @@ extend type User {
     distinct: Boolean = false
   ): Int! @fdc_generated(from: "User.lastLogin", purpose: QUERY_COUNT)
   """
+  ✨ Count the number of rows in the `User` table where the `lastPaymentAmount` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
+  """
+  lastPaymentAmount_count(
+    """
+    Set to true to count the number of distinct values.
+    """
+    distinct: Boolean = false
+  ): Int! @fdc_generated(from: "User.lastPaymentAmount", purpose: QUERY_COUNT)
+  """
+  ✨ Count the number of rows in the `User` table where the `lastPaymentDate` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
+  """
+  lastPaymentDate_count(
+    """
+    Set to true to count the number of distinct values.
+    """
+    distinct: Boolean = false
+  ): Int! @fdc_generated(from: "User.lastPaymentDate", purpose: QUERY_COUNT)
+  """
+  ✨ Count the number of rows in the `User` table where the `lastPaymentStatus` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
+  """
+  lastPaymentStatus_count(
+    """
+    Set to true to count the number of distinct values.
+    """
+    distinct: Boolean = false
+  ): Int! @fdc_generated(from: "User.lastPaymentStatus", purpose: QUERY_COUNT)
+  """
+  ✨ Count the number of rows in the `User` table where the `paymentRetryCount` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
+  """
+  paymentRetryCount_count(
+    """
+    Set to true to count the number of distinct values.
+    """
+    distinct: Boolean = false
+  ): Int! @fdc_generated(from: "User.paymentRetryCount", purpose: QUERY_COUNT)
+  """
+  ✨ Count the number of rows in the `User` table where the `pendingCheckoutSessionId` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
+  """
+  pendingCheckoutSessionId_count(
+    """
+    Set to true to count the number of distinct values.
+    """
+    distinct: Boolean = false
+  ): Int! @fdc_generated(from: "User.pendingCheckoutSessionId", purpose: QUERY_COUNT)
+  """
+  ✨ Count the number of rows in the `User` table where the `pendingPayment` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
+  """
+  pendingPayment_count(
+    """
+    Set to true to count the number of distinct values.
+    """
+    distinct: Boolean = false
+  ): Int! @fdc_generated(from: "User.pendingPayment", purpose: QUERY_COUNT)
+  """
   ✨ Count the number of rows in the `User` table where the `provider` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
   """
   provider_count(
@@ -818,6 +935,33 @@ extend type User {
     distinct: Boolean = false
   ): Int! @fdc_generated(from: "User.stripeCustomerId", purpose: QUERY_COUNT)
   """
+  ✨ Count the number of rows in the `User` table where the `subscriptionCanceledAt` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
+  """
+  subscriptionCanceledAt_count(
+    """
+    Set to true to count the number of distinct values.
+    """
+    distinct: Boolean = false
+  ): Int! @fdc_generated(from: "User.subscriptionCanceledAt", purpose: QUERY_COUNT)
+  """
+  ✨ Count the number of rows in the `User` table where the `subscriptionId` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
+  """
+  subscriptionId_count(
+    """
+    Set to true to count the number of distinct values.
+    """
+    distinct: Boolean = false
+  ): Int! @fdc_generated(from: "User.subscriptionId", purpose: QUERY_COUNT)
+  """
+  ✨ Count the number of rows in the `User` table where the `subscriptionStatus` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
+  """
+  subscriptionStatus_count(
+    """
+    Set to true to count the number of distinct values.
+    """
+    distinct: Boolean = false
+  ): Int! @fdc_generated(from: "User.subscriptionStatus", purpose: QUERY_COUNT)
+  """
   ✨ Count the number of rows in the `User` table where the `updatedAt` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
   """
   updatedAt_count(
@@ -827,6 +971,46 @@ extend type User {
     distinct: Boolean = false
   ): Int! @fdc_generated(from: "User.updatedAt", purpose: QUERY_COUNT)
   """
+  ✨ Sum the `lastPaymentAmount` field in the `User` table.
+  """
+  lastPaymentAmount_sum(
+    """
+    Set to true to sum the distinct values.
+    """
+    distinct: Boolean = false
+  ): Float @fdc_generated(from: "User.lastPaymentAmount", purpose: QUERY_SUM)
+  """
+  ✨ Sum the `paymentRetryCount` field in the `User` table.
+  """
+  paymentRetryCount_sum(
+    """
+    Set to true to sum the distinct values.
+    """
+    distinct: Boolean = false
+  ): Int @fdc_generated(from: "User.paymentRetryCount", purpose: QUERY_SUM)
+  """
+  ✨ Average the `lastPaymentAmount` field in the `User` table.
+  """
+  lastPaymentAmount_avg(
+    """
+    Set to true to average the distinct values.
+    """
+    distinct: Boolean = false
+  ): Float @fdc_generated(from: "User.lastPaymentAmount", purpose: QUERY_AVG)
+  """
+  ✨ Average the `paymentRetryCount` field in the `User` table.
+  """
+  paymentRetryCount_avg(
+    """
+    Set to true to average the distinct values.
+    """
+    distinct: Boolean = false
+  ): Float @fdc_generated(from: "User.paymentRetryCount", purpose: QUERY_AVG)
+  """
+  ✨ Minimum of the `checkoutInitiatedAt` field in the `User` table.
+  """
+  checkoutInitiatedAt_min: Timestamp @fdc_generated(from: "User.checkoutInitiatedAt", purpose: QUERY_MIN)
+  """
   ✨ Minimum of the `createdAt` field in the `User` table.
   """
   createdAt_min: Timestamp @fdc_generated(from: "User.createdAt", purpose: QUERY_MIN)
@@ -835,9 +1019,29 @@ extend type User {
   """
   lastLogin_min: Timestamp @fdc_generated(from: "User.lastLogin", purpose: QUERY_MIN)
   """
+  ✨ Minimum of the `lastPaymentAmount` field in the `User` table.
+  """
+  lastPaymentAmount_min: Float @fdc_generated(from: "User.lastPaymentAmount", purpose: QUERY_MIN)
+  """
+  ✨ Minimum of the `lastPaymentDate` field in the `User` table.
+  """
+  lastPaymentDate_min: Timestamp @fdc_generated(from: "User.lastPaymentDate", purpose: QUERY_MIN)
+  """
+  ✨ Minimum of the `paymentRetryCount` field in the `User` table.
+  """
+  paymentRetryCount_min: Int @fdc_generated(from: "User.paymentRetryCount", purpose: QUERY_MIN)
+  """
+  ✨ Minimum of the `subscriptionCanceledAt` field in the `User` table.
+  """
+  subscriptionCanceledAt_min: Timestamp @fdc_generated(from: "User.subscriptionCanceledAt", purpose: QUERY_MIN)
+  """
   ✨ Minimum of the `updatedAt` field in the `User` table.
   """
   updatedAt_min: Timestamp @fdc_generated(from: "User.updatedAt", purpose: QUERY_MIN)
+  """
+  ✨ Maximum of the `checkoutInitiatedAt` field in the `User` table.
+  """
+  checkoutInitiatedAt_max: Timestamp @fdc_generated(from: "User.checkoutInitiatedAt", purpose: QUERY_MAX)
   """
   ✨ Maximum of the `createdAt` field in the `User` table.
   """
@@ -847,7 +1051,104 @@ extend type User {
   """
   lastLogin_max: Timestamp @fdc_generated(from: "User.lastLogin", purpose: QUERY_MAX)
   """
+  ✨ Maximum of the `lastPaymentAmount` field in the `User` table.
+  """
+  lastPaymentAmount_max: Float @fdc_generated(from: "User.lastPaymentAmount", purpose: QUERY_MAX)
+  """
+  ✨ Maximum of the `lastPaymentDate` field in the `User` table.
+  """
+  lastPaymentDate_max: Timestamp @fdc_generated(from: "User.lastPaymentDate", purpose: QUERY_MAX)
+  """
+  ✨ Maximum of the `paymentRetryCount` field in the `User` table.
+  """
+  paymentRetryCount_max: Int @fdc_generated(from: "User.paymentRetryCount", purpose: QUERY_MAX)
+  """
+  ✨ Maximum of the `subscriptionCanceledAt` field in the `User` table.
+  """
+  subscriptionCanceledAt_max: Timestamp @fdc_generated(from: "User.subscriptionCanceledAt", purpose: QUERY_MAX)
+  """
   ✨ Maximum of the `updatedAt` field in the `User` table.
   """
   updatedAt_max: Timestamp @fdc_generated(from: "User.updatedAt", purpose: QUERY_MAX)
+}
+extend type WebhookLog {
+  """
+  Implicit metadata field that cannot be written. It provides extra information about query results.
+  """
+  _metadata: _Metadata @fdc_generated(from: "WebhookLog", purpose: METADATA_FIELD)
+  """
+  ✨ Count the number of rows in the `WebhookLog` table.
+  """
+  _count: Int! @fdc_generated(from: "WebhookLog.", purpose: QUERY_COUNT)
+  """
+  ✨ Count the number of rows in the `WebhookLog` table where the `error` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
+  """
+  error_count(
+    """
+    Set to true to count the number of distinct values.
+    """
+    distinct: Boolean = false
+  ): Int! @fdc_generated(from: "WebhookLog.error", purpose: QUERY_COUNT)
+  """
+  ✨ Count the number of rows in the `WebhookLog` table where the `eventId` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
+  """
+  eventId_count(
+    """
+    Set to true to count the number of distinct values.
+    """
+    distinct: Boolean = false
+  ): Int! @fdc_generated(from: "WebhookLog.eventId", purpose: QUERY_COUNT)
+  """
+  ✨ Count the number of rows in the `WebhookLog` table where the `eventType` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
+  """
+  eventType_count(
+    """
+    Set to true to count the number of distinct values.
+    """
+    distinct: Boolean = false
+  ): Int! @fdc_generated(from: "WebhookLog.eventType", purpose: QUERY_COUNT)
+  """
+  ✨ Count the number of rows in the `WebhookLog` table where the `id` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
+  """
+  id_count(
+    """
+    Set to true to count the number of distinct values.
+    """
+    distinct: Boolean = false
+  ): Int! @fdc_generated(from: "WebhookLog.id", purpose: QUERY_COUNT)
+  """
+  ✨ Count the number of rows in the `WebhookLog` table where the `metadata` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
+  """
+  metadata_count(
+    """
+    Set to true to count the number of distinct values.
+    """
+    distinct: Boolean = false
+  ): Int! @fdc_generated(from: "WebhookLog.metadata", purpose: QUERY_COUNT)
+  """
+  ✨ Count the number of rows in the `WebhookLog` table where the `processedAt` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
+  """
+  processedAt_count(
+    """
+    Set to true to count the number of distinct values.
+    """
+    distinct: Boolean = false
+  ): Int! @fdc_generated(from: "WebhookLog.processedAt", purpose: QUERY_COUNT)
+  """
+  ✨ Count the number of rows in the `WebhookLog` table where the `status` field is non-null. Pass the `distinct` argument to instead count the number of distinct values.
+  """
+  status_count(
+    """
+    Set to true to count the number of distinct values.
+    """
+    distinct: Boolean = false
+  ): Int! @fdc_generated(from: "WebhookLog.status", purpose: QUERY_COUNT)
+  """
+  ✨ Minimum of the `processedAt` field in the `WebhookLog` table.
+  """
+  processedAt_min: Timestamp @fdc_generated(from: "WebhookLog.processedAt", purpose: QUERY_MIN)
+  """
+  ✨ Maximum of the `processedAt` field in the `WebhookLog` table.
+  """
+  processedAt_max: Timestamp @fdc_generated(from: "WebhookLog.processedAt", purpose: QUERY_MAX)
 }

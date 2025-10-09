@@ -9,10 +9,22 @@ type User @table {
   displayName: String @col(dataType: "varchar(255)")
   provider: String @col(dataType: "varchar(50)") # 'email' ou 'google'
   hasPaid: Boolean! @default(value: false)
-  stripeCustomerId: String @col(dataType: "varchar(255)")
+  stripeCustomerId: String @col(dataType: "varchar(255)") @unique # Added @unique for easier lookup
   createdAt: Timestamp! @default(expr: "request.time")
   lastLogin: Timestamp
   updatedAt: Timestamp
+  subscriptionId: String @col(dataType: "varchar(255)") # Added for subscription status
+  subscriptionStatus: String @col(dataType: "varchar(50)") # Added for subscription status
+  subscriptionCanceledAt: Timestamp # Added for subscription status
+  cancelAtPeriodEnd: Boolean # Added for subscription status
+  lastPaymentStatus: String @col(dataType: "varchar(50)") # Added for payment status
+  lastPaymentAmount: Float # Added for payment status
+  lastPaymentDate: Timestamp # Added for payment status
+  paymentRetryCount: Int @default(value: 0) # Added for payment retries
+  # Pending fields (consider if these should be moved to a separate PaymentIntent/CheckoutSession log)
+  pendingPayment: Boolean @default(value: false)
+  pendingCheckoutSessionId: String @col(dataType: "varchar(255)")
+  checkoutInitiatedAt: Timestamp
 }
 
 # Tabela de pagamentos
@@ -27,6 +39,11 @@ type Payment @table {
   paymentMethod: String @col(dataType: "varchar(50)")
   createdAt: Timestamp! @default(expr: "request.time")
   completedAt: Timestamp
+  type: String @col(dataType: "varchar(50)") # e.g., 'checkout_session_init', 'invoice_payment_succeeded'
+  description: String @col(dataType: "text")
+  customer: String @col(dataType: "varchar(255)") # Stripe Customer ID
+  subscription: String @col(dataType: "varchar(255)") # Stripe Subscription ID
+  invoiceId: String @col(dataType: "varchar(255)") # Stripe Invoice ID
 }
 
 # Tabela de cálculos de IRPF
@@ -57,4 +74,15 @@ type AuditLog @table {
   ipAddress: String @col(dataType: "varchar(50)")
   userAgent: String @col(dataType: "varchar(500)")
   createdAt: Timestamp! @default(expr: "request.time")
+}
+
+# Tabela para logs de webhooks do Stripe
+type WebhookLog @table {
+  id: UUID! @default(expr: "uuidV4()")
+  eventId: String! @col(dataType: "varchar(255)") # Stripe event ID
+  eventType: String! @col(dataType: "varchar(100)") # Type of webhook event
+  status: String! @col(dataType: "varchar(50)") # 'success', 'error'
+  metadata: String @col(dataType: "text") # JSON string of additional metadata
+  processedAt: Timestamp! @default(expr: "request.time")
+  error: String @col(dataType: "text") # Error message if processing failed
 }

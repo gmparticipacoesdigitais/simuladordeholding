@@ -1,6 +1,7 @@
 // ============================================================================
 // FIREBASE CLOUD FUNCTIONS - Sistema de Pagamento com Stripe
 // Integração completa e robusta usando stripe-service.js
+// Refatorado para usar Data Connect para todas as operações de dados
 // ============================================================================
 
 const functions = require('firebase-functions');
@@ -9,7 +10,8 @@ const {
   CheckoutSessionService,
   SubscriptionService,
   WebhookProcessor,
-  Logger
+  Logger,
+  DataConnectHelper // Importar o novo DataConnectHelper
 } = require('./stripe-service');
 
 admin.initializeApp();
@@ -176,12 +178,11 @@ exports.createPortalSession = functions.https.onRequest(async (req, res) => {
       return;
     }
 
-    // Buscar dados do usuário
-    const snapshot = await admin.database().ref(`users/${userId}`).once('value');
-    const userData = snapshot.val();
+    // Buscar dados do usuário via Data Connect
+    const userData = await DataConnectHelper.getUserByUid(userId);
 
     if (!userData || !userData.stripeCustomerId) {
-      Logger.warn('Usuário sem customer ID do Stripe', { userId });
+      Logger.warn('Usuário sem customer ID do Stripe (Data Connect)', { userId });
       res.status(404).json({
         error: 'Cliente não encontrado',
         details: 'Você precisa ter uma assinatura ativa'
@@ -244,12 +245,11 @@ exports.getSubscriptionStatus = functions.https.onRequest(async (req, res) => {
       return;
     }
 
-    // Buscar dados do usuário
-    const snapshot = await admin.database().ref(`users/${userId}`).once('value');
-    const userData = snapshot.val();
+    // Buscar dados do usuário via Data Connect
+    const userData = await DataConnectHelper.getUserByUid(userId);
 
     if (!userData) {
-      res.status(404).json({ error: 'Usuário não encontrado' });
+      res.status(404).json({ error: 'Usuário não encontrado no Data Connect' });
       return;
     }
 
@@ -278,6 +278,8 @@ exports.getSubscriptionStatus = functions.https.onRequest(async (req, res) => {
     res.status(200).json({
       success: true,
       user: {
+        uid: userData.uid,
+        email: userData.email,
         hasPaid: userData.hasPaid || false,
         subscriptionStatus: userData.subscriptionStatus,
         subscriptionId: userData.subscriptionId,
@@ -327,24 +329,31 @@ exports.cancelSubscription = functions.https.onRequest(async (req, res) => {
       return;
     }
 
-    // Buscar dados do usuário
-    const snapshot = await admin.database().ref(`users/${userId}`).once('value');
-    const userData = snapshot.val();
+    // Buscar dados do usuário via Data Connect
+    const userData = await DataConnectHelper.getUserByUid(userId);
 
     if (!userData || !userData.subscriptionId) {
       res.status(404).json({
-        error: 'Assinatura não encontrada',
+        error: 'Assinatura não encontrada no Data Connect',
         details: 'Você não possui uma assinatura ativa'
       });
       return;
     }
 
-    // Cancelar assinatura
+    // Cancelar assinatura no Stripe
     const cancelAtPeriodEnd = !immediate;
     const subscription = await SubscriptionService.cancelSubscription(
       userData.subscriptionId,
       cancelAtPeriodEnd
     );
+
+    // Atualizar status no Data Connect
+    await DataConnectHelper.updateUser(userId, {
+      subscriptionStatus: subscription.status,
+      cancelAtPeriodEnd: subscription.cancel_at_period_end,
+      subscriptionCanceledAt: subscription.cancel_at ? new Date(subscription.cancel_at * 1000).toISOString() : null,
+      hasPaid: subscription.status === 'active' || subscription.status === 'trialing' // Se for cancelamento imediato, setar hasPaid para false
+    });
 
     Logger.info('Assinatura cancelada por requisição do usuário', {
       userId,

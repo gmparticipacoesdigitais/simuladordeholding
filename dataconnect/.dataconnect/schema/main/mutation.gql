@@ -36,6 +36,15 @@ extend type Mutation {
     data: User_Data!
   ): User_KeyOutput! @fdc_generated(from: "User", purpose: INSERT_SINGLE)
   """
+  ✨ Insert a single `WebhookLog` into the table and return its key. Columns not specified in `data` will receive defaults (e.g. `null`).
+  """
+  webhookLog_insert(
+    """
+    Data object to insert into the table.
+    """
+    data: WebhookLog_Data!
+  ): WebhookLog_KeyOutput! @fdc_generated(from: "WebhookLog", purpose: INSERT_SINGLE)
+  """
   ✨ Insert `AuditLog` objects into the table and return their keys. Columns not specified in `data` will receive defaults (e.g. `null`).
   """
   auditLog_insertMany(
@@ -71,6 +80,15 @@ extend type Mutation {
     """
     data: [User_Data!]!
   ): [User_KeyOutput!]! @fdc_generated(from: "User", purpose: INSERT_MULTIPLE)
+  """
+  ✨ Insert `WebhookLog` objects into the table and return their keys. Columns not specified in `data` will receive defaults (e.g. `null`).
+  """
+  webhookLog_insertMany(
+    """
+    List of data objects to insert into the table.
+    """
+    data: [WebhookLog_Data!]!
+  ): [WebhookLog_KeyOutput!]! @fdc_generated(from: "WebhookLog", purpose: INSERT_MULTIPLE)
   """
   ✨ Insert or update a single `AuditLog` into the table, based on the primary key. Returns the key of the newly inserted or existing updated `AuditLog`.
   """
@@ -108,6 +126,15 @@ extend type Mutation {
     data: User_Data!
   ): User_KeyOutput! @fdc_generated(from: "User", purpose: UPSERT_SINGLE)
   """
+  ✨ Insert or update a single `WebhookLog` into the table, based on the primary key. Returns the key of the newly inserted or existing updated `WebhookLog`.
+  """
+  webhookLog_upsert(
+    """
+    Data object to insert or update if it already exists.
+    """
+    data: WebhookLog_Data!
+  ): WebhookLog_KeyOutput! @fdc_generated(from: "WebhookLog", purpose: UPSERT_SINGLE)
+  """
   ✨ Insert or update `AuditLog` objects into the table, based on the primary key. Returns the key of the newly inserted or existing updated `AuditLog`.
   """
   auditLog_upsertMany(
@@ -143,6 +170,15 @@ extend type Mutation {
     """
     data: [User_Data!]!
   ): [User_KeyOutput!]! @fdc_generated(from: "User", purpose: UPSERT_MULTIPLE)
+  """
+  ✨ Insert or update `WebhookLog` objects into the table, based on the primary key. Returns the key of the newly inserted or existing updated `WebhookLog`.
+  """
+  webhookLog_upsertMany(
+    """
+    List of data objects to insert or update if it already exists.
+    """
+    data: [WebhookLog_Data!]!
+  ): [WebhookLog_KeyOutput!]! @fdc_generated(from: "WebhookLog", purpose: UPSERT_MULTIPLE)
   """
   ✨ Update a single `AuditLog` based on `id`, `key` or `first`, setting columns specified in `data`. Returns the key of the updated `AuditLog` or `null` if not found.
   """
@@ -245,6 +281,30 @@ extend type Mutation {
     data: User_Data!
   ): User_KeyOutput @fdc_generated(from: "User", purpose: UPDATE_SINGLE)
   """
+  ✨ Update a single `WebhookLog` based on `id`, `key` or `first`, setting columns specified in `data`. Returns the key of the updated `WebhookLog` or `null` if not found.
+  """
+  webhookLog_update(
+    """
+    The unique ID of the object.
+    """
+    id: UUID
+
+    """
+    The key used to identify the object.
+    """
+    key: WebhookLog_Key
+
+    """
+    Fetch the first row based on the filters and ordering.
+    """
+    first: WebhookLog_FirstRow
+
+    """
+    Data object containing fields to be updated.
+    """
+    data: WebhookLog_Data!
+  ): WebhookLog_KeyOutput @fdc_generated(from: "WebhookLog", purpose: UPDATE_SINGLE)
+  """
   ✨ Update `AuditLog` objects matching `where` conditions (or `all`, if true) according to `data`. Returns the number of rows updated.
   """
   auditLog_updateMany(
@@ -320,6 +380,25 @@ extend type Mutation {
     """
     data: User_Data!
   ): Int! @fdc_generated(from: "User", purpose: UPDATE_MULTIPLE)
+  """
+  ✨ Update `WebhookLog` objects matching `where` conditions (or `all`, if true) according to `data`. Returns the number of rows updated.
+  """
+  webhookLog_updateMany(
+    """
+    Filter condition to specify which rows to update.
+    """
+    where: WebhookLog_Filter
+
+    """
+    Set to true to update all rows.
+    """
+    all: Boolean = false
+
+    """
+    Data object containing fields to update.
+    """
+    data: WebhookLog_Data!
+  ): Int! @fdc_generated(from: "WebhookLog", purpose: UPDATE_MULTIPLE)
   """
   ✨ Delete a single `AuditLog` based on `id`, `key` or `first` and return its key (or `null` if not found).
   """
@@ -402,6 +481,25 @@ extend type Mutation {
     first: User_FirstRow
   ): User_KeyOutput @fdc_generated(from: "User", purpose: DELETE_SINGLE)
   """
+  ✨ Delete a single `WebhookLog` based on `id`, `key` or `first` and return its key (or `null` if not found).
+  """
+  webhookLog_delete(
+    """
+    The unique ID of the object.
+    """
+    id: UUID
+
+    """
+    The key used to identify the object.
+    """
+    key: WebhookLog_Key
+
+    """
+    Fetch the first row based on the filters and ordering.
+    """
+    first: WebhookLog_FirstRow
+  ): WebhookLog_KeyOutput @fdc_generated(from: "WebhookLog", purpose: DELETE_SINGLE)
+  """
   ✨ Delete `AuditLog` objects matching `where` conditions (or `all`, if true). Returns the number of rows deleted.
   """
   auditLog_deleteMany(
@@ -457,4 +555,18 @@ extend type Mutation {
     """
     all: Boolean = false
   ): Int! @fdc_generated(from: "User", purpose: DELETE_MULTIPLE)
+  """
+  ✨ Delete `WebhookLog` objects matching `where` conditions (or `all`, if true). Returns the number of rows deleted.
+  """
+  webhookLog_deleteMany(
+    """
+    Filter condition to specify which rows to delete.
+    """
+    where: WebhookLog_Filter
+
+    """
+    Set to true to delete all rows.
+    """
+    all: Boolean = false
+  ): Int! @fdc_generated(from: "WebhookLog", purpose: DELETE_MULTIPLE)
 }

@@ -23,6 +23,12 @@ It has the same format as `User_Key`, but is only used as mutation return value.
 """
 scalar User_KeyOutput
 """
+✨ `WebhookLog_KeyOutput` returns the primary key fields of table type `WebhookLog`.
+
+It has the same format as `WebhookLog_Key`, but is only used as mutation return value.
+"""
+scalar WebhookLog_KeyOutput
+"""
 ✨ Generated data input type for table 'AuditLog'. It includes all necessary fields for creating or upserting rows into table.
 """
 input AuditLog_Data {
@@ -1249,6 +1255,30 @@ input Payment_Data {
   """
   currency_expr: String_Expr
   """
+  ✨ Generated from Field `Payment`.`customer` of type `String`
+  """
+  customer: String
+  """
+  ✨ `_expr` server value variant of `customer` (✨ Generated from Field `Payment`.`customer` of type `String`)
+  """
+  customer_expr: String_Expr
+  """
+  ✨ Generated from Field `Payment`.`description` of type `String`
+  """
+  description: String
+  """
+  ✨ `_expr` server value variant of `description` (✨ Generated from Field `Payment`.`description` of type `String`)
+  """
+  description_expr: String_Expr
+  """
+  ✨ Generated from Field `Payment`.`invoiceId` of type `String`
+  """
+  invoiceId: String
+  """
+  ✨ `_expr` server value variant of `invoiceId` (✨ Generated from Field `Payment`.`invoiceId` of type `String`)
+  """
+  invoiceId_expr: String_Expr
+  """
   ✨ Generated from Field `Payment`.`paymentMethod` of type `String`
   """
   paymentMethod: String
@@ -1280,6 +1310,22 @@ input Payment_Data {
   ✨ `_expr` server value variant of `stripeSessionId` (✨ Generated from Field `Payment`.`stripeSessionId` of type `String`)
   """
   stripeSessionId_expr: String_Expr
+  """
+  ✨ Generated from Field `Payment`.`subscription` of type `String`
+  """
+  subscription: String
+  """
+  ✨ `_expr` server value variant of `subscription` (✨ Generated from Field `Payment`.`subscription` of type `String`)
+  """
+  subscription_expr: String_Expr
+  """
+  ✨ Generated from Field `Payment`.`type` of type `String`
+  """
+  type: String
+  """
+  ✨ `_expr` server value variant of `type` (✨ Generated from Field `Payment`.`type` of type `String`)
+  """
+  type_expr: String_Expr
 }
 """
 ✨ Generated filter input type for table 'Payment'. This input allows filtering objects using various conditions. Use `_or`, `_and`, and `_not` to compose complex filters.
@@ -1326,6 +1372,18 @@ input Payment_Filter {
   """
   currency: String_Filter
   """
+  ✨ Generated from Field `Payment`.`customer` of type `String`
+  """
+  customer: String_Filter
+  """
+  ✨ Generated from Field `Payment`.`description` of type `String`
+  """
+  description: String_Filter
+  """
+  ✨ Generated from Field `Payment`.`invoiceId` of type `String`
+  """
+  invoiceId: String_Filter
+  """
   ✨ Generated from Field `Payment`.`paymentMethod` of type `String`
   """
   paymentMethod: String_Filter
@@ -1341,6 +1399,14 @@ input Payment_Filter {
   ✨ Generated from Field `Payment`.`stripeSessionId` of type `String`
   """
   stripeSessionId: String_Filter
+  """
+  ✨ Generated from Field `Payment`.`subscription` of type `String`
+  """
+  subscription: String_Filter
+  """
+  ✨ Generated from Field `Payment`.`type` of type `String`
+  """
+  type: String_Filter
 }
 """
 ✨ Generated first-row input type for table 'Payment'. This input selects the first row matching the filter criteria, ordered according to the specified conditions.
@@ -1396,9 +1462,21 @@ input Payment_Having {
   """
   currency_count: Int_Filter
   """
+  ✨ Generated from Field `Payment`.`customer_count` of type `Int!`
+  """
+  customer_count: Int_Filter
+  """
+  ✨ Generated from Field `Payment`.`description_count` of type `Int!`
+  """
+  description_count: Int_Filter
+  """
   ✨ Generated from Field `Payment`.`id_count` of type `Int!`
   """
   id_count: Int_Filter
+  """
+  ✨ Generated from Field `Payment`.`invoiceId_count` of type `Int!`
+  """
+  invoiceId_count: Int_Filter
   """
   ✨ Generated from Field `Payment`.`paymentMethod_count` of type `Int!`
   """
@@ -1415,6 +1493,14 @@ input Payment_Having {
   ✨ Generated from Field `Payment`.`stripeSessionId_count` of type `Int!`
   """
   stripeSessionId_count: Int_Filter
+  """
+  ✨ Generated from Field `Payment`.`subscription_count` of type `Int!`
+  """
+  subscription_count: Int_Filter
+  """
+  ✨ Generated from Field `Payment`.`type_count` of type `Int!`
+  """
+  type_count: Int_Filter
   """
   ✨ Generated from Field `Payment`.`userId_count` of type `Int!`
   """
@@ -1511,6 +1597,18 @@ input Payment_Order {
   """
   currency: OrderDirection
   """
+  ✨ Generated from Field `Payment`.`customer` of type `String`
+  """
+  customer: OrderDirection
+  """
+  ✨ Generated from Field `Payment`.`description` of type `String`
+  """
+  description: OrderDirection
+  """
+  ✨ Generated from Field `Payment`.`invoiceId` of type `String`
+  """
+  invoiceId: OrderDirection
+  """
   ✨ Generated from Field `Payment`.`paymentMethod` of type `String`
   """
   paymentMethod: OrderDirection
@@ -1526,6 +1624,14 @@ input Payment_Order {
   ✨ Generated from Field `Payment`.`stripeSessionId` of type `String`
   """
   stripeSessionId: OrderDirection
+  """
+  ✨ Generated from Field `Payment`.`subscription` of type `String`
+  """
+  subscription: OrderDirection
+  """
+  ✨ Generated from Field `Payment`.`type` of type `String`
+  """
+  type: OrderDirection
   """
   ✨ Generated from Field `Payment`.`_count` of type `Int!`
   """
@@ -1547,9 +1653,21 @@ input Payment_Order {
   """
   currency_count: OrderDirection
   """
+  ✨ Generated from Field `Payment`.`customer_count` of type `Int!`
+  """
+  customer_count: OrderDirection
+  """
+  ✨ Generated from Field `Payment`.`description_count` of type `Int!`
+  """
+  description_count: OrderDirection
+  """
   ✨ Generated from Field `Payment`.`id_count` of type `Int!`
   """
   id_count: OrderDirection
+  """
+  ✨ Generated from Field `Payment`.`invoiceId_count` of type `Int!`
+  """
+  invoiceId_count: OrderDirection
   """
   ✨ Generated from Field `Payment`.`paymentMethod_count` of type `Int!`
   """
@@ -1566,6 +1684,14 @@ input Payment_Order {
   ✨ Generated from Field `Payment`.`stripeSessionId_count` of type `Int!`
   """
   stripeSessionId_count: OrderDirection
+  """
+  ✨ Generated from Field `Payment`.`subscription_count` of type `Int!`
+  """
+  subscription_count: OrderDirection
+  """
+  ✨ Generated from Field `Payment`.`type_count` of type `Int!`
+  """
+  type_count: OrderDirection
   """
   ✨ Generated from Field `Payment`.`userId_count` of type `Int!`
   """
@@ -1615,6 +1741,30 @@ input User_Data {
   ✨ `_expr` server value variant of `id` (✨ Generated from Field `User`.`id` of type `String!`)
   """
   id_expr: String_Expr
+  """
+  ✨ Generated from Field `User`.`cancelAtPeriodEnd` of type `Boolean`
+  """
+  cancelAtPeriodEnd: Boolean
+  """
+  ✨ `_expr` server value variant of `cancelAtPeriodEnd` (✨ Generated from Field `User`.`cancelAtPeriodEnd` of type `Boolean`)
+  """
+  cancelAtPeriodEnd_expr: Boolean_Expr
+  """
+  ✨ Generated from Field `User`.`checkoutInitiatedAt` of type `Timestamp`
+  """
+  checkoutInitiatedAt: Timestamp
+  """
+  ✨ `_expr` server value variant of `checkoutInitiatedAt` (✨ Generated from Field `User`.`checkoutInitiatedAt` of type `Timestamp`)
+  """
+  checkoutInitiatedAt_expr: Timestamp_Expr
+  """
+  ✨ `_time` server value variant of `checkoutInitiatedAt` (✨ Generated from Field `User`.`checkoutInitiatedAt` of type `Timestamp`)
+  """
+  checkoutInitiatedAt_time: Timestamp_Relative
+  """
+  ✨ `_update` server value variant of `checkoutInitiatedAt` (✨ Generated from Field `User`.`checkoutInitiatedAt` of type `Timestamp`)
+  """
+  checkoutInitiatedAt_update: [Timestamp_Update!]
   """
   ✨ Generated from Field `User`.`createdAt` of type `Timestamp!`
   """
@@ -1672,6 +1822,70 @@ input User_Data {
   """
   lastLogin_update: [Timestamp_Update!]
   """
+  ✨ Generated from Field `User`.`lastPaymentAmount` of type `Float`
+  """
+  lastPaymentAmount: Float
+  """
+  ✨ `_expr` server value variant of `lastPaymentAmount` (✨ Generated from Field `User`.`lastPaymentAmount` of type `Float`)
+  """
+  lastPaymentAmount_expr: Float_Expr
+  """
+  ✨ `_update` server value variant of `lastPaymentAmount` (✨ Generated from Field `User`.`lastPaymentAmount` of type `Float`)
+  """
+  lastPaymentAmount_update: [Float_Update!]
+  """
+  ✨ Generated from Field `User`.`lastPaymentDate` of type `Timestamp`
+  """
+  lastPaymentDate: Timestamp
+  """
+  ✨ `_expr` server value variant of `lastPaymentDate` (✨ Generated from Field `User`.`lastPaymentDate` of type `Timestamp`)
+  """
+  lastPaymentDate_expr: Timestamp_Expr
+  """
+  ✨ `_time` server value variant of `lastPaymentDate` (✨ Generated from Field `User`.`lastPaymentDate` of type `Timestamp`)
+  """
+  lastPaymentDate_time: Timestamp_Relative
+  """
+  ✨ `_update` server value variant of `lastPaymentDate` (✨ Generated from Field `User`.`lastPaymentDate` of type `Timestamp`)
+  """
+  lastPaymentDate_update: [Timestamp_Update!]
+  """
+  ✨ Generated from Field `User`.`lastPaymentStatus` of type `String`
+  """
+  lastPaymentStatus: String
+  """
+  ✨ `_expr` server value variant of `lastPaymentStatus` (✨ Generated from Field `User`.`lastPaymentStatus` of type `String`)
+  """
+  lastPaymentStatus_expr: String_Expr
+  """
+  ✨ Generated from Field `User`.`paymentRetryCount` of type `Int`
+  """
+  paymentRetryCount: Int
+  """
+  ✨ `_expr` server value variant of `paymentRetryCount` (✨ Generated from Field `User`.`paymentRetryCount` of type `Int`)
+  """
+  paymentRetryCount_expr: Int_Expr
+  """
+  ✨ `_update` server value variant of `paymentRetryCount` (✨ Generated from Field `User`.`paymentRetryCount` of type `Int`)
+  """
+  paymentRetryCount_update: [Int_Update!]
+  """
+  ✨ Generated from Field `User`.`pendingCheckoutSessionId` of type `String`
+  """
+  pendingCheckoutSessionId: String
+  """
+  ✨ `_expr` server value variant of `pendingCheckoutSessionId` (✨ Generated from Field `User`.`pendingCheckoutSessionId` of type `String`)
+  """
+  pendingCheckoutSessionId_expr: String_Expr
+  """
+  ✨ Generated from Field `User`.`pendingPayment` of type `Boolean`
+  """
+  pendingPayment: Boolean
+  """
+  ✨ `_expr` server value variant of `pendingPayment` (✨ Generated from Field `User`.`pendingPayment` of type `Boolean`)
+  """
+  pendingPayment_expr: Boolean_Expr
+  """
   ✨ Generated from Field `User`.`provider` of type `String`
   """
   provider: String
@@ -1687,6 +1901,38 @@ input User_Data {
   ✨ `_expr` server value variant of `stripeCustomerId` (✨ Generated from Field `User`.`stripeCustomerId` of type `String`)
   """
   stripeCustomerId_expr: String_Expr
+  """
+  ✨ Generated from Field `User`.`subscriptionCanceledAt` of type `Timestamp`
+  """
+  subscriptionCanceledAt: Timestamp
+  """
+  ✨ `_expr` server value variant of `subscriptionCanceledAt` (✨ Generated from Field `User`.`subscriptionCanceledAt` of type `Timestamp`)
+  """
+  subscriptionCanceledAt_expr: Timestamp_Expr
+  """
+  ✨ `_time` server value variant of `subscriptionCanceledAt` (✨ Generated from Field `User`.`subscriptionCanceledAt` of type `Timestamp`)
+  """
+  subscriptionCanceledAt_time: Timestamp_Relative
+  """
+  ✨ `_update` server value variant of `subscriptionCanceledAt` (✨ Generated from Field `User`.`subscriptionCanceledAt` of type `Timestamp`)
+  """
+  subscriptionCanceledAt_update: [Timestamp_Update!]
+  """
+  ✨ Generated from Field `User`.`subscriptionId` of type `String`
+  """
+  subscriptionId: String
+  """
+  ✨ `_expr` server value variant of `subscriptionId` (✨ Generated from Field `User`.`subscriptionId` of type `String`)
+  """
+  subscriptionId_expr: String_Expr
+  """
+  ✨ Generated from Field `User`.`subscriptionStatus` of type `String`
+  """
+  subscriptionStatus: String
+  """
+  ✨ `_expr` server value variant of `subscriptionStatus` (✨ Generated from Field `User`.`subscriptionStatus` of type `String`)
+  """
+  subscriptionStatus_expr: String_Expr
   """
   ✨ Generated from Field `User`.`updatedAt` of type `Timestamp`
   """
@@ -1725,6 +1971,14 @@ input User_Filter {
   """
   id: String_Filter
   """
+  ✨ Generated from Field `User`.`cancelAtPeriodEnd` of type `Boolean`
+  """
+  cancelAtPeriodEnd: Boolean_Filter
+  """
+  ✨ Generated from Field `User`.`checkoutInitiatedAt` of type `Timestamp`
+  """
+  checkoutInitiatedAt: Timestamp_Filter
+  """
   ✨ Generated from Field `User`.`createdAt` of type `Timestamp!`
   """
   createdAt: Timestamp_Filter
@@ -1745,6 +1999,30 @@ input User_Filter {
   """
   lastLogin: Timestamp_Filter
   """
+  ✨ Generated from Field `User`.`lastPaymentAmount` of type `Float`
+  """
+  lastPaymentAmount: Float_Filter
+  """
+  ✨ Generated from Field `User`.`lastPaymentDate` of type `Timestamp`
+  """
+  lastPaymentDate: Timestamp_Filter
+  """
+  ✨ Generated from Field `User`.`lastPaymentStatus` of type `String`
+  """
+  lastPaymentStatus: String_Filter
+  """
+  ✨ Generated from Field `User`.`paymentRetryCount` of type `Int`
+  """
+  paymentRetryCount: Int_Filter
+  """
+  ✨ Generated from Field `User`.`pendingCheckoutSessionId` of type `String`
+  """
+  pendingCheckoutSessionId: String_Filter
+  """
+  ✨ Generated from Field `User`.`pendingPayment` of type `Boolean`
+  """
+  pendingPayment: Boolean_Filter
+  """
   ✨ Generated from Field `User`.`provider` of type `String`
   """
   provider: String_Filter
@@ -1752,6 +2030,18 @@ input User_Filter {
   ✨ Generated from Field `User`.`stripeCustomerId` of type `String`
   """
   stripeCustomerId: String_Filter
+  """
+  ✨ Generated from Field `User`.`subscriptionCanceledAt` of type `Timestamp`
+  """
+  subscriptionCanceledAt: Timestamp_Filter
+  """
+  ✨ Generated from Field `User`.`subscriptionId` of type `String`
+  """
+  subscriptionId: String_Filter
+  """
+  ✨ Generated from Field `User`.`subscriptionStatus` of type `String`
+  """
+  subscriptionStatus: String_Filter
   """
   ✨ Generated from Field `User`.`updatedAt` of type `Timestamp`
   """
@@ -1807,6 +2097,14 @@ input User_Having {
   """
   _count: Int_Filter
   """
+  ✨ Generated from Field `User`.`cancelAtPeriodEnd_count` of type `Int!`
+  """
+  cancelAtPeriodEnd_count: Int_Filter
+  """
+  ✨ Generated from Field `User`.`checkoutInitiatedAt_count` of type `Int!`
+  """
+  checkoutInitiatedAt_count: Int_Filter
+  """
   ✨ Generated from Field `User`.`createdAt_count` of type `Int!`
   """
   createdAt_count: Int_Filter
@@ -1831,6 +2129,30 @@ input User_Having {
   """
   lastLogin_count: Int_Filter
   """
+  ✨ Generated from Field `User`.`lastPaymentAmount_count` of type `Int!`
+  """
+  lastPaymentAmount_count: Int_Filter
+  """
+  ✨ Generated from Field `User`.`lastPaymentDate_count` of type `Int!`
+  """
+  lastPaymentDate_count: Int_Filter
+  """
+  ✨ Generated from Field `User`.`lastPaymentStatus_count` of type `Int!`
+  """
+  lastPaymentStatus_count: Int_Filter
+  """
+  ✨ Generated from Field `User`.`paymentRetryCount_count` of type `Int!`
+  """
+  paymentRetryCount_count: Int_Filter
+  """
+  ✨ Generated from Field `User`.`pendingCheckoutSessionId_count` of type `Int!`
+  """
+  pendingCheckoutSessionId_count: Int_Filter
+  """
+  ✨ Generated from Field `User`.`pendingPayment_count` of type `Int!`
+  """
+  pendingPayment_count: Int_Filter
+  """
   ✨ Generated from Field `User`.`provider_count` of type `Int!`
   """
   provider_count: Int_Filter
@@ -1839,9 +2161,41 @@ input User_Having {
   """
   stripeCustomerId_count: Int_Filter
   """
+  ✨ Generated from Field `User`.`subscriptionCanceledAt_count` of type `Int!`
+  """
+  subscriptionCanceledAt_count: Int_Filter
+  """
+  ✨ Generated from Field `User`.`subscriptionId_count` of type `Int!`
+  """
+  subscriptionId_count: Int_Filter
+  """
+  ✨ Generated from Field `User`.`subscriptionStatus_count` of type `Int!`
+  """
+  subscriptionStatus_count: Int_Filter
+  """
   ✨ Generated from Field `User`.`updatedAt_count` of type `Int!`
   """
   updatedAt_count: Int_Filter
+  """
+  ✨ Generated from Field `User`.`lastPaymentAmount_sum` of type `Float`
+  """
+  lastPaymentAmount_sum: Float_Filter
+  """
+  ✨ Generated from Field `User`.`paymentRetryCount_sum` of type `Int`
+  """
+  paymentRetryCount_sum: Int_Filter
+  """
+  ✨ Generated from Field `User`.`lastPaymentAmount_avg` of type `Float`
+  """
+  lastPaymentAmount_avg: Float_Filter
+  """
+  ✨ Generated from Field `User`.`paymentRetryCount_avg` of type `Float`
+  """
+  paymentRetryCount_avg: Float_Filter
+  """
+  ✨ Generated from Field `User`.`checkoutInitiatedAt_min` of type `Timestamp`
+  """
+  checkoutInitiatedAt_min: Timestamp_Filter
   """
   ✨ Generated from Field `User`.`createdAt_min` of type `Timestamp`
   """
@@ -1851,9 +2205,29 @@ input User_Having {
   """
   lastLogin_min: Timestamp_Filter
   """
+  ✨ Generated from Field `User`.`lastPaymentAmount_min` of type `Float`
+  """
+  lastPaymentAmount_min: Float_Filter
+  """
+  ✨ Generated from Field `User`.`lastPaymentDate_min` of type `Timestamp`
+  """
+  lastPaymentDate_min: Timestamp_Filter
+  """
+  ✨ Generated from Field `User`.`paymentRetryCount_min` of type `Int`
+  """
+  paymentRetryCount_min: Int_Filter
+  """
+  ✨ Generated from Field `User`.`subscriptionCanceledAt_min` of type `Timestamp`
+  """
+  subscriptionCanceledAt_min: Timestamp_Filter
+  """
   ✨ Generated from Field `User`.`updatedAt_min` of type `Timestamp`
   """
   updatedAt_min: Timestamp_Filter
+  """
+  ✨ Generated from Field `User`.`checkoutInitiatedAt_max` of type `Timestamp`
+  """
+  checkoutInitiatedAt_max: Timestamp_Filter
   """
   ✨ Generated from Field `User`.`createdAt_max` of type `Timestamp`
   """
@@ -1862,6 +2236,22 @@ input User_Having {
   ✨ Generated from Field `User`.`lastLogin_max` of type `Timestamp`
   """
   lastLogin_max: Timestamp_Filter
+  """
+  ✨ Generated from Field `User`.`lastPaymentAmount_max` of type `Float`
+  """
+  lastPaymentAmount_max: Float_Filter
+  """
+  ✨ Generated from Field `User`.`lastPaymentDate_max` of type `Timestamp`
+  """
+  lastPaymentDate_max: Timestamp_Filter
+  """
+  ✨ Generated from Field `User`.`paymentRetryCount_max` of type `Int`
+  """
+  paymentRetryCount_max: Int_Filter
+  """
+  ✨ Generated from Field `User`.`subscriptionCanceledAt_max` of type `Timestamp`
+  """
+  subscriptionCanceledAt_max: Timestamp_Filter
   """
   ✨ Generated from Field `User`.`updatedAt_max` of type `Timestamp`
   """
@@ -1902,6 +2292,14 @@ input User_Order {
   """
   id: OrderDirection
   """
+  ✨ Generated from Field `User`.`cancelAtPeriodEnd` of type `Boolean`
+  """
+  cancelAtPeriodEnd: OrderDirection
+  """
+  ✨ Generated from Field `User`.`checkoutInitiatedAt` of type `Timestamp`
+  """
+  checkoutInitiatedAt: OrderDirection
+  """
   ✨ Generated from Field `User`.`createdAt` of type `Timestamp!`
   """
   createdAt: OrderDirection
@@ -1922,6 +2320,30 @@ input User_Order {
   """
   lastLogin: OrderDirection
   """
+  ✨ Generated from Field `User`.`lastPaymentAmount` of type `Float`
+  """
+  lastPaymentAmount: OrderDirection
+  """
+  ✨ Generated from Field `User`.`lastPaymentDate` of type `Timestamp`
+  """
+  lastPaymentDate: OrderDirection
+  """
+  ✨ Generated from Field `User`.`lastPaymentStatus` of type `String`
+  """
+  lastPaymentStatus: OrderDirection
+  """
+  ✨ Generated from Field `User`.`paymentRetryCount` of type `Int`
+  """
+  paymentRetryCount: OrderDirection
+  """
+  ✨ Generated from Field `User`.`pendingCheckoutSessionId` of type `String`
+  """
+  pendingCheckoutSessionId: OrderDirection
+  """
+  ✨ Generated from Field `User`.`pendingPayment` of type `Boolean`
+  """
+  pendingPayment: OrderDirection
+  """
   ✨ Generated from Field `User`.`provider` of type `String`
   """
   provider: OrderDirection
@@ -1930,6 +2352,18 @@ input User_Order {
   """
   stripeCustomerId: OrderDirection
   """
+  ✨ Generated from Field `User`.`subscriptionCanceledAt` of type `Timestamp`
+  """
+  subscriptionCanceledAt: OrderDirection
+  """
+  ✨ Generated from Field `User`.`subscriptionId` of type `String`
+  """
+  subscriptionId: OrderDirection
+  """
+  ✨ Generated from Field `User`.`subscriptionStatus` of type `String`
+  """
+  subscriptionStatus: OrderDirection
+  """
   ✨ Generated from Field `User`.`updatedAt` of type `Timestamp`
   """
   updatedAt: OrderDirection
@@ -1937,6 +2371,14 @@ input User_Order {
   ✨ Generated from Field `User`.`_count` of type `Int!`
   """
   _count: OrderDirection
+  """
+  ✨ Generated from Field `User`.`cancelAtPeriodEnd_count` of type `Int!`
+  """
+  cancelAtPeriodEnd_count: OrderDirection
+  """
+  ✨ Generated from Field `User`.`checkoutInitiatedAt_count` of type `Int!`
+  """
+  checkoutInitiatedAt_count: OrderDirection
   """
   ✨ Generated from Field `User`.`createdAt_count` of type `Int!`
   """
@@ -1962,6 +2404,30 @@ input User_Order {
   """
   lastLogin_count: OrderDirection
   """
+  ✨ Generated from Field `User`.`lastPaymentAmount_count` of type `Int!`
+  """
+  lastPaymentAmount_count: OrderDirection
+  """
+  ✨ Generated from Field `User`.`lastPaymentDate_count` of type `Int!`
+  """
+  lastPaymentDate_count: OrderDirection
+  """
+  ✨ Generated from Field `User`.`lastPaymentStatus_count` of type `Int!`
+  """
+  lastPaymentStatus_count: OrderDirection
+  """
+  ✨ Generated from Field `User`.`paymentRetryCount_count` of type `Int!`
+  """
+  paymentRetryCount_count: OrderDirection
+  """
+  ✨ Generated from Field `User`.`pendingCheckoutSessionId_count` of type `Int!`
+  """
+  pendingCheckoutSessionId_count: OrderDirection
+  """
+  ✨ Generated from Field `User`.`pendingPayment_count` of type `Int!`
+  """
+  pendingPayment_count: OrderDirection
+  """
   ✨ Generated from Field `User`.`provider_count` of type `Int!`
   """
   provider_count: OrderDirection
@@ -1970,9 +2436,41 @@ input User_Order {
   """
   stripeCustomerId_count: OrderDirection
   """
+  ✨ Generated from Field `User`.`subscriptionCanceledAt_count` of type `Int!`
+  """
+  subscriptionCanceledAt_count: OrderDirection
+  """
+  ✨ Generated from Field `User`.`subscriptionId_count` of type `Int!`
+  """
+  subscriptionId_count: OrderDirection
+  """
+  ✨ Generated from Field `User`.`subscriptionStatus_count` of type `Int!`
+  """
+  subscriptionStatus_count: OrderDirection
+  """
   ✨ Generated from Field `User`.`updatedAt_count` of type `Int!`
   """
   updatedAt_count: OrderDirection
+  """
+  ✨ Generated from Field `User`.`lastPaymentAmount_sum` of type `Float`
+  """
+  lastPaymentAmount_sum: OrderDirection
+  """
+  ✨ Generated from Field `User`.`paymentRetryCount_sum` of type `Int`
+  """
+  paymentRetryCount_sum: OrderDirection
+  """
+  ✨ Generated from Field `User`.`lastPaymentAmount_avg` of type `Float`
+  """
+  lastPaymentAmount_avg: OrderDirection
+  """
+  ✨ Generated from Field `User`.`paymentRetryCount_avg` of type `Float`
+  """
+  paymentRetryCount_avg: OrderDirection
+  """
+  ✨ Generated from Field `User`.`checkoutInitiatedAt_min` of type `Timestamp`
+  """
+  checkoutInitiatedAt_min: OrderDirection
   """
   ✨ Generated from Field `User`.`createdAt_min` of type `Timestamp`
   """
@@ -1982,9 +2480,29 @@ input User_Order {
   """
   lastLogin_min: OrderDirection
   """
+  ✨ Generated from Field `User`.`lastPaymentAmount_min` of type `Float`
+  """
+  lastPaymentAmount_min: OrderDirection
+  """
+  ✨ Generated from Field `User`.`lastPaymentDate_min` of type `Timestamp`
+  """
+  lastPaymentDate_min: OrderDirection
+  """
+  ✨ Generated from Field `User`.`paymentRetryCount_min` of type `Int`
+  """
+  paymentRetryCount_min: OrderDirection
+  """
+  ✨ Generated from Field `User`.`subscriptionCanceledAt_min` of type `Timestamp`
+  """
+  subscriptionCanceledAt_min: OrderDirection
+  """
   ✨ Generated from Field `User`.`updatedAt_min` of type `Timestamp`
   """
   updatedAt_min: OrderDirection
+  """
+  ✨ Generated from Field `User`.`checkoutInitiatedAt_max` of type `Timestamp`
+  """
+  checkoutInitiatedAt_max: OrderDirection
   """
   ✨ Generated from Field `User`.`createdAt_max` of type `Timestamp`
   """
@@ -1994,7 +2512,310 @@ input User_Order {
   """
   lastLogin_max: OrderDirection
   """
+  ✨ Generated from Field `User`.`lastPaymentAmount_max` of type `Float`
+  """
+  lastPaymentAmount_max: OrderDirection
+  """
+  ✨ Generated from Field `User`.`lastPaymentDate_max` of type `Timestamp`
+  """
+  lastPaymentDate_max: OrderDirection
+  """
+  ✨ Generated from Field `User`.`paymentRetryCount_max` of type `Int`
+  """
+  paymentRetryCount_max: OrderDirection
+  """
+  ✨ Generated from Field `User`.`subscriptionCanceledAt_max` of type `Timestamp`
+  """
+  subscriptionCanceledAt_max: OrderDirection
+  """
   ✨ Generated from Field `User`.`updatedAt_max` of type `Timestamp`
   """
   updatedAt_max: OrderDirection
+}
+"""
+✨ Generated data input type for table 'WebhookLog'. It includes all necessary fields for creating or upserting rows into table.
+"""
+input WebhookLog_Data {
+  """
+  ✨ Generated from Field `WebhookLog`.`id` of type `UUID!`
+  """
+  id: UUID
+  """
+  ✨ `_expr` server value variant of `id` (✨ Generated from Field `WebhookLog`.`id` of type `UUID!`)
+  """
+  id_expr: UUID_Expr
+  """
+  ✨ Generated from Field `WebhookLog`.`error` of type `String`
+  """
+  error: String
+  """
+  ✨ `_expr` server value variant of `error` (✨ Generated from Field `WebhookLog`.`error` of type `String`)
+  """
+  error_expr: String_Expr
+  """
+  ✨ Generated from Field `WebhookLog`.`eventId` of type `String!`
+  """
+  eventId: String
+  """
+  ✨ `_expr` server value variant of `eventId` (✨ Generated from Field `WebhookLog`.`eventId` of type `String!`)
+  """
+  eventId_expr: String_Expr
+  """
+  ✨ Generated from Field `WebhookLog`.`eventType` of type `String!`
+  """
+  eventType: String
+  """
+  ✨ `_expr` server value variant of `eventType` (✨ Generated from Field `WebhookLog`.`eventType` of type `String!`)
+  """
+  eventType_expr: String_Expr
+  """
+  ✨ Generated from Field `WebhookLog`.`metadata` of type `String`
+  """
+  metadata: String
+  """
+  ✨ `_expr` server value variant of `metadata` (✨ Generated from Field `WebhookLog`.`metadata` of type `String`)
+  """
+  metadata_expr: String_Expr
+  """
+  ✨ Generated from Field `WebhookLog`.`processedAt` of type `Timestamp!`
+  """
+  processedAt: Timestamp
+  """
+  ✨ `_expr` server value variant of `processedAt` (✨ Generated from Field `WebhookLog`.`processedAt` of type `Timestamp!`)
+  """
+  processedAt_expr: Timestamp_Expr
+  """
+  ✨ `_time` server value variant of `processedAt` (✨ Generated from Field `WebhookLog`.`processedAt` of type `Timestamp!`)
+  """
+  processedAt_time: Timestamp_Relative
+  """
+  ✨ `_update` server value variant of `processedAt` (✨ Generated from Field `WebhookLog`.`processedAt` of type `Timestamp!`)
+  """
+  processedAt_update: [Timestamp_Update!]
+  """
+  ✨ Generated from Field `WebhookLog`.`status` of type `String!`
+  """
+  status: String
+  """
+  ✨ `_expr` server value variant of `status` (✨ Generated from Field `WebhookLog`.`status` of type `String!`)
+  """
+  status_expr: String_Expr
+}
+"""
+✨ Generated filter input type for table 'WebhookLog'. This input allows filtering objects using various conditions. Use `_or`, `_and`, and `_not` to compose complex filters.
+"""
+input WebhookLog_Filter {
+  """
+  Apply multiple filter conditions using `AND` logic.
+  """
+  _and: [WebhookLog_Filter!]
+  """
+  Negate the result of the provided filter condition.
+  """
+  _not: WebhookLog_Filter
+  """
+  Apply multiple filter conditions using `OR` logic.
+  """
+  _or: [WebhookLog_Filter!]
+  """
+  ✨ Generated from Field `WebhookLog`.`id` of type `UUID!`
+  """
+  id: UUID_Filter
+  """
+  ✨ Generated from Field `WebhookLog`.`error` of type `String`
+  """
+  error: String_Filter
+  """
+  ✨ Generated from Field `WebhookLog`.`eventId` of type `String!`
+  """
+  eventId: String_Filter
+  """
+  ✨ Generated from Field `WebhookLog`.`eventType` of type `String!`
+  """
+  eventType: String_Filter
+  """
+  ✨ Generated from Field `WebhookLog`.`metadata` of type `String`
+  """
+  metadata: String_Filter
+  """
+  ✨ Generated from Field `WebhookLog`.`processedAt` of type `Timestamp!`
+  """
+  processedAt: Timestamp_Filter
+  """
+  ✨ Generated from Field `WebhookLog`.`status` of type `String!`
+  """
+  status: String_Filter
+}
+"""
+✨ Generated first-row input type for table 'WebhookLog'. This input selects the first row matching the filter criteria, ordered according to the specified conditions.
+"""
+input WebhookLog_FirstRow {
+  """
+  Order the result by the specified fields.
+  """
+  orderBy: [WebhookLog_Order!]
+  """
+  Filters rows based on the specified conditions.
+  """
+  where: WebhookLog_Filter
+}
+"""
+✨ Generated having input type for table 'WebhookLog'. This input allows you to filter groups during aggregate queries using various conditions. Use `_or`, `_and`, and `_not` to compose complex filters.
+"""
+input WebhookLog_Having {
+  """
+  Apply multiple Having conditions using `AND` logic.
+  """
+  _and: [WebhookLog_Having!]
+  """
+  Whether to apply DISTINCT to the aggregate function.
+  """
+  _distinct: Boolean
+  """
+  Negate the result of the provided Having condition.
+  """
+  _not: WebhookLog_Having
+  """
+  Apply multiple Having conditions using `OR` logic.
+  """
+  _or: [WebhookLog_Having!]
+  """
+  ✨ Generated from Field `WebhookLog`.`_count` of type `Int!`
+  """
+  _count: Int_Filter
+  """
+  ✨ Generated from Field `WebhookLog`.`error_count` of type `Int!`
+  """
+  error_count: Int_Filter
+  """
+  ✨ Generated from Field `WebhookLog`.`eventId_count` of type `Int!`
+  """
+  eventId_count: Int_Filter
+  """
+  ✨ Generated from Field `WebhookLog`.`eventType_count` of type `Int!`
+  """
+  eventType_count: Int_Filter
+  """
+  ✨ Generated from Field `WebhookLog`.`id_count` of type `Int!`
+  """
+  id_count: Int_Filter
+  """
+  ✨ Generated from Field `WebhookLog`.`metadata_count` of type `Int!`
+  """
+  metadata_count: Int_Filter
+  """
+  ✨ Generated from Field `WebhookLog`.`processedAt_count` of type `Int!`
+  """
+  processedAt_count: Int_Filter
+  """
+  ✨ Generated from Field `WebhookLog`.`status_count` of type `Int!`
+  """
+  status_count: Int_Filter
+  """
+  ✨ Generated from Field `WebhookLog`.`processedAt_min` of type `Timestamp`
+  """
+  processedAt_min: Timestamp_Filter
+  """
+  ✨ Generated from Field `WebhookLog`.`processedAt_max` of type `Timestamp`
+  """
+  processedAt_max: Timestamp_Filter
+}
+"""
+✨ Generated key input type for table 'WebhookLog'. It represents the primary key fields used to uniquely identify a row in the table.
+"""
+input WebhookLog_Key {
+  """
+  ✨ Generated from Field `WebhookLog`.`id` of type `UUID!`
+  """
+  id: UUID
+  """
+  ✨ `_expr` server value variant of `id` (✨ Generated from Field `WebhookLog`.`id` of type `UUID!`)
+  """
+  id_expr: UUID_Expr
+}
+"""
+✨ Generated list filter input type for table 'WebhookLog'. This input applies filtering logic based on the count or existence of related objects that matches certain criteria.
+"""
+input WebhookLog_ListFilter {
+  """
+  The desired number of objects that match the condition (defaults to at least one).
+  """
+  count: Int_Filter = {gt:0}
+  """
+  Condition of the related objects to filter for.
+  """
+  exist: WebhookLog_Filter
+}
+"""
+✨ Generated order input type for table 'WebhookLog'. This input defines the sorting order of rows in query results based on one or more fields.
+"""
+input WebhookLog_Order {
+  """
+  ✨ Generated from Field `WebhookLog`.`id` of type `UUID!`
+  """
+  id: OrderDirection
+  """
+  ✨ Generated from Field `WebhookLog`.`error` of type `String`
+  """
+  error: OrderDirection
+  """
+  ✨ Generated from Field `WebhookLog`.`eventId` of type `String!`
+  """
+  eventId: OrderDirection
+  """
+  ✨ Generated from Field `WebhookLog`.`eventType` of type `String!`
+  """
+  eventType: OrderDirection
+  """
+  ✨ Generated from Field `WebhookLog`.`metadata` of type `String`
+  """
+  metadata: OrderDirection
+  """
+  ✨ Generated from Field `WebhookLog`.`processedAt` of type `Timestamp!`
+  """
+  processedAt: OrderDirection
+  """
+  ✨ Generated from Field `WebhookLog`.`status` of type `String!`
+  """
+  status: OrderDirection
+  """
+  ✨ Generated from Field `WebhookLog`.`_count` of type `Int!`
+  """
+  _count: OrderDirection
+  """
+  ✨ Generated from Field `WebhookLog`.`error_count` of type `Int!`
+  """
+  error_count: OrderDirection
+  """
+  ✨ Generated from Field `WebhookLog`.`eventId_count` of type `Int!`
+  """
+  eventId_count: OrderDirection
+  """
+  ✨ Generated from Field `WebhookLog`.`eventType_count` of type `Int!`
+  """
+  eventType_count: OrderDirection
+  """
+  ✨ Generated from Field `WebhookLog`.`id_count` of type `Int!`
+  """
+  id_count: OrderDirection
+  """
+  ✨ Generated from Field `WebhookLog`.`metadata_count` of type `Int!`
+  """
+  metadata_count: OrderDirection
+  """
+  ✨ Generated from Field `WebhookLog`.`processedAt_count` of type `Int!`
+  """
+  processedAt_count: OrderDirection
+  """
+  ✨ Generated from Field `WebhookLog`.`status_count` of type `Int!`
+  """
+  status_count: OrderDirection
+  """
+  ✨ Generated from Field `WebhookLog`.`processedAt_min` of type `Timestamp`
+  """
+  processedAt_min: OrderDirection
+  """
+  ✨ Generated from Field `WebhookLog`.`processedAt_max` of type `Timestamp`
+  """
+  processedAt_max: OrderDirection
 }

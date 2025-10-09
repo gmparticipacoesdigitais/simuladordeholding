@@ -1,27 +1,34 @@
 // ============================================================================
 // CHECKOUT.JS - Sistema de Checkout Melhorado com Stripe
 // Integração completa usando Cloud Functions e helpers
+// Refatorado para usar Data Connect para todas as operações de dados do usuário
 // ============================================================================
 
 import { firebaseConfig, stripeConfig } from './firebase-config.js';
 import { StripeHelper, UIManager, ErrorHandler } from './stripe-helper.js';
+import {
+    checkPaymentStatus,
+    getUserData,
+    createPayment,
+    updateUserLogin, // Adicionado para manter a consistência se houver login aqui
+    createAuditLog
+} from './dataconnect-integration.js';
 
 // Inicializar Firebase
-let auth, database;
+let auth;
 try {
     if (!firebase.apps.length) {
         firebase.initializeApp(firebaseConfig);
     }
     auth = firebase.auth();
-    database = firebase.database();
     console.log('✅ Firebase inicializado com sucesso no checkout');
 } catch (error) {
     console.error('❌ Erro ao inicializar Firebase:', error);
     alert('Erro ao inicializar Firebase. Verifique sua configuração.');
 }
 
-// Inicializar helper do Stripe
-const stripeHelper = new StripeHelper();
+// Inicializar helper do Stripe (necessita de um objeto Stripe, será inicializado no redirectToCheckout)
+const stripeHelper = new StripeHelper(stripeConfig.publishableKey, stripeConfig.priceId);
 
 // Elementos do DOM
 const checkoutButton = document.getElementById('checkout-button');
@@ -43,15 +50,15 @@ auth.onAuthStateChanged(async (user) => {
     }
 
     console.log('✅ Usuário autenticado:', user.email);
+    await updateUserLogin(user.uid); // Atualiza o último login também aqui no checkout
 
-    // Verificar se já pagou
+    // Verificar se já pagou usando Data Connect
     try {
-        const snapshot = await database.ref(`users/${user.uid}`).once('value');
-        const userData = snapshot.val();
+        const hasPaid = await checkPaymentStatus(user.uid);
+        
+        console.log('📊 Status de pagamento (Data Connect):', hasPaid ? 'PAGO' : 'PENDENTE');
 
-        console.log('📊 Dados do usuário:', userData);
-
-        if (userData && userData.hasPaid) {
+        if (hasPaid) {
             console.log('✅ Usuário já pagou! Redirecionando para app...');
             UIManager.showNotification('Você já possui uma assinatura ativa!', 'success');
             setTimeout(() => {
@@ -62,19 +69,20 @@ auth.onAuthStateChanged(async (user) => {
 
         console.log('💳 Pagamento pendente, mostrando opções de checkout...');
 
-        // Verificar se existe checkout pendente
-        if (userData && userData.pendingCheckoutSessionId) {
-            showPendingCheckoutWarning();
-        }
+        // Refatorar: A lógica de 'pendingCheckoutSessionId' deve ser gerenciada pelo backend (Cloud Function)
+        // e o Data Connect deve ser a fonte de verdade para o status de pagamento.
+        // Por enquanto, apenas removemos a verificação direta no frontend, assumindo que
+        // o status `hasPaid` do Data Connect é o suficiente.
 
     } catch (error) {
         console.error('❌ Erro ao verificar pagamento:', error);
         ErrorHandler.handle(error, 'verificação de pagamento');
+        UIManager.showNotification('Erro ao verificar status de pagamento. Tente novamente.', 'error');
     }
 });
 
 // ============================================================================
-// MOSTRAR AVISO DE CHECKOUT PENDENTE
+// MOSTRAR AVISO DE CHECKOUT PENDENTE (Mantido, mas a lógica de ativação pode mudar)
 // ============================================================================
 
 function showPendingCheckoutWarning() {
@@ -96,21 +104,15 @@ async function processCheckoutSession(user) {
     try {
         console.log('🎯 Processando checkout via Checkout Session...');
 
-        // Validar dados do usuário
         if (!user.email) {
             throw new Error('Email do usuário não encontrado');
         }
 
-        // Salvar informações do usuário no banco antes de redirecionar
-        await database.ref(`users/${user.uid}`).update({
-            email: user.email,
-            displayName: user.displayName || 'Usuário',
-            pendingPayment: true,
-            checkoutInitiatedAt: firebase.database.ServerValue.TIMESTAMP,
-            updatedAt: firebase.database.ServerValue.TIMESTAMP
-        });
+        // O `createPayment` no Data Connect deve ser chamado no backend (Cloud Function)
+        // após a criação da Checkout Session, para evitar duplicidade ou inconsistências.
+        // O Data Connect será atualizado via webhook do Stripe.
 
-        console.log('✅ Informações salvas no banco');
+        await createAuditLog(user.uid, 'INITIATE_CHECKOUT_SESSION', `Email: ${user.email}`);
 
         // Criar checkout session usando o helper
         await stripeHelper.redirectToCheckout(
@@ -140,19 +142,14 @@ async function processPaymentLink(user) {
         const PAYMENT_LINK = stripeConfig.paymentLink;
 
         if (!PAYMENT_LINK || PAYMENT_LINK.includes('SEU_LINK')) {
-            throw new Error('Payment Link não configurado corretamente');
+            throw new Error('Payment Link não configurado corretamente no firebase-config.js');
         }
 
-        // Salvar informações do usuário no banco
-        await database.ref(`users/${user.uid}`).update({
-            email: user.email,
-            displayName: user.displayName || 'Usuário',
-            pendingPayment: true,
-            paymentInitiatedAt: firebase.database.ServerValue.TIMESTAMP,
-            updatedAt: firebase.database.ServerValue.TIMESTAMP
-        });
+        // O `createPayment` no Data Connect deve ser chamado no backend (Cloud Function)
+        // ou após a confirmação do pagamento via webhook do Stripe.
+        // Aqui, apenas iniciamos o redirecionamento.
 
-        console.log('✅ Informações salvas no banco');
+        await createAuditLog(user.uid, 'INITIATE_PAYMENT_LINK', `Email: ${user.email}`);
 
         // Construir URL do Payment Link com parâmetros
         const paymentUrl = new URL(PAYMENT_LINK);
@@ -252,7 +249,7 @@ checkoutButton.addEventListener('click', async () => {
         console.log('✅ Método de checkout definido:', checkoutMethod);
 
         // Se Payment Link estiver configurado e for preferido, usar ele
-        if (stripeConfig.preferPaymentLink && stripeConfig.paymentLink) {
+        if (stripeConfig.preferPaymentLink && stripeConfig.paymentLink && !stripeConfig.paymentLink.includes('YOUR_PAYMENT_LINK')) {
             checkoutMethod = 'payment_link';
             console.log('🔄 Usando Payment Link (preferência configurada)');
         }
@@ -267,21 +264,13 @@ checkoutButton.addEventListener('click', async () => {
 
 auth.onAuthStateChanged((user) => {
     if (user) {
-        // Observar mudanças em tempo real
-        const userRef = database.ref(`users/${user.uid}`);
+        // Observar mudanças em tempo real no Data Connect para o status de pagamento
+        // Nota: Idealmente, essa observação deveria ser feita via um mecanismo de real-time do Data Connect
+        // ou uma checagem periódica mais eficiente. Por simplicidade, faremos uma checagem
+        // no carregamento e a página de sucesso fará o redirecionamento final.
 
-        userRef.on('value', (snapshot) => {
-            const userData = snapshot.val();
-
-            if (userData && userData.hasPaid) {
-                console.log('🎉 Pagamento detectado! Redirecionando...');
-                UIManager.showNotification('Pagamento confirmado! Redirecionando...', 'success');
-
-                setTimeout(() => {
-                    window.location.href = 'app.html';
-                }, 1500);
-            }
-        });
+        // Removida a observação direta do Realtime Database.
+        // O redirecionamento após pagamento é tratado na página de sucesso ou no `onAuthStateChanged` inicial.
     }
 });
 

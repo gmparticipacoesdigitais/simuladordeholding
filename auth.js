@@ -7,7 +7,8 @@ import {
     upsertUser,
     checkPaymentStatus,
     updateUserLogin,
-    createAuditLog
+    createAuditLog,
+    getUserData
 } from './dataconnect-integration.js';
 
 // Inicializar Firebase
@@ -132,7 +133,7 @@ function showNotification(message, type = 'info') {
     }, 5000);
 }
 
-// Produtos Stripe
+// Produtos Stripe (mantidos para consistência, mas o helper deve usá-los)
 const STRIPE_PRODUCT_ID = stripeConfig.productId;
 const STRIPE_PRICE_ID = stripeConfig.priceId;
 
@@ -141,33 +142,21 @@ const STRIPE_PRICE_ID = stripeConfig.priceId;
 // ============================================================================
 
 /**
- * Verifica se o usuário já pagou usando Realtime Database
+ * Verifica se o usuário já pagou usando Data Connect.
+ * Removido o fallback para Realtime Database para centralizar no Data Connect.
  * @param {string} uid - ID do usuário
  * @returns {Promise<boolean>}
  */
 async function checkUserPayment(uid) {
     try {
-        // Tentar buscar do Realtime Database primeiro
-        const database = firebase.database();
-        const snapshot = await database.ref(`users/${uid}`).once('value');
-        const userData = snapshot.val();
-
-        if (userData && userData.hasPaid) {
-            console.log('📊 Status de pagamento (Realtime DB):', 'PAGO');
-            return true;
-        }
-
-        // Fallback: tentar Data Connect
-        try {
-            const hasPaid = await checkPaymentStatus(uid);
-            console.log('📊 Status de pagamento (Data Connect):', hasPaid ? 'PAGO' : 'PENDENTE');
-            return hasPaid;
-        } catch (dcError) {
-            console.warn('⚠️ Data Connect não disponível, usando apenas Realtime DB');
-            return false;
-        }
+        const hasPaid = await checkPaymentStatus(uid);
+        console.log('📊 Status de pagamento (Data Connect):', hasPaid ? 'PAGO' : 'PENDENTE');
+        return hasPaid;
     } catch (error) {
-        console.error('❌ Erro ao verificar pagamento:', error);
+        console.error('❌ Erro ao verificar pagamento com Data Connect:', error);
+        // Em caso de erro, por segurança, assume que não pagou ou que o status é desconhecido.
+        // A interface do usuário deve guiar para o checkout ou tentar novamente.
+        showNotification('Erro ao verificar status de pagamento. Tente novamente mais tarde.', 'error');
         return false;
     }
 }
@@ -196,7 +185,7 @@ async function checkPaymentAndRedirect(user) {
             }
         }
     } catch (error) {
-        console.error('❌ Erro ao verificar pagamento:', error);
+        console.error('❌ Erro ao verificar pagamento e redirecionar:', error);
         // Em caso de erro, redireciona para checkout por segurança
         window.location.href = `checkout.html?uid=${user.uid}`;
     }
@@ -210,6 +199,18 @@ auth.onAuthStateChanged(async (user) => {
     const currentPage = window.location.pathname.split('/').pop() || 'index.html';
 
     if (user && (currentPage === 'index.html' || currentPage === '')) {
+        // Tenta buscar dados do usuário do Data Connect para garantir que está sincronizado
+        try {
+            const userData = await getUserData(user.uid);
+            if (!userData) {
+                // Se o usuário não existe no Data Connect, cria-o (caso de login de um usuário antigo)
+                await upsertUser(user.email, user.displayName || user.email, user.providerData[0].providerId);
+            }
+        } catch (dataConnectError) {
+            console.error('❌ Erro ao verificar/criar usuário no Data Connect no onAuthStateChanged:', dataConnectError);
+            // Não impede o login, mas registra o erro
+        }
+
         // Atualizar último login no Data Connect
         await updateUserLogin(user.uid);
         // Log de auditoria
@@ -245,6 +246,9 @@ if (loginForm) {
             console.log('🔐 Tentando fazer login com:', email);
             const userCredential = await auth.signInWithEmailAndPassword(email, senha);
             console.log('✅ Login bem-sucedido!');
+
+            // Após login, garantir que o usuário existe no Data Connect e atualizar o provedor
+            await upsertUser(userCredential.user.email, userCredential.user.displayName || userCredential.user.email, 'password');
 
             showNotification('Login realizado com sucesso!', 'success');
 
