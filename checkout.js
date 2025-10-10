@@ -1,8 +1,11 @@
 // ============================================================================
-// CHECKOUT.JS - Sistema de Checkout Melhorado com Stripe
+// CHECKOUT.JS - Sistema de Checkout Melhorado com Stripe (Firebase Modular SDK v9+)
 // Integração completa usando Cloud Functions e helpers
 // Refatorado para usar Data Connect para todas as operações de dados do usuário
 // ============================================================================
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
 
 import { firebaseConfig, stripeConfig } from './firebase-config.js';
 import { StripeHelper, UIManager, ErrorHandler } from './stripe-helper.js';
@@ -10,22 +13,15 @@ import {
     checkPaymentStatus,
     getUserData,
     createPayment,
-    updateUserLogin, // Adicionado para manter a consistência se houver login aqui
+    updateUserLogin,
     createAuditLog
 } from './dataconnect-integration.js';
 
-// Inicializar Firebase
-let auth;
-try {
-    if (!firebase.apps.length) {
-        firebase.initializeApp(firebaseConfig);
-    }
-    auth = firebase.auth();
-    console.log('✅ Firebase inicializado com sucesso no checkout');
-} catch (error) {
-    console.error('❌ Erro ao inicializar Firebase:', error);
-    alert('Erro ao inicializar Firebase. Verifique sua configuração.');
-}
+// Inicializar Firebase App e Auth
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+
+console.log('✅ Firebase modular SDK inicializado com sucesso no checkout');
 
 // Inicializar helper do Stripe (necessita de um objeto Stripe, será inicializado no redirectToCheckout)
 const stripeHelper = new StripeHelper(stripeConfig.publishableKey, stripeConfig.priceId);
@@ -42,7 +38,7 @@ let checkoutMethod = 'checkout_session'; // 'checkout_session' ou 'payment_link'
 // VERIFICAR AUTENTICAÇÃO E STATUS DE PAGAMENTO
 // ============================================================================
 
-auth.onAuthStateChanged(async (user) => {
+onAuthStateChanged(auth, async (user) => {
     if (!user) {
         console.log('❌ Usuário não autenticado, redirecionando para login...');
         window.location.href = 'index.html';
@@ -68,11 +64,6 @@ auth.onAuthStateChanged(async (user) => {
         }
 
         console.log('💳 Pagamento pendente, mostrando opções de checkout...');
-
-        // Refatorar: A lógica de 'pendingCheckoutSessionId' deve ser gerenciada pelo backend (Cloud Function)
-        // e o Data Connect deve ser a fonte de verdade para o status de pagamento.
-        // Por enquanto, apenas removemos a verificação direta no frontend, assumindo que
-        // o status `hasPaid` do Data Connect é o suficiente.
 
     } catch (error) {
         console.error('❌ Erro ao verificar pagamento:', error);
@@ -108,10 +99,6 @@ async function processCheckoutSession(user) {
             throw new Error('Email do usuário não encontrado');
         }
 
-        // O `createPayment` no Data Connect deve ser chamado no backend (Cloud Function)
-        // após a criação da Checkout Session, para evitar duplicidade ou inconsistências.
-        // O Data Connect será atualizado via webhook do Stripe.
-
         await createAuditLog(user.uid, 'INITIATE_CHECKOUT_SESSION', `Email: ${user.email}`);
 
         // Criar checkout session usando o helper
@@ -144,10 +131,6 @@ async function processPaymentLink(user) {
         if (!PAYMENT_LINK || PAYMENT_LINK.includes('SEU_LINK')) {
             throw new Error('Payment Link não configurado corretamente no firebase-config.js');
         }
-
-        // O `createPayment` no Data Connect deve ser chamado no backend (Cloud Function)
-        // ou após a confirmação do pagamento via webhook do Stripe.
-        // Aqui, apenas iniciamos o redirecionamento.
 
         await createAuditLog(user.uid, 'INITIATE_PAYMENT_LINK', `Email: ${user.email}`);
 
@@ -262,7 +245,7 @@ checkoutButton.addEventListener('click', async () => {
 // LISTENER PARA MUDANÇAS NO STATUS DE PAGAMENTO
 // ============================================================================
 
-auth.onAuthStateChanged((user) => {
+onAuthStateChanged(auth, (user) => {
     if (user) {
         // Observar mudanças em tempo real no Data Connect para o status de pagamento
         // Nota: Idealmente, essa observação deveria ser feita via um mecanismo de real-time do Data Connect

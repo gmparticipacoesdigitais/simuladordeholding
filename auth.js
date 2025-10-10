@@ -1,6 +1,16 @@
 // ============================================================================
-// AUTH.JS - Sistema de autenticação com Firebase Data Connect + Stripe
+// AUTH.JS - Sistema de autenticação com Firebase Modular SDK (v9+) + Stripe
 // ============================================================================
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+import {
+    getAuth,
+    onAuthStateChanged,
+    signInWithEmailAndPassword,
+    createUserWithEmailAndPassword,
+    GoogleAuthProvider,
+    signInWithPopup
+} from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
 
 import { firebaseConfig, stripeConfig } from './firebase-config.js';
 import {
@@ -11,30 +21,12 @@ import {
     getUserData
 } from './dataconnect-integration.js';
 
-// Inicializar Firebase
-let auth;
-let isFirebaseInitialized = false;
+// Inicializar Firebase App e Auth
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
 
-try {
-    if (!firebase.apps.length) {
-        firebase.initializeApp(firebaseConfig);
-    }
-    auth = firebase.auth();
-    isFirebaseInitialized = true;
-    console.log('✅ Firebase inicializado com sucesso');
-    console.log('🔑 Project ID:', firebaseConfig.projectId);
-} catch (error) {
-    console.error('❌ Erro ao inicializar Firebase:', error);
-    alert('❌ Erro ao inicializar Firebase. Verifique sua configuração e recarregue a página.');
-}
-
-// Verificar se Firebase está inicializado antes de qualquer operação
-function checkFirebaseInit() {
-    if (!isFirebaseInitialized || !auth) {
-        throw new Error('Firebase não está inicializado');
-    }
-    return true;
-}
+console.log('✅ Firebase modular SDK inicializado com sucesso');
+console.log('🔑 Project ID:', firebaseConfig.projectId);
 
 // ============================================================================
 // SISTEMA DE NOTIFICAÇÕES
@@ -46,7 +38,6 @@ function checkFirebaseInit() {
  * @param {string} type - 'success', 'error', 'info', 'warning'
  */
 function showNotification(message, type = 'info') {
-    // Criar elemento de notificação se não existir
     let notification = document.getElementById('notification-toast');
     if (!notification) {
         notification = document.createElement('div');
@@ -73,7 +64,6 @@ function showNotification(message, type = 'info') {
         document.body.appendChild(notification);
     }
 
-    // Definir cores baseado no tipo
     const colors = {
         success: '#10b981',
         error: '#ef4444',
@@ -95,7 +85,6 @@ function showNotification(message, type = 'info') {
     `;
     notification.style.display = 'flex';
 
-    // Adicionar animação CSS se não existir
     if (!document.getElementById('notification-styles')) {
         const style = document.createElement('style');
         style.id = 'notification-styles';
@@ -124,7 +113,6 @@ function showNotification(message, type = 'info') {
         document.head.appendChild(style);
     }
 
-    // Remover após 5 segundos
     setTimeout(() => {
         notification.style.animation = 'slideOut 0.3s ease';
         setTimeout(() => {
@@ -133,7 +121,6 @@ function showNotification(message, type = 'info') {
     }, 5000);
 }
 
-// Produtos Stripe (mantidos para consistência, mas o helper deve usá-los)
 const STRIPE_PRODUCT_ID = stripeConfig.productId;
 const STRIPE_PRICE_ID = stripeConfig.priceId;
 
@@ -143,7 +130,6 @@ const STRIPE_PRICE_ID = stripeConfig.priceId;
 
 /**
  * Verifica se o usuário já pagou usando Data Connect.
- * Removido o fallback para Realtime Database para centralizar no Data Connect.
  * @param {string} uid - ID do usuário
  * @returns {Promise<boolean>}
  */
@@ -154,8 +140,6 @@ async function checkUserPayment(uid) {
         return hasPaid;
     } catch (error) {
         console.error('❌ Erro ao verificar pagamento com Data Connect:', error);
-        // Em caso de erro, por segurança, assume que não pagou ou que o status é desconhecido.
-        // A interface do usuário deve guiar para o checkout ou tentar novamente.
         showNotification('Erro ao verificar status de pagamento. Tente novamente mais tarde.', 'error');
         return false;
     }
@@ -174,7 +158,6 @@ async function checkPaymentAndRedirect(user) {
         console.log(`💳 Status de pagamento: ${hasPaid ? 'PAGO' : 'PENDENTE'}`);
         console.log(`📄 Página atual: ${currentPage}`);
 
-        // Só redirecionar se estiver na página de login ou registro
         if (currentPage === 'index.html' || currentPage === '') {
             if (hasPaid) {
                 console.log('➡️ Redirecionando para app.html');
@@ -186,7 +169,6 @@ async function checkPaymentAndRedirect(user) {
         }
     } catch (error) {
         console.error('❌ Erro ao verificar pagamento e redirecionar:', error);
-        // Em caso de erro, redireciona para checkout por segurança
         window.location.href = `checkout.html?uid=${user.uid}`;
     }
 }
@@ -195,25 +177,20 @@ async function checkPaymentAndRedirect(user) {
 // VERIFICAR AUTENTICAÇÃO
 // ============================================================================
 
-auth.onAuthStateChanged(async (user) => {
+onAuthStateChanged(auth, async (user) => {
     const currentPage = window.location.pathname.split('/').pop() || 'index.html';
 
     if (user && (currentPage === 'index.html' || currentPage === '')) {
-        // Tenta buscar dados do usuário do Data Connect para garantir que está sincronizado
         try {
             const userData = await getUserData(user.uid);
             if (!userData) {
-                // Se o usuário não existe no Data Connect, cria-o (caso de login de um usuário antigo)
                 await upsertUser(user.email, user.displayName || user.email, user.providerData[0].providerId);
             }
         } catch (dataConnectError) {
             console.error('❌ Erro ao verificar/criar usuário no Data Connect no onAuthStateChanged:', dataConnectError);
-            // Não impede o login, mas registra o erro
         }
 
-        // Atualizar último login no Data Connect
         await updateUserLogin(user.uid);
-        // Log de auditoria
         await createAuditLog(user.uid, 'LOGIN', `Login from ${currentPage}`);
         await checkPaymentAndRedirect(user);
     }
@@ -232,7 +209,6 @@ if (loginForm) {
         const senha = loginForm.querySelector('input[name="senha"]').value;
         const submitBtn = loginForm.querySelector('button[type="submit"]');
 
-        // Validação básica
         if (!email || !senha) {
             showNotification('Por favor, preencha todos os campos.', 'warning');
             return;
@@ -242,12 +218,10 @@ if (loginForm) {
         submitBtn.innerHTML = '<span>Entrando...</span>';
 
         try {
-            checkFirebaseInit();
             console.log('🔐 Tentando fazer login com:', email);
-            const userCredential = await auth.signInWithEmailAndPassword(email, senha);
+            const userCredential = await signInWithEmailAndPassword(auth, email, senha);
             console.log('✅ Login bem-sucedido!');
 
-            // Após login, garantir que o usuário existe no Data Connect e atualizar o provedor
             await upsertUser(userCredential.user.email, userCredential.user.displayName || userCredential.user.email, 'password');
 
             showNotification('Login realizado com sucesso!', 'success');
@@ -255,15 +229,11 @@ if (loginForm) {
             await updateUserLogin(userCredential.user.uid);
             await createAuditLog(userCredential.user.uid, 'LOGIN_SUCCESS', `Email: ${email}`);
 
-            // Pequeno delay para mostrar a notificação antes de redirecionar
             setTimeout(() => {
                 checkPaymentAndRedirect(userCredential.user);
             }, 800);
         } catch (error) {
             console.error('❌ Erro no login:', error);
-            console.error('Código do erro:', error.code);
-            console.error('Mensagem do erro:', error.message);
-
             let errorMessage = 'Erro ao fazer login. Tente novamente.';
 
             if (error.code === 'auth/user-not-found') {
@@ -300,12 +270,11 @@ if (googleLoginBtn) {
 
         try {
             console.log('🔐 Iniciando login com Google...');
-            const provider = new firebase.auth.GoogleAuthProvider();
-            const result = await auth.signInWithPopup(provider);
+            const provider = new GoogleAuthProvider();
+            const result = await signInWithPopup(auth, provider);
 
             console.log('✅ Login com Google bem-sucedido!');
 
-            // Criar/atualizar usuário no Data Connect
             await upsertUser(
                 result.user.email,
                 result.user.displayName,
@@ -339,7 +308,6 @@ if (registerForm) {
         const confirmarSenha = registerForm.querySelector('input[name="confirmar-senha"]').value;
         const submitBtn = registerForm.querySelector('button[type="submit"]');
 
-        // Validação
         if (!nome || !email || !senha || !confirmarSenha) {
             showNotification('Por favor, preencha todos os campos.', 'warning');
             return;
@@ -359,16 +327,14 @@ if (registerForm) {
         submitBtn.innerHTML = '<span>Criando conta...</span>';
 
         try {
-            checkFirebaseInit();
             console.log('📝 Criando nova conta para:', email);
-            const userCredential = await auth.createUserWithEmailAndPassword(email, senha);
+            const userCredential = await createUserWithEmailAndPassword(auth, email, senha);
 
             console.log('✅ Conta criada com sucesso!');
             showNotification('Conta criada com sucesso! Redirecionando...', 'success');
 
             console.log('📝 Salvando dados no Data Connect...');
 
-            // Criar usuário no Data Connect
             await upsertUser(email, nome, 'email');
 
             await updateUserLogin(userCredential.user.uid);
@@ -377,14 +343,11 @@ if (registerForm) {
             console.log('✅ Dados salvos com sucesso!');
             console.log('➡️ Redirecionando para checkout...');
 
-            // Redirecionar para checkout após 1 segundo
             setTimeout(() => {
                 window.location.href = `checkout.html?uid=${userCredential.user.uid}`;
             }, 1000);
         } catch (error) {
             console.error('❌ Erro no cadastro:', error);
-            console.error('Código do erro:', error.code);
-            console.error('Mensagem do erro:', error.message);
 
             let errorMessage = 'Erro ao criar conta. Tente novamente.';
 
@@ -418,12 +381,11 @@ if (googleRegisterBtn) {
 
         try {
             console.log('📝 Iniciando cadastro com Google...');
-            const provider = new firebase.auth.GoogleAuthProvider();
-            const result = await auth.signInWithPopup(provider);
+            const provider = new GoogleAuthProvider();
+            const result = await signInWithPopup(auth, provider);
 
             console.log('✅ Cadastro com Google bem-sucedido!');
 
-            // Criar usuário no Data Connect
             await upsertUser(
                 result.user.email,
                 result.user.displayName,
@@ -442,6 +404,6 @@ if (googleRegisterBtn) {
     });
 }
 
-// Exportar funções para uso global
+// Exportar funções para uso global (se necessário, considere alternativas)
 window.checkUserPayment = checkUserPayment;
 window.checkPaymentAndRedirect = checkPaymentAndRedirect;

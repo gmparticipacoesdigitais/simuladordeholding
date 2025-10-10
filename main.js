@@ -1,24 +1,21 @@
 // ============================================================================
-// APP.JS - Refatorado para usar Realtime Database
+// MAIN.JS - Refatorado para usar Realtime Database
 // Estimador de Imposto de Renda com proteção de autenticação e pagamento
 // ============================================================================
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
+import { getDatabase, ref, once, update, push, ServerValue } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js";
 
 // Usar configuração centralizada do Firebase
 const firebaseConfig = window.FIREBASE_CONFIG;
 
 // Inicializar Firebase
-let auth, database;
-try {
-    if (!firebase.apps.length) {
-        firebase.initializeApp(firebaseConfig);
-    }
-    auth = firebase.auth();
-    database = firebase.database();
-    console.log('✅ Firebase inicializado com sucesso no app (Realtime Database)');
-} catch (error) {
-    console.error('❌ Erro ao inicializar Firebase:', error);
-    alert('Erro ao inicializar Firebase. Verifique sua configuração.');
-}
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const database = getDatabase(app);
+
+console.log('✅ Firebase inicializado com sucesso no app (Realtime Database)');
 
 // ============================================================================
 // VERIFICAÇÃO DE AUTENTICAÇÃO E PAGAMENTO
@@ -26,7 +23,7 @@ try {
 
 let currentUser = null;
 
-auth.onAuthStateChanged(async (user) => {
+onAuthStateChanged(auth, async (user) => {
     if (!user) {
         console.log('❌ Usuário não autenticado, redirecionando para login...');
         window.location.href = 'index.html';
@@ -38,7 +35,7 @@ auth.onAuthStateChanged(async (user) => {
 
     // Verificar se o usuário pagou
     try {
-        const snapshot = await database.ref(`users/${user.uid}`).once('value');
+        const snapshot = await once(ref(database, `users/${user.uid}`));
         const userData = snapshot.val();
 
         console.log('📊 Dados do usuário:', userData);
@@ -50,7 +47,7 @@ auth.onAuthStateChanged(async (user) => {
         }
 
         console.log('✅ Usuário tem acesso ao app!');
-        initializeApp(user, userData);
+        initializeAppContent(user, userData);
 
     } catch (error) {
         console.error('❌ Erro ao verificar pagamento:', error);
@@ -63,7 +60,7 @@ auth.onAuthStateChanged(async (user) => {
 // INICIALIZAR APLICAÇÃO
 // ============================================================================
 
-function initializeApp(user, userData) {
+function initializeAppContent(user, userData) {
     console.log('🚀 Inicializando aplicação...');
 
     // Mostrar informações do usuário (opcional)
@@ -96,7 +93,7 @@ function displayUserInfo(user, userData) {
 window.logout = async function() {
     try {
         console.log('🚪 Fazendo logout...');
-        await auth.signOut();
+        await signOut(auth);
         console.log('✅ Logout realizado com sucesso');
         window.location.href = 'index.html';
     } catch (error) {
@@ -111,7 +108,7 @@ window.logout = async function() {
 
 async function loadUserCalculations(uid) {
     try {
-        const snapshot = await database.ref(`calculations/${uid}/latest`).once('value');
+        const snapshot = await once(ref(database, `calculations/${uid}/latest`));
         const savedData = snapshot.val();
 
         if (savedData) {
@@ -140,16 +137,16 @@ async function saveUserCalculations(uid, data) {
     try {
         const calculationData = {
             ...data,
-            savedAt: firebase.database.ServerValue.TIMESTAMP
+            savedAt: ServerValue.TIMESTAMP
         };
 
-        await database.ref(`calculations/${uid}`).update({
+        await update(ref(database, `calculations/${uid}`), {
             latest: calculationData,
-            lastUpdated: firebase.database.ServerValue.TIMESTAMP
+            lastUpdated: ServerValue.TIMESTAMP
         });
 
         // Também salvar no histórico
-        await database.ref(`calculations/${uid}/history`).push(calculationData);
+        await push(ref(database, `calculations/${uid}/history`), calculationData);
 
         console.log('💾 Cálculos salvos com sucesso!');
     } catch (error) {
@@ -433,4 +430,4 @@ function exibirResultado(data) {
     }
 }
 
-console.log('📱 App.js carregado e pronto!');
+console.log('📱 main.js carregado e pronto!');
